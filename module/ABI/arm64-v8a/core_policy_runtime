@@ -99,15 +99,11 @@ com.google.android.gsf
 "
 
 for pkg in $($CMD package list packages -s | sed 's/package://'); do
-    skip=false
-    for p in $PROTECT_PKGS; do
-        [ "$pkg" = "$p" ] && { skip=true; break; }
-    done
-    $skip && continue
-    PIDS=$(pidof "$pkg") || continue
-    for pid in $PIDS; do
-        $CMD activity make-uid-idle --user 0 "$pkg"
-        $CMD sensorservice set-uid-state "$pkg" idle
-    done
+    case " $PROTECT_PKGS " in
+        *" $pkg "*) continue ;;
+    esac
+
+    $CMD activity make-uid-idle --user 0 "$pkg"
+    $CMD sensorservice set-uid-state "$pkg" idle
 done
 setprop debug.core.policy.runtime done
