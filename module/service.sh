@@ -30,6 +30,7 @@ log "boot completed"
 
 # ---- verify ----
 VERIFY="$MODDIR/verify.sh"
+chmod 0755 "$VERIFY"
 if [ ! -x "$VERIFY" ]; then
     exit 1
 fi
