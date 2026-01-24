@@ -12,8 +12,15 @@ else
     CRONUSER="shell"
 fi
 
+VERIFY="$MODDIR/verify.sh"
+if [ ! -x "$VERIFY" ]; then
+    exit 1
+fi
+
+"$VERIFY" || exit 1
+
 LOG="$MODDIR/core_policy.log"
-echo > $LOG
+echo > "$LOG"
 log() {
     echo "[CorePolicy] $(date '+%Y-%m-%d %H:%M:%S') $*" >> "$LOG"
 }
@@ -93,7 +100,7 @@ done
 
 SCHEDULER="none"
 
-#  cron fallback (root) ----
+# ---- cron fallback (root) ----
 if [ "$SCHEDULER" = "none" ] && [ "$UID" -eq 0 ] && command -v busybox >/dev/null; then
     log "trying cron fallback (root)"
 
@@ -101,14 +108,14 @@ if [ "$SCHEDULER" = "none" ] && [ "$UID" -eq 0 ] && command -v busybox >/dev/nul
         mkdir -p "$CRONDIR"
         : > "$CRONLOG"
 
-        cat > "$CRONTAB" <<EOF
+        cat > "$CRONTAB" <<EOT
 SHELL=/system/bin/sh
 PATH=/system/bin:/system/xbin
 
 */1 * * * * $PERF_DAEMON
 0   * * * * $DEMOTE_DAEMON
 0   0 * * * cmd package bg-dexopt-job
-EOF
+EOT
 
         chmod 0700 "$CRONDIR"
         chmod 0600 "$CRONTAB"
@@ -125,7 +132,7 @@ EOF
     }
 fi
 
-#  shell fallback ----
+# ---- shell scheduler fallback ----
 if [ "$SCHEDULER" = "none" ]; then
     log "using shell scheduler fallback"
 
@@ -133,7 +140,7 @@ if [ "$SCHEDULER" = "none" ]; then
         mkdir -p "$CRONDIR"
         : > "$CRONLOG"
 
-        cat > "$CRONTAB" <<EOF
+        cat > "$CRONTAB" <<EOT
 #!/system/bin/sh
 exec >>"$CRONLOG" 2>&1
 
@@ -157,7 +164,7 @@ while true; do
         cmd package bg-dexopt-job
     fi
 done
-EOF
+EOT
 
         chmod 0755 "$CRONTAB"
     fi
