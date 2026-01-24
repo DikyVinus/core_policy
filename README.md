@@ -1,33 +1,33 @@
 CorePolicy
 
-CorePolicy is a native Android policy module that dynamically manages memory residency, CPU scheduling, and process priority using Android’s own kernel and framework mechanisms.
+CorePolicy is a native Android policy module that coordinates memory residency, CPU scheduling, and process prioritization using system-supported kernel and framework mechanisms.
 
-It is designed to work both with and without root, automatically adapting its behavior based on the privileges available at runtime.
-
-
----
-
-Key Features
-
-Dynamic shared library preloading for the current foreground app
-
-Safe memory locking of critical system libraries
-
-Foreground performance boosting with automatic fallback paths
-
-Background process demotion to reduce interference
-
-No hardcoded device profiles
-
-No permanent boosts or unsafe pinning
-
+It is designed to operate safely across a wide range of environments, including rooted and non-rooted devices, adapting its behavior at runtime based on available privileges.
 
 
 ---
 
-Compatibility
+Overview
 
-It works with:
+CorePolicy provides a unified policy layer that:
+
+Improves foreground application responsiveness
+
+Reduces background interference
+
+Preserves system stability and compatibility
+
+Avoids device-specific tuning and hardcoded assumptions
+
+
+All actions are applied dynamically and reverted when no longer required.
+
+
+---
+
+Supported Environments
+
+CorePolicy is compatible with the following managers and execution environments:
 
 Magisk
 
@@ -37,61 +37,61 @@ APatch
 
 Axeron Manager (non-root mode)
 
-Other root managers that support native binaries and libraries
+Other root managers capable of loading native binaries and shared libraries
 
 
-Root access is optional.
-When root is unavailable, CorePolicy switches to Android-managed task profiles and framework APIs.
+Root access is not required.
+When root privileges are unavailable, CorePolicy transparently falls back to Android framework–managed task profiles.
 
 
 ---
 
-How CorePolicy Works
+Architecture
 
-CorePolicy is composed of coordinated native components:
+CorePolicy is composed of independent native components that cooperate at runtime.
 
-1. Preload Policy (Memory)
+Memory Policy (Preload)
 
-Preloads shared libraries used by the current foreground app
+Preloads shared libraries used by the current foreground application
 
-Permanently locks a small set of critical system libraries
+Permanently locks a limited set of critical system libraries
 
-Dynamically locks and unlocks app-specific libraries when the top app changes
+Dynamically locks and unlocks application-specific libraries on foreground transitions
 
-Uses mlock() only when safe and supported
-
-
-2. Performance Policy (CPU & Scheduling)
-
-Detects the current foreground app using:
-
-1. cpuset / cpuctl (primary)
+Uses mlock() only when permitted and safe
 
 
-2. ActivityManager stack (framework fallback)
+Performance Policy (CPU & Scheduling)
+
+Identifies the foreground application using a prioritized detection chain:
+
+1. cpuset / cpuctl (kernel-level)
+
+
+2. ActivityManager stack (framework-level fallback)
 
 
 
-Boosts:
+Applies performance boosts to:
 
-The foreground app
+The current foreground application
 
 SurfaceFlinger
 
 
-Applies:
+Uses:
 
 Kernel cgroups and schedulers when root is available
 
-Android settaskprofile when running non-root
+Android settaskprofile when operating without root
 
 
 
-3. Background Demotion Policy
+Background Policy (Demotion)
 
 Demotes background and non-critical processes
 
-Avoids system-critical services
+Preserves essential system services
 
 Uses kernel controls or task profiles depending on permissions
 
@@ -99,71 +99,69 @@ Uses kernel controls or task profiles depending on permissions
 
 ---
 
-Root vs Non-Root Behavior
+Privilege-Aware Behavior
+
+CorePolicy automatically detects available capabilities and selects the appropriate execution path.
 
 Capability	Root	Non-Root
 
-cpuset / cpuctl control	✔	✖
-Kernel scheduler (SCHED_IDLE / RR)	✔	✖
-mlock()	✔	Limited
-Android task profiles	✔	✔
-Foreground app detection	✔	✔
-Background demotion	✔	✔
+cpuset / cpuctl control	Yes	No
+Kernel scheduler control	Yes	No
+mlock()	Yes	Limited
+Android task profiles	Yes	Yes
+Foreground app detection	Yes	Yes
+Background demotion	Yes	Yes
 
 
-No manual configuration is required.
-Capability detection is automatic.
+No user configuration is required.
 
 
 ---
 
 Design Principles
 
-System-aligned behavior (no fighting Android)
+Alignment with Android’s scheduling and memory model
 
-Graceful fallback instead of hard failure
+No persistent or irreversible system changes
 
-No shell execution in hot paths
+No forced behavior when a capability is unavailable
 
-No persistent or irreversible state changes
+ABI-correct execution on 32-bit and 64-bit systems
 
-ABI-correct handling on 32-bit and 64-bit systems
+Minimal overhead and predictable behavior
 
 
-If a mechanism is unavailable, it is skipped — not forced.
+If a mechanism cannot be used safely, it is skipped rather than emulated.
 
 
 ---
 
 Intended Use
 
-CorePolicy is intended for users who want:
+CorePolicy is intended for users who require:
 
-Improved foreground responsiveness
+Consistent foreground performance
 
-Reduced background interference
+Controlled background behavior
 
-Predictable behavior across devices
+Compatibility across devices and Android versions
 
 Support for both rooted and non-rooted environments
 
 
-It is suitable for daily use and long-running sessions.
+The module is suitable for continuous operation.
 
 
 ---
 
 Updates
 
-CorePolicy supports update checking via update.json.
-Updates are optional and do not affect existing installations.
+CorePolicy supports optional update checks via update.json.
+Updates do not alter existing behavior unless explicitly installed.
 
 
 ---
 
 License
 
-See LICENSE for details.
-
-
----
+Refer to the LICENSE file for licensing terms.
