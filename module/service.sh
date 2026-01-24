@@ -12,15 +12,8 @@ else
     CRONUSER="shell"
 fi
 
-VERIFY="$MODDIR/verify.sh"
-if [ ! -x "$VERIFY" ]; then
-    exit 1
-fi
-
-"$VERIFY" || exit 1
-
 LOG="$MODDIR/core_policy.log"
-echo > "$LOG"
+
 log() {
     echo "[CorePolicy] $(date '+%Y-%m-%d %H:%M:%S') $*" >> "$LOG"
 }
@@ -32,7 +25,17 @@ while [ "$(getprop sys.boot_completed)" != "1" ]; do
     sleep 2
 done
 sleep 5
+echo > "$LOG"
 log "boot completed"
+
+# ---- verify ----
+VERIFY="$MODDIR/verify.sh"
+if [ ! -x "$VERIFY" ]; then
+    exit 1
+fi
+
+"$VERIFY" || exit 1
+
 
 # ---- ABI selection ----
 ABI64="$MODDIR/ABI/arm64-v8a"
