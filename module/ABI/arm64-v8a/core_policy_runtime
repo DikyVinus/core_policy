@@ -108,9 +108,6 @@ for pkg in $($CMD package list packages -s | sed 's/package://'); do
     for pid in $PIDS; do
         $CMD activity make-uid-idle --user 0 "$pkg"
         $CMD sensorservice set-uid-state "$pkg" idle
-        $CMD activity set-foreground-service-delegate --user 0 "$pkg"
-        $CMD activity set-watch-heap "$pid" 0
-        $CMD activity profile stop "$pid"
     done
 done
 setprop debug.core.policy.runtime done
