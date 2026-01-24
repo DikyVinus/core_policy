@@ -26,6 +26,7 @@ while [ "$(getprop sys.boot_completed)" != "1" ]; do
 done
 sleep 5
 echo > "$LOG"
+chmod 0644 "$LOG"
 log "boot completed"
 
 # ---- verify ----
