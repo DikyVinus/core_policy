@@ -4,18 +4,42 @@
 
 UID="$(id -u)"
 
+# ------------------------------------------------------------
+# Language detection (en / id)
+# ------------------------------------------------------------
+
+LANG_CODE="$(getprop persist.sys.locale | cut -d- -f1)"
+[ -z "$LANG_CODE" ] && LANG_CODE="$(getprop ro.product.locale | cut -d- -f1)"
+[ "$LANG_CODE" != "id" ] && LANG_CODE="en"
+
+ui() {
+    if [ "$LANG_CODE" = "id" ]; then
+        ui_print "$2"
+    else
+        ui_print "$1"
+    fi
+}
+
+# ------------------------------------------------------------
+# Module directory
+# ------------------------------------------------------------
+
 if [ "$UID" -eq 0 ]; then
     MODDIR="/data/adb/modules/core_policy"
-    ui_print "• CorePolicy: running as root"
-    ui_print "• CorePolicy: module dir = $MODDIR"
+    ui "• CorePolicy: running as root" \
+       "• CorePolicy: berjalan sebagai root"
+    ui "• CorePolicy: module dir = $MODDIR" \
+       "• CorePolicy: direktori modul = $MODDIR"
 else
     MODDIR="${AXERONDIR}/plugins/core_policy"
-    ui_print "• CorePolicy: running as non-root"
-    ui_print "• CorePolicy: module dir = $MODDIR"
+    ui "• CorePolicy: running as non-root" \
+       "• CorePolicy: berjalan sebagai non-root"
+    ui "• CorePolicy: module dir = $MODDIR" \
+       "• CorePolicy: direktori modul = $MODDIR"
 fi
 
 # ============================================================
-# Gate 1: module.prop integrity (best-effort, no hardcoded hash)
+# Gate 1: module.prop integrity (best-effort)
 # ============================================================
 
 PROP_FILE="$MODDIR/module.prop"
@@ -26,10 +50,12 @@ if [ -f "$PROP_FILE" ] && [ -f "$PROP_SUM" ]; then
     actual="$(sha256sum "$PROP_FILE" | awk '{print $1}')"
 
     if [ "$expected" != "$actual" ]; then
-        ui_print "• CorePolicy: warning – module.prop integrity mismatch"
+        ui "• CorePolicy: warning – module.prop integrity mismatch" \
+           "• CorePolicy: peringatan – integritas module.prop tidak cocok"
     fi
 else
-    ui_print "• CorePolicy: module.prop verification skipped"
+    ui "• CorePolicy: module.prop verification skipped" \
+       "• CorePolicy: verifikasi module.prop dilewati"
 fi
 
 # ============================================================
@@ -42,7 +68,8 @@ if [ -d "$MODDIR" ]; then
         target="${sumfile%.sha256}"
 
         [ -f "$target" ] || {
-            ui_print "• CorePolicy: missing $(basename "$target"), skipping"
+            ui "• CorePolicy: missing $(basename "$target"), skipping" \
+               "• CorePolicy: $(basename "$target") tidak ditemukan, dilewati"
             continue
         }
 
@@ -50,7 +77,8 @@ if [ -d "$MODDIR" ]; then
         actual="$(sha256sum "$target" | awk '{print $1}')"
 
         if [ "$expected" != "$actual" ]; then
-            ui_print "• CorePolicy: integrity warning for $(basename "$target")"
+            ui "• CorePolicy: integrity warning for $(basename "$target")" \
+               "• CorePolicy: peringatan integritas untuk $(basename "$target")"
         fi
     done
 fi
@@ -65,52 +93,114 @@ ui_print "        CorePolicy Performance"
 ui_print "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 ui_print " "
 
-ui_print "This module optimizes system performance automatically."
-ui_print "No configuration is required."
+ui "This module optimizes system performance automatically." \
+   "Modul ini mengoptimalkan performa sistem secara otomatis."
+
+ui "No configuration is required." \
+   "Tidak memerlukan konfigurasi."
+
 ui_print " "
 
-ui_print "What CorePolicy does:"
-ui_print "• Detects your device RAM and CPU capabilities"
-ui_print "• Identifies frequently used apps"
-ui_print "• Preloads critical native libraries (.so)"
-ui_print "• Boosts foreground and top apps safely"
-ui_print "• Uses Android-native scheduling policies"
+ui "What CorePolicy does:" \
+   "Fungsi CorePolicy:"
+
+ui "• Detects your device RAM and CPU capabilities" \
+   "• Mendeteksi kemampuan RAM dan CPU perangkat"
+
+ui "• Identifies frequently used apps" \
+   "• Mengidentifikasi aplikasi yang sering digunakan"
+
+ui "• Preloads critical native libraries (.so)" \
+   "• Melakukan preload library native penting (.so)"
+
+ui "• Boosts foreground and top apps safely" \
+   "• Meningkatkan performa aplikasi foreground secara aman"
+
+ui "• Uses Android-native scheduling policies" \
+   "• Menggunakan kebijakan penjadwalan bawaan Android"
+
 ui_print " "
 
-ui_print "Smart and adaptive behavior:"
-ui_print "• Automatically adjusts to low / mid / high RAM devices"
-ui_print "• Never forces performance on background apps"
-ui_print "• Avoids system and boot-time slowdowns"
-ui_print "• Falls back safely if a feature is unavailable"
+ui "Smart and adaptive behavior:" \
+   "Perilaku adaptif dan cerdas:"
+
+ui "• Automatically adjusts to device capabilities" \
+   "• Menyesuaikan otomatis dengan kemampuan perangkat"
+
+ui "• Never forces performance on background apps" \
+   "• Tidak memaksa performa pada aplikasi latar belakang"
+
+ui "• Avoids system and boot-time slowdowns" \
+   "• Menghindari perlambatan sistem dan waktu boot"
+
+ui "• Falls back safely if a feature is unavailable" \
+   "• Menggunakan fallback aman jika fitur tidak tersedia"
+
 ui_print " "
 
-ui_print "Safety guarantees:"
-ui_print "• No system files are replaced"
-ui_print "• No permanent kernel changes"
-ui_print "• No boot blocking"
-ui_print "• No continuous background wakelocks"
+ui "Safety guarantees:" \
+   "Jaminan keamanan:"
+
+ui "• No system files are replaced" \
+   "• Tidak mengganti file sistem"
+
+ui "• No permanent kernel changes" \
+   "• Tidak melakukan perubahan kernel permanen"
+
+ui "• No boot blocking" \
+   "• Tidak menghambat proses boot"
+
+ui "• No continuous background wakelocks" \
+   "• Tidak menahan wakelock latar belakang secara terus-menerus"
+
 ui_print " "
 
-ui_print "Compatibility:"
-ui_print "• Works on Android 10+"
-ui_print "• Supports both root and non-root modes"
-ui_print "• Compatible with AOSP and OEM ROMs"
+ui "Compatibility:" \
+   "Kompatibilitas:"
+
+ui "• Works on Android 10+" \
+   "• Berfungsi pada Android 10 ke atas"
+
+ui "• Supports both root and non-root modes" \
+   "• Mendukung mode root dan non-root"
+
+ui "• Compatible with AOSP and OEM ROMs" \
+   "• Kompatibel dengan ROM AOSP dan OEM"
+
 ui_print " "
 
-ui_print "Installation notes:"
-ui_print "• First boot may take slightly longer (one-time)"
-ui_print "• Performance improves after normal usage"
-ui_print "• Changes apply automatically after reboot"
+ui "Installation notes:" \
+   "Catatan instalasi:"
+
+ui "• First boot may take slightly longer (one-time)" \
+   "• Boot pertama mungkin sedikit lebih lama (sekali saja)"
+
+ui "• Performance improves after normal usage" \
+   "• Performa meningkat setelah penggunaan normal"
+
+ui "• Changes apply automatically after reboot" \
+   "• Perubahan diterapkan otomatis setelah reboot"
+
 ui_print " "
 
-ui_print "Logs and status:"
-ui_print "• Internal logs are minimal by design"
-ui_print "• No spam or unnecessary output"
-ui_print "• Module operates silently in the background"
+ui "Logs and status:" \
+   "Log dan status:"
+
+ui "• Internal logs are minimal by design" \
+   "• Log internal dibuat minimal secara desain"
+
+ui "• No spam or unnecessary output" \
+   "• Tidak ada output berlebihan"
+
+ui "• Module operates silently in the background" \
+   "• Modul berjalan diam-diam di latar belakang"
+
 ui_print " "
 
 ui_print "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-ui_print " CorePolicy installed successfully"
-ui_print " Reboot to activate"
+ui " CorePolicy installed successfully" \
+   " CorePolicy berhasil dipasang"
+ui " Reboot to activate" \
+   " Reboot untuk mengaktifkan"
 ui_print "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 ui_print " "
