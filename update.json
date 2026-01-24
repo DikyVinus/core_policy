@@ -1,6 +1,6 @@
 {
-  "version": "v1.2",
-  "versionCode": 3,
-  "zipUrl": "https://github.com/DikyVinus/core_policy/releases/download/v1.2/core_policy-v1.2.zip",
-  "changelog": "Integrity verification added, preload and scheduler supervision hardened, compatibility improvements across root and non-root environments."
+  "version": "v1.3",
+  "versionCode": 4,
+  "zipUrl": "https://github.com/DikyVinus/core_policy/releases/download/v1.3/core_policy-v1.3.zip",
+  "changelog": "Added language-aware installer output, refined integrity verification behavior, and finalized runtime policy adjustments."
 }
