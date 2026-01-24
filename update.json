@@ -1,0 +1,6 @@
+{
+  "version": "v1.1",
+  "versionCode": 2,
+  "zipUrl": "https://github.com/DikyVinus/core_policy/releases/download/v1.1/core_policy_v1.1.zip",
+  "changelog": "Improved preload selection and scheduler stability"
+}
