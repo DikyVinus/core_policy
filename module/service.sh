@@ -31,6 +31,7 @@ log "service start (uid=$UID)"
 while [ "$(getprop sys.boot_completed)" != "1" ]; do
     sleep 2
 done
+sleep 5
 log "boot completed"
 
 # ---- ABI selection ----
