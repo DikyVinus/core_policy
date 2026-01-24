@@ -30,7 +30,7 @@ CorePolicy is compatible with the following managers and execution environments:
 - Other root managers capable of loading native binaries and shared libraries  
 
 Root access is **not required**.  
-When root privileges are unavailable, CorePolicy transparently falls back to Android framework–managed task profiles.
+When root privileges are unavailable, CorePolicy transparently falls back to Android framework-managed task profiles.
 
 ---
 
