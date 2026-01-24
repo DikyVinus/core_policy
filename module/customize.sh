@@ -15,19 +15,21 @@ else
 fi
 
 # ============================================================
-# Gate 1: module.prop integrity (best-effort)
+# Gate 1: module.prop integrity (best-effort, no hardcoded hash)
 # ============================================================
 
-EXPECTED_PROP_SHA256="187622106a8c5585b885b2c6d3a6525e569e11e5b426159987fcbc644d2f6501"
 PROP_FILE="$MODDIR/module.prop"
+PROP_SUM="$MODDIR/module.prop.sha256"
 
-if [ -f "$PROP_FILE" ]; then
-    ACTUAL_PROP_SHA256="$(sha256sum "$PROP_FILE" | awk '{print $1}')"
-    if [ "$ACTUAL_PROP_SHA256" != "$EXPECTED_PROP_SHA256" ]; then
+if [ -f "$PROP_FILE" ] && [ -f "$PROP_SUM" ]; then
+    expected="$(cat "$PROP_SUM")"
+    actual="$(sha256sum "$PROP_FILE" | awk '{print $1}')"
+
+    if [ "$expected" != "$actual" ]; then
         ui_print "• CorePolicy: warning – module.prop integrity mismatch"
     fi
 else
-    ui_print "• CorePolicy: module.prop not present yet, skipping verification"
+    ui_print "• CorePolicy: module.prop verification skipped"
 fi
 
 # ============================================================
@@ -40,7 +42,7 @@ if [ -d "$MODDIR" ]; then
         target="${sumfile%.sha256}"
 
         [ -f "$target" ] || {
-            ui_print "• CorePolicy: missing file $(basename "$target"), skipping"
+            ui_print "• CorePolicy: missing $(basename "$target"), skipping"
             continue
         }
 
