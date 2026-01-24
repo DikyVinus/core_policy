@@ -18,9 +18,9 @@ abort() {
     ui "$1" "$1"
 
     if [ "$UID" -eq 0 ]; then
-        rm -rf /data/adb/modules/core_policy/*
+        rm -r "/data/adb/modules/core_policy"
     else
-        rm -rf "${AXERONDIR}/plugins/core_policy"
+        rm -r "${AXERONDIR}/plugins/core_policy"
     fi
 
     exit 1
