@@ -13,7 +13,8 @@ else
 fi
 
 LOG="$MODDIR/core_policy.log"
-
+SCHED_PID_PROP="debug.core.policy.scheduler.pid"
+SCHED_TYPE_PROP="debug.core.policy.scheduler.type"
 log() {
     echo "[CorePolicy] $(date '+%Y-%m-%d %H:%M:%S') $*" >> "$LOG"
 }
@@ -131,7 +132,14 @@ EOT
 
     pgrep -f "busybox crond.* $CRONDIR" >/dev/null || \
         busybox crond -f -c "$CRONDIR" -L "$CRONLOG" &
-
+    sleep 1
+CRON_PID="$(pgrep -f "busybox crond.* $CRONDIR" | head -n1)"
+if [ -n "$CRON_PID" ]; then
+    setprop "$SCHED_PID_PROP" "$CRON_PID"
+    setprop "$SCHED_TYPE_PROP" "cron"
+    log "cron scheduler pid=$CRON_PID"
+    SCHEDULER="cron"
+fi
     sleep 1
     pgrep -f "busybox crond.* $CRONDIR" >/dev/null && {
         SCHEDULER="cron"
@@ -157,7 +165,7 @@ DAY=\$(date +%d)
 while true; do
     sleep 60
     MIN=\$((MIN + 1))
-     "$PRELOAD_DAEMON"
+    "$PRELOAD_DAEMON"
     "$PERF_DAEMON"
 
     if [ "\$MIN" -ge 60 ]; then
@@ -177,8 +185,11 @@ EOT
     fi
 
     "$CRONTAB" &
-    log "shell scheduler pid=$!"
-    SCHEDULER="shell"
+SHELL_PID="$!"
+setprop "$SCHED_PID_PROP" "$SHELL_PID"
+setprop "$SCHED_TYPE_PROP" "shell"
+log "shell scheduler pid=$SHELL_PID"
+SCHEDULER="shell"
 fi
 
 "$PRELOAD_DAEMON" & log "preload pid=$!"
