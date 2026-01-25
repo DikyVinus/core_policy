@@ -1,4 +1,0 @@
-persist.traced.enable=0
-debug.renderengine.backend=skiaglthreaded
-debug.stagefright.renderengine.backend=threaded
-service.adb.tcp.port=5555
