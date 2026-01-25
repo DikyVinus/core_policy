@@ -1,7 +1,7 @@
 id=core_policy
 name=CorePolicy
-version=v1.3
-versionCode=4
+version=v1.4
+versionCode=5
 author=Diky_I
 description=Native CPU and memory policy daemon that optimizes performance by managing process priority, preloading shared libraries, and controlling background behavior.
 banner=banner.png
