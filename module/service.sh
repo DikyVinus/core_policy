@@ -118,6 +118,7 @@ if [ "$SCHEDULER" = "none" ] && [ "$UID" -eq 0 ] && command -v busybox >/dev/nul
 SHELL=/system/bin/sh
 PATH=/system/bin:/system/xbin
 
+*/1 * * * * $PRELOAD_DAEMON
 */1 * * * * $PERF_DAEMON
 0   * * * * $DEMOTE_DAEMON
 0   0 * * * cmd package bg-dexopt-job
