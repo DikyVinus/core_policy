@@ -157,7 +157,7 @@ DAY=\$(date +%d)
 while true; do
     sleep 60
     MIN=\$((MIN + 1))
-
+     "$PRELOAD_DAEMON"
     "$PERF_DAEMON"
 
     if [ "\$MIN" -ge 60 ]; then
