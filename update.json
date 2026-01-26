@@ -1,6 +1,13 @@
 {
-  "version": "v2.0",
-  "versionCode": 20,
-  "zipUrl": "https://github.com/DikyVinus/core_policy/releases/download/v2.0/core_policy-v2.0.zip",
-  "changelog": "Major policy rewrite: unified top-app resolution, per-thread perf enforcement, binder exclusion, and improved preload + discovery stability."
+  "version": "v3.0",
+  "versionCode": 300,
+  "zipUrl": "https://github.com/DikyVinus/core_policy-private/releases/download/v3.0/core_policy-v3.0.zip",
+  "changelog": [
+    "Deterministic rebuild of all policy binaries (arm64-v8a, armeabi-v7a)",
+    "Dynamic preload generator hardened and bounded",
+    "Top-app performance boost via libcoreperf",
+    "SurfaceFlinger one-shot boost gated by debug.core.policy.perf",
+    "Aggressive background demotion via libcoredemote",
+    "API 21 baseline, reproducible toolchain outputs"
+  ]
 }
