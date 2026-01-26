@@ -4,44 +4,44 @@ exec 2>/dev/null
 MODDIR="${0%/*}"
 LOG="$MODDIR/core_policy.log"
 CRONLOG="$MODDIR/cron/cron.log"
+CRONDIR="$MODDIR/cron"
 
 FIRSTPASS_PROP="debug.core.policy.firstpass"
 SCHED_PID_PROP="debug.core.policy.scheduler.pid"
 SCHED_TYPE_PROP="debug.core.policy.scheduler.type"
 
-ABI64="$MODDIR/ABI/arm64-v8a"
-ABI32="$MODDIR/ABI/armeabi-v7a"
+echo "===== CorePolicy SANITY ====="
+echo
 
-if [ -n "$(getprop ro.product.cpu.abilist64)" ]; then
-    RUNDIR="$ABI64"
+echo "--- core_policy.log ---"
+if [ -f "$LOG" ]; then
+    cat "$LOG"
 else
-    RUNDIR="$ABI32"
+    echo "(core_policy.log not found)"
 fi
 
-CRONDIR="$MODDIR/cron"
-CRONUSER="$(basename "$(ls "$CRONDIR" 2>/dev/null | head -n1)")"
-
-if [ "$(getprop "$FIRSTPASS_PROP")" != "1" ]; then
-    echo "===== CorePolicy ====="
-    echo
-    cat "$LOG" 2>/dev/null
-    echo
-    echo "----- cron log (last 10) -----"
-    tail -n 10 "$CRONLOG" 2>/dev/null
-    echo
-    PID="$(getprop "$SCHED_PID_PROP")"
-    TYPE="$(getprop "$SCHED_TYPE_PROP")"
-    if [ -n "$PID" ] && kill -0 "$PID" 2>/dev/null; then
-        echo "Scheduler alive: $TYPE (pid=$PID)"
-    else
-        echo "Scheduler not running"
-    fi
-    setprop "$FIRSTPASS_PROP" 1
-    exit 0
+echo
+echo "--- cron.log (last 10) ---"
+if [ -f "$CRONLOG" ]; then
+    tail -n 10 "$CRONLOG"
+else
+    echo "(cron.log not found)"
 fi
 
+echo
+echo "--- properties ---"
+FIRSTPASS="$(getprop "$FIRSTPASS_PROP")"
 PID="$(getprop "$SCHED_PID_PROP")"
 TYPE="$(getprop "$SCHED_TYPE_PROP")"
+
+echo "firstpass: ${FIRSTPASS:-0}"
+echo "sched pid: ${PID:-}"
+echo "sched type: ${TYPE:-}"
+
+echo
+echo "===== END ====="
+
+[ "$FIRSTPASS" != "1" ] && setprop "$FIRSTPASS_PROP" 1
 
 [ -z "$PID" ] && exit 0
 
@@ -49,16 +49,28 @@ if kill -0 "$PID" 2>/dev/null; then
     exit 0
 fi
 
-if [ "$TYPE" = "cron" ] && command -v busybox >/dev/null; then
-    busybox crond -f -c "$CRONDIR" -L "$CRONLOG" &
-    NEWPID="$!"
-elif [ "$TYPE" = "shell" ] && [ -x "$CRONDIR/$CRONUSER" ]; then
-    "$CRONDIR/$CRONUSER" &
-    NEWPID="$!"
-else
-    exit 0
-fi
+case "$TYPE" in
+    cron)
+        if command -v busybox >/dev/null; then
+            busybox crond -f -c "$CRONDIR" -L "$CRONLOG" &
+            NEWPID="$!"
+        else
+            exit 0
+        fi
+        ;;
+    shell)
+        CRONUSER="$(ls "$CRONDIR" 2>/dev/null | head -n1)"
+        if [ -n "$CRONUSER" ] && [ -x "$CRONDIR/$CRONUSER" ]; then
+            "$CRONDIR/$CRONUSER" &
+            NEWPID="$!"
+        else
+            exit 0
+        fi
+        ;;
+    *)
+        exit 0
+        ;;
+esac
 
 setprop "$SCHED_PID_PROP" "$NEWPID"
-tail -n 5 "$CRONLOG"
 exit 0
