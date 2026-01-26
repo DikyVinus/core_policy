@@ -26,7 +26,7 @@ CorePolicy is compatible with the following managers and execution environments:
 - Magisk  
 - KernelSU  
 - APatch  
-- Axeron Manager (root or non-root mode )  
+- Axeron Manager (non-root mode )  
 - Other root managers capable of loading native binaries and shared libraries  
 
 Root access is **not required**.  
