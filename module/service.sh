@@ -13,6 +13,7 @@ else
 fi
 
 LOG="$MODDIR/core_policy.log"
+CRONLOG="$MODDIR/cron/cron.log"
 SCHED_PID_PROP="debug.core.policy.scheduler.pid"
 SCHED_TYPE_PROP="debug.core.policy.scheduler.type"
 log() {
@@ -28,6 +29,9 @@ done
 sleep 5
 echo > "$LOG"
 chmod 0644 "$LOG"
+mkdir -p "$MODDIR/cron"
+echo > "$CRONLOG"
+chmod 0644 "$CRONLOG"
 log "boot completed"
 
 # ---- verify ----
