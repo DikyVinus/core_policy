@@ -1,5 +1,4 @@
 #!/system/bin/sh
-exec 2>/dev/null
 
 MODDIR="${0%/*}"
 LOG="$MODDIR/core_policy.log"
@@ -41,14 +40,18 @@ echo "sched type: ${TYPE:-}"
 echo
 echo "===== END ====="
 
+# mark first pass
 [ "$FIRSTPASS" != "1" ] && setprop "$FIRSTPASS_PROP" 1
 
+# nothing to supervise
 [ -z "$PID" ] && exit 0
 
+# scheduler still alive
 if kill -0 "$PID" 2>/dev/null; then
     exit 0
 fi
 
+# restart scheduler
 case "$TYPE" in
     cron)
         if command -v busybox >/dev/null; then
