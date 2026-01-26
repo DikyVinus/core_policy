@@ -20,10 +20,10 @@ else
 fi
 
 echo
-echo "--- cron.log (last 10, filtered) ---"
+echo "--- cron.log (last 10) ---"
 if [ -f "$CRONLOG" ]; then
-    tail -n 50 "$CRONLOG" | \
-        grep -Ev 'Profile (CPUSET|SCHED)_SP_TOP_APP' | \
+    tail -n 100 "$CRONLOG" | \
+        grep -Ev 'Profile (CPUSET|SCHED)_SP_TOP_APP|Profile (CPUSET|SCHED)_SP_(RESTRICTED|BACKGROUND)' | \
         tail -n 10
 else
     echo "(cron.log not found)"
