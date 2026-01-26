@@ -6,8 +6,8 @@ LOG="$MODDIR/core_policy.log"
 CRONLOG="$MODDIR/cron/cron.log"
 
 FIRSTPASS_PROP="debug.core.policy.firstpass"
-SCHED_PID_PROP="debug.core.policy.sched.pid"
-SCHED_TYPE_PROP="debug.core.policy.sched.type"
+SCHED_PID_PROP="debug.core.policy.scheduler.pid"
+SCHED_TYPE_PROP="debug.core.policy.scheduler.type"
 
 ABI64="$MODDIR/ABI/arm64-v8a"
 ABI32="$MODDIR/ABI/armeabi-v7a"
