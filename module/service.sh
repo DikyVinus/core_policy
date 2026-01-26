@@ -159,23 +159,33 @@ if [ "$SCHEDULER" = "none" ]; then
 #!/system/bin/sh
 exec >>"$CRONLOG" 2>&1
 
+log_run() {
+    echo "crond: USER $CRONUSER pid $$ cmd $1"
+}
+
 MIN=0
-DAY=\$(date +%d)
+DAY="$(date +%d)"
 
 while true; do
     sleep 60
-    MIN=\$((MIN + 1))
+    MIN=$((MIN + 1))
+
+    log_run "$PRELOAD_DAEMON"
     "$PRELOAD_DAEMON"
+
+    log_run "$PERF_DAEMON"
     "$PERF_DAEMON"
 
-    if [ "\$MIN" -ge 60 ]; then
+    if [ "$MIN" -ge 60 ]; then
         MIN=0
+        log_run "$DEMOTE_DAEMON"
         "$DEMOTE_DAEMON"
     fi
 
-    NOW=\$(date +%d)
-    if [ "\$NOW" != "\$DAY" ]; then
-        DAY="\$NOW"
+    NOW="$(date +%d)"
+    if [ "$NOW" != "$DAY" ]; then
+        DAY="$NOW"
+        log_run "cmd package bg-dexopt-job"
         cmd package bg-dexopt-job
     fi
 done
