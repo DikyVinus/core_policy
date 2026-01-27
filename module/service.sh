@@ -1,14 +1,15 @@
 #!/system/bin/sh
-# CorePolicy service supervisor
 
 UID="$(id -u)"
 
 if [ "$UID" -eq 0 ]; then
     MODDIR="/data/adb/modules/core_policy"
     CRONUSER="root"
+    BINDIR="/data/adb/ksu/bin"
 else
     MODDIR="${AXERONDIR}/plugins/core_policy"
     CRONUSER="shell"
+    BINDIR="$AXERONBIN"
 fi
 
 LOG="$MODDIR/core_policy.log"
@@ -26,23 +27,20 @@ log() {
 log "service start (uid=$UID)"
 
 while ! dumpsys usagestats >/dev/null 2>&1; do
-    sleep 5
+    sleep 2
 done
 
-# init logs
 mkdir -p "$CRONDIR"
-: > "$LOG"
-: > "$CRONLOG"
+: >"$LOG"
+: >"$CRONLOG"
 chmod 0644 "$LOG" "$CRONLOG"
 log "boot completed"
 
-# verify
 VERIFY="$MODDIR/verify.sh"
 chmod 0755 "$VERIFY"
 [ -x "$VERIFY" ] || exit 1
 "$VERIFY" || exit 1
 
-# ABI selection
 ABI64="$MODDIR/ABI/arm64-v8a"
 ABI32="$MODDIR/ABI/armeabi-v7a"
 
@@ -54,11 +52,10 @@ else
     log "using arm32 ABI"
 fi
 
-# binaries
 DISCOVERY="$RUNDIR/core_policy_discovery"
-PRELOAD_DAEMON="$RUNDIR/core_policy_preload"
-PERF_DAEMON="$RUNDIR/core_policy_perf"
-DEMOTE_DAEMON="$RUNDIR/core_policy_demote"
+PRELOAD="$RUNDIR/core_policy_preload"
+PERF="$RUNDIR/core_policy_perf"
+DEMOTE="$RUNDIR/core_policy_demote"
 RUNTIME="$RUNDIR/core_policy_runtime"
 
 LIBLOCK="$RUNDIR/libcorelock.so"
@@ -67,59 +64,62 @@ LIBDEMOTE="$RUNDIR/libcoredemote.so"
 DYNAMIC_LIST="$RUNDIR/core_preload.core"
 STATIC_LIST="$RUNDIR/core_preload_static.core"
 
-chmod 0755 \
-    "$DISCOVERY" \
-    "$PRELOAD_DAEMON" \
-    "$PERF_DAEMON" \
-    "$DEMOTE_DAEMON" \
-    "$RUNTIME" 2>/dev/null
+chmod 0755 "$DISCOVERY" "$PRELOAD" "$PERF" "$DEMOTE" "$RUNTIME" 2>/dev/null
+chmod 0644 "$LIBLOCK" "$LIBDEMOTE" "$DYNAMIC_LIST" "$STATIC_LIST" 2>/dev/null
 
-chmod 0644 \
-    "$LIBLOCK" \
-    "$LIBDEMOTE" \
-    "$DYNAMIC_LIST" \
-    "$STATIC_LIST" 2>/dev/null
+[ -f "$LIBLOCK" ] || exit 1
+[ -f "$LIBDEMOTE" ] || exit 1
 
-[ -f "$LIBLOCK" ]   || { log "missing libcorelock"; exit 1; }
-[ -f "$LIBDEMOTE" ] || { log "missing libcoredemote"; exit 1; }
+LINK_GATE="$MODDIR/.linked"
 
-# discovery
+if [ ! -f "$LINK_GATE" ]; then
+    mkdir -p "$BINDIR"
+
+    for bin in \
+        "$DISCOVERY" \
+        "$PRELOAD" \
+        "$PERF" \
+        "$DEMOTE" \
+        "$RUNTIME"
+    do
+        name="$(basename "$bin")"
+        target="$BINDIR/$name"
+        [ -L "$target" ] || ln -s "$bin" "$target"
+    done
+
+    : >"$LINK_GATE"
+    log "executables linked into $BINDIR"
+fi
+
 if [ ! -s "$DYNAMIC_LIST" ] || [ ! -s "$STATIC_LIST" ]; then
     log "running discovery"
     "$DISCOVERY"
 fi
 
-[ -s "$DYNAMIC_LIST" ] || { log "dynamic list empty, abort"; exit 0; }
+[ -s "$DYNAMIC_LIST" ] || exit 0
 
-# append internal libs
 for so in "$RUNDIR"/*.so; do
     [ -f "$so" ] || continue
-    grep -qxF "$so" "$STATIC_LIST" 2>/dev/null || {
-        echo "$so" >> "$STATIC_LIST"
-        log "static lock added: $so"
-    }
+    grep -qxF "$so" "$STATIC_LIST" 2>/dev/null || echo "$so" >>"$STATIC_LIST"
 done
 
 SCHEDULER="none"
 
-# cron fallback (root)
 if [ "$UID" -eq 0 ] && command -v busybox >/dev/null; then
-    log "trying cron fallback (root)"
-
     if [ ! -f "$CRONTAB" ]; then
-        cat > "$CRONTAB" <<EOT
+        cat >"$CRONTAB" <<EOF
 SHELL=/system/bin/sh
 PATH=/system/bin:/system/xbin
 
-*/1 * * * * $PRELOAD_DAEMON
-*/1 * * * * $PERF_DAEMON
-0   * * * * $DEMOTE_DAEMON
+*/1 * * * * $PRELOAD
+*/1 * * * * $PERF
+0   * * * * $DEMOTE
 0   0 * * * cmd package bg-dexopt-job
-EOT
+EOF
         chmod 0600 "$CRONTAB"
     fi
 
-    pgrep -f "busybox crond.* $CRONDIR" >/dev/null || \
+    pgrep -f "busybox crond.* $CRONDIR" >/dev/null ||
         busybox crond -f -c "$CRONDIR" -L "$CRONLOG" &
 
     sleep 1
@@ -127,23 +127,15 @@ EOT
     if [ -n "$CRON_PID" ]; then
         setprop "$SCHED_PID_PROP" "$CRON_PID"
         setprop "$SCHED_TYPE_PROP" "cron"
-        log "cron scheduler pid=$CRON_PID"
         SCHEDULER="cron"
     fi
 fi
 
-# shell fallback
 if [ "$SCHEDULER" = "none" ]; then
-    log "using shell scheduler fallback"
-
     if [ ! -f "$CRONTAB" ]; then
-        cat > "$CRONTAB" <<EOT
+        cat >"$CRONTAB" <<EOF
 #!/system/bin/sh
 exec >>"$CRONLOG" 2>&1
-
-log_run() {
-    echo "crond: USER $CRONUSER pid $$ cmd \$1"
-}
 
 MIN=0
 DAY=\$(date +%d)
@@ -152,40 +144,32 @@ while true; do
     sleep 60
     MIN=\$((MIN + 1))
 
-    log_run "$PRELOAD_DAEMON"
-    "$PRELOAD_DAEMON"
-
-    log_run "$PERF_DAEMON"
-    "$PERF_DAEMON"
+    $PRELOAD
+    $PERF
 
     if [ "\$MIN" -ge 60 ]; then
         MIN=0
-        log_run "$DEMOTE_DAEMON"
-        "$DEMOTE_DAEMON"
+        $DEMOTE
     fi
 
     NOW=\$(date +%d)
     if [ "\$NOW" != "\$DAY" ]; then
         DAY="\$NOW"
-        log_run "cmd package bg-dexopt-job"
         cmd package bg-dexopt-job
     fi
 done
-EOT
+EOF
         chmod 0755 "$CRONTAB"
     fi
 
     "$CRONTAB" &
-    SHELL_PID="$!"
-    setprop "$SCHED_PID_PROP" "$SHELL_PID"
+    setprop "$SCHED_PID_PROP" "$!"
     setprop "$SCHED_TYPE_PROP" "shell"
-    log "shell scheduler pid=$SHELL_PID"
-    SCHEDULER="shell"
 fi
 
-"$PRELOAD_DAEMON" & log "preload pid=$!"
-"$PERF_DAEMON"    & log "perf pid=$!"
-"$DEMOTE_DAEMON"  & log "demote pid=$!"
-"$RUNTIME"        & log "runtime pid=$!"
+"$PRELOAD" &
+"$PERF" &
+"$DEMOTE" &
+"$RUNTIME" &
 
-log "service setup complete (scheduler=$SCHEDULER)"
+log "service setup complete"
