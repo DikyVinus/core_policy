@@ -130,7 +130,7 @@ else
         cat >"$SHELL_CRON" <<EOF
 #!/system/bin/sh
 exec >>"$CRONLOG" 2>&1
-
+echo "[CorePolicy] scheduler=shell pid=$$"
 MIN=0
 DAY=\$(date +%d)
 
