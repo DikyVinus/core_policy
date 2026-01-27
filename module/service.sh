@@ -96,8 +96,10 @@ fi
 grep -qxF "$LIBSHIFT" "$STATIC_LIST" 2>/dev/null || \
     echo "$LIBSHIFT" >>"$STATIC_LIST"
 
-### SCHEDULER (CRON ONLY)
+### SCHEDULER
+
 if [ "$UID" -eq 0 ] && command -v busybox >/dev/null 2>&1; then
+    ### CRON
     if [ ! -f "$CRONTAB" ]; then
         cat >"$CRONTAB" <<EOF
 SHELL=/system/bin/sh
@@ -120,8 +122,43 @@ EOF
         setprop "$SCHED_TYPE_PROP" "cron"
         log "scheduler: cron (pid=$CRON_PID)"
     fi
+
 else
-    log "no cron available, scheduler not started"
+    SHELL_CRON="$CRONDIR/shell_cron.sh"
+
+    if [ ! -f "$SHELL_CRON" ]; then
+        cat >"$SHELL_CRON" <<EOF
+#!/system/bin/sh
+exec >>"$CRONLOG" 2>&1
+
+MIN=0
+DAY=\$(date +%d)
+
+while true; do
+    sleep 60
+    MIN=\$((MIN + 1))
+
+    $EXE
+
+    if [ "\$MIN" -ge 60 ]; then
+        MIN=0
+        $DEMOTE
+    fi
+
+    NOW=\$(date +%d)
+    if [ "\$NOW" != "\$DAY" ]; then
+        DAY="\$NOW"
+        cmd package bg-dexopt-job
+    fi
+done
+EOF
+        chmod 0755 "$SHELL_CRON"
+    fi
+
+    "$SHELL_CRON" &
+    setprop "$SCHED_PID_PROP" "$!"
+    setprop "$SCHED_TYPE_PROP" "shell"
+    log "scheduler: shell (pid=$!)"
 fi
 
 log "service setup complete"
