@@ -1,14 +1,13 @@
 #!/system/bin/sh
+
 UID="$(id -u)"
 
 if [ "$UID" -eq 0 ]; then
     MODDIR="/data/adb/modules/core_policy"
     CRONUSER="root"
-    BINDIR="/data/adb/ksu/bin"
 else
     MODDIR="${AXERONDIR}/plugins/core_policy"
     CRONUSER="shell"
-    BINDIR="$AXERONBIN"
 fi
 
 LOG="$MODDIR/core_policy.log"
@@ -23,25 +22,21 @@ log() {
     echo "[CorePolicy] $(date '+%Y-%m-%d %H:%M:%S') $*" >>"$LOG"
 }
 
-### WAIT FOR SYSTEM
+log "service start (uid=$UID)"
+
 while ! dumpsys usagestats >/dev/null 2>&1; do
-    sleep 2
+    sleep 5
 done
 
-### INIT FS
 mkdir -p "$CRONDIR"
 : >"$LOG"
 : >"$CRONLOG"
 chmod 0644 "$LOG" "$CRONLOG"
 
-log "service start (uid=$UID)"
-
-### VERIFY
 VERIFY="$MODDIR/verify.sh"
 [ -f "$VERIFY" ] || exit 1
 sh "$VERIFY" || exit 1
 
-### ABI RESOLUTION
 ABI64="$MODDIR/ABI/arm64-v8a"
 ABI32="$MODDIR/ABI/armeabi-v7a"
 
@@ -53,37 +48,31 @@ else
     log "using arm32 ABI"
 fi
 
-### BINARIES
 DISCOVERY="$RUNDIR/core_policy_discovery"
-RUNTIME="$MODDIR/core_policy_runtime"
 EXE="$RUNDIR/core_policy_exe"
 DEMOTE="$RUNDIR/core_policy_demote"
+RUNTIME="$MODDIR/core_policy_runtime"
 LIBSHIFT="$RUNDIR/libcoreshift.so"
 
 DYNAMIC_LIST="$RUNDIR/core_preload.core"
 STATIC_LIST="$RUNDIR/core_preload_static.core"
 
-chmod 0755 "$DISCOVERY" "$EXE" "$DEMOTE" "$RUNTIME" 2>/dev/null || true
-chmod 0644 "$LIBSHIFT" "$DYNAMIC_LIST" "$STATIC_LIST" 2>/dev/null || true
+chmod 0755 "$DISCOVERY" "$EXE" "$DEMOTE" "$RUNTIME" 2>/dev/null
+chmod 0644 "$LIBSHIFT" "$DYNAMIC_LIST" "$STATIC_LIST" 2>/dev/null
 
 [ -x "$EXE" ] || exit 1
 [ -x "$DEMOTE" ] || exit 1
 [ -f "$LIBSHIFT" ] || exit 1
 
-### LINK BINARIES (ONE-TIME)
 LINK_GATE="$MODDIR/.linked"
 if [ ! -f "$LINK_GATE" ]; then
-    mkdir -p "$BINDIR"
     for bin in "$DISCOVERY" "$EXE" "$DEMOTE"; do
-        name="$(basename "$bin")"
-        target="$BINDIR/$name"
-        [ -L "$target" ] || ln -s "$bin" "$target"
+        ln -sf "$bin" "/data/adb/ksu/bin/$(basename "$bin")"
     done
     : >"$LINK_GATE"
-    log "executables linked into $BINDIR"
+    log "executables linked"
 fi
 
-### DISCOVERY (ONE-TIME)
 if [ ! -s "$DYNAMIC_LIST" ] || [ ! -s "$STATIC_LIST" ]; then
     log "running discovery"
     "$DISCOVERY"
@@ -91,22 +80,20 @@ fi
 
 [ -s "$DYNAMIC_LIST" ] || exit 0
 
-### ENSURE SELF LIB IS STATIC-LOCKED
 grep -qxF "$LIBSHIFT" "$STATIC_LIST" 2>/dev/null || \
     echo "$LIBSHIFT" >>"$STATIC_LIST"
 
-### SCHEDULER
+SCHEDULER="none"
 
 if [ "$UID" -eq 0 ] && command -v busybox >/dev/null 2>&1; then
-    ### CRON
     if [ ! -f "$CRONTAB" ]; then
         cat >"$CRONTAB" <<EOF
 SHELL=/system/bin/sh
 PATH=/system/bin:/system/xbin
 
-*/1 * * * * $EXE
-0   * * * * $DEMOTE
-0   0 * * * cmd package bg-dexopt-job
+*/1 * * * * $EXE >/dev/null 2>&1
+0   * * * * $DEMOTE >/dev/null 2>&1
+0   0 * * * cmd package bg-dexopt-job >/dev/null 2>&1
 EOF
         chmod 0600 "$CRONTAB"
     fi
@@ -119,17 +106,19 @@ EOF
     if [ -n "$CRON_PID" ]; then
         setprop "$SCHED_PID_PROP" "$CRON_PID"
         setprop "$SCHED_TYPE_PROP" "cron"
-        log "scheduler: cron (pid=$CRON_PID)"
+        log "scheduler=cron pid=$CRON_PID"
+        SCHEDULER="cron"
     fi
+fi
 
-else
-    SHELL_CRON="$CRONDIR/shell"
+if [ "$SCHEDULER" = "none" ]; then
+    SHELL_CRON="$CRONTAB"
 
     if [ ! -f "$SHELL_CRON" ]; then
         cat >"$SHELL_CRON" <<EOF
 #!/system/bin/sh
 exec >>"$CRONLOG" 2>&1
-echo "[CorePolicy] scheduler=shell pid=$$"
+
 MIN=0
 DAY=\$(date +%d)
 
@@ -137,11 +126,11 @@ while true; do
     sleep 60
     MIN=\$((MIN + 1))
 
-    $EXE
+    "$EXE"
 
     if [ "\$MIN" -ge 60 ]; then
         MIN=0
-        $DEMOTE
+        "$DEMOTE"
     fi
 
     NOW=\$(date +%d)
@@ -155,9 +144,13 @@ EOF
     fi
 
     "$SHELL_CRON" &
-    setprop "$SCHED_PID_PROP" "$!"
+    SHELL_PID="$!"
+    setprop "$SCHED_PID_PROP" "$SHELL_PID"
     setprop "$SCHED_TYPE_PROP" "shell"
-    log "scheduler: shell (pid=$!)"
+    log "scheduler=shell pid=$SHELL_PID"
 fi
-$RUNTIME
+
+"$RUNTIME" &
+log "runtime pid=$!"
+
 log "service setup complete"
