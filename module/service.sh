@@ -25,11 +25,9 @@ log() {
 
 log "service start (uid=$UID)"
 
-# wait for boot
-while [ "$(getprop sys.boot_completed)" != "1" ]; do
-    sleep 2
+while ! dumpsys usagestats >/dev/null 2>&1; do
+    sleep 5
 done
-sleep 5
 
 # init logs
 mkdir -p "$CRONDIR"
