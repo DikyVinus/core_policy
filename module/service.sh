@@ -61,7 +61,7 @@ DISCOVERY="$RUNDIR/core_policy_discovery"
 PRELOAD="$RUNDIR/core_policy_preload"
 PERF="$RUNDIR/core_policy_perf"
 DEMOTE="$RUNDIR/core_policy_demote"
-RUNTIME="$RUNDIR/core_policy_runtime"
+RUNTIME="$MODDIR/core_policy_runtime"
 LIBSHIFT="$RUNDIR/libcoreshift.so"
 
 DYNAMIC_LIST="$RUNDIR/core_preload.core"
