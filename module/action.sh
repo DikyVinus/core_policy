@@ -2,14 +2,18 @@
 
 MODDIR="${0%/*}"
 LOG="$MODDIR/core_policy.log"
-CRONLOG="$MODDIR/cron/cron.log"
 CRONDIR="$MODDIR/cron"
+CRONLOG="$CRONDIR/cron.log"
 
 FIRSTPASS_PROP="debug.core.policy.firstpass"
 SCHED_PID_PROP="debug.core.policy.scheduler.pid"
 SCHED_TYPE_PROP="debug.core.policy.scheduler.type"
 
-echo "===== CorePolicy SANITY ====="
+FIRSTPASS="$(getprop "$FIRSTPASS_PROP")"
+PID="$(getprop "$SCHED_PID_PROP")"
+TYPE="$(getprop "$SCHED_TYPE_PROP")"
+
+echo "===== CorePolicy System Status ====="
 echo
 
 echo "--- core_policy.log ---"
@@ -19,48 +23,43 @@ else
     echo "(core_policy.log not found)"
 fi
 
-echo
-echo "--- properties ---"
-FIRSTPASS="$(getprop "$FIRSTPASS_PROP")"
-PID="$(getprop "$SCHED_PID_PROP")"
-TYPE="$(getprop "$SCHED_TYPE_PROP")"
+if [ "$FIRSTPASS" = "1" ]; then
+    echo
+    echo "--- cronlog ---"
+    if [ -f "$CRONLOG" ]; then
+        tail -n 10 "$CRONLOG"
+    else
+        echo "(cron log not found)"
+    fi
+fi
 
-echo "firstpass: ${FIRSTPASS:-0}"
-echo "sched pid: ${PID:-}"
-echo "sched type: ${TYPE:-}"
+echo
+echo "--- scheduler ---"
+echo "pid : ${PID:-}"
+echo "type: ${TYPE:-}"
 
 echo
 echo "===== END ====="
 
-# mark first pass
 [ "$FIRSTPASS" != "1" ] && setprop "$FIRSTPASS_PROP" 1
 
-# nothing to supervise
 [ -z "$PID" ] && exit 0
 
-# scheduler still alive
 if kill -0 "$PID" 2>/dev/null; then
     exit 0
 fi
 
-# restart scheduler
 case "$TYPE" in
     cron)
-        if command -v busybox >/dev/null; then
-            busybox crond -f -c "$CRONDIR" -L "$CRONLOG" &
-            NEWPID="$!"
-        else
-            exit 0
-        fi
+        command -v busybox >/dev/null || exit 0
+        busybox crond -f -c "$CRONDIR" -L "$CRONLOG" &
+        NEWPID="$!"
         ;;
     shell)
         CRONUSER="$(ls "$CRONDIR" 2>/dev/null | head -n1)"
-        if [ -n "$CRONUSER" ] && [ -x "$CRONDIR/$CRONUSER" ]; then
-            "$CRONDIR/$CRONUSER" &
-            NEWPID="$!"
-        else
-            exit 0
-        fi
+        [ -n "$CRONUSER" ] && [ -x "$CRONDIR/$CRONUSER" ] || exit 0
+        "$CRONDIR/$CRONUSER" &
+        NEWPID="$!"
         ;;
     *)
         exit 0
@@ -68,4 +67,3 @@ case "$TYPE" in
 esac
 
 setprop "$SCHED_PID_PROP" "$NEWPID"
-exit 0
