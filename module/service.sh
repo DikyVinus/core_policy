@@ -40,7 +40,6 @@ log "service start (uid=$UID)"
 
 ### VERIFY
 VERIFY="$MODDIR/verify.sh"
-chmod 0755 "$VERIFY" 2>/dev/null || true
 [ -x "$VERIFY" ] || exit 1
 "$VERIFY" || exit 1
 
@@ -58,34 +57,25 @@ fi
 
 ### BINARIES
 DISCOVERY="$RUNDIR/core_policy_discovery"
-PRELOAD="$RUNDIR/core_policy_preload"
-PERF="$RUNDIR/core_policy_perf"
+EXE="$RUNDIR/core_policy_exe"
 DEMOTE="$RUNDIR/core_policy_demote"
-RUNTIME="$MODDIR/core_policy_runtime"
 LIBSHIFT="$RUNDIR/libcoreshift.so"
 
 DYNAMIC_LIST="$RUNDIR/core_preload.core"
 STATIC_LIST="$RUNDIR/core_preload_static.core"
 
-chmod 0755 \
-    "$DISCOVERY" \
-    "$PRELOAD" \
-    "$PERF" \
-    "$DEMOTE" \
-    "$RUNTIME" 2>/dev/null || true
+chmod 0755 "$DISCOVERY" "$EXE" "$DEMOTE" 2>/dev/null || true
+chmod 0644 "$LIBSHIFT" "$DYNAMIC_LIST" "$STATIC_LIST" 2>/dev/null || true
 
-chmod 0644 \
-    "$LIBSHIFT" \
-    "$DYNAMIC_LIST" \
-    "$STATIC_LIST" 2>/dev/null || true
-
+[ -x "$EXE" ] || exit 1
+[ -x "$DEMOTE" ] || exit 1
 [ -f "$LIBSHIFT" ] || exit 1
 
 ### LINK BINARIES (ONE-TIME)
 LINK_GATE="$MODDIR/.linked"
 if [ ! -f "$LINK_GATE" ]; then
     mkdir -p "$BINDIR"
-    for bin in "$DISCOVERY" "$PRELOAD" "$PERF" "$DEMOTE" "$RUNTIME"; do
+    for bin in "$DISCOVERY" "$EXE" "$DEMOTE"; do
         name="$(basename "$bin")"
         target="$BINDIR/$name"
         [ -L "$target" ] || ln -s "$bin" "$target"
@@ -94,7 +84,7 @@ if [ ! -f "$LINK_GATE" ]; then
     log "executables linked into $BINDIR"
 fi
 
-### DISCOVERY (ONE-TIME OR EMPTY)
+### DISCOVERY (ONE-TIME)
 if [ ! -s "$DYNAMIC_LIST" ] || [ ! -s "$STATIC_LIST" ]; then
     log "running discovery"
     "$DISCOVERY"
@@ -106,25 +96,19 @@ fi
 grep -qxF "$LIBSHIFT" "$STATIC_LIST" 2>/dev/null || \
     echo "$LIBSHIFT" >>"$STATIC_LIST"
 
-### SCHEDULER SETUP
-SCHEDULER="none"
-
+### SCHEDULER (CRON ONLY)
 if [ "$UID" -eq 0 ] && command -v busybox >/dev/null 2>&1; then
     if [ ! -f "$CRONTAB" ]; then
         cat >"$CRONTAB" <<EOF
 SHELL=/system/bin/sh
 PATH=/system/bin:/system/xbin
 
-*/1 * * * * $PRELOAD
-*/1 * * * * $PERF
+*/1 * * * * $EXE
 0   * * * * $DEMOTE
 0   0 * * * cmd package bg-dexopt-job
 EOF
         chmod 0600 "$CRONTAB"
     fi
-
-    mkdir -p "$CRONDIR"
-    chmod 0755 "$CRONDIR"
 
     pgrep -f "busybox crond.* $CRONDIR" >/dev/null || \
         busybox crond -f -c "$CRONDIR" -L "$CRONLOG" &
@@ -134,53 +118,11 @@ EOF
     if [ -n "$CRON_PID" ]; then
         setprop "$SCHED_PID_PROP" "$CRON_PID"
         setprop "$SCHED_TYPE_PROP" "cron"
-        SCHEDULER="cron"
         log "scheduler: cron (pid=$CRON_PID)"
     fi
+else
+    log "no cron available, scheduler not started"
 fi
-
-### SHELL FALLBACK SCHEDULER
-if [ "$SCHEDULER" = "none" ]; then
-    if [ ! -f "$CRONTAB" ]; then
-        cat >"$CRONTAB" <<EOF
-#!/system/bin/sh
-exec >>"$CRONLOG" 2>&1
-
-MIN=0
-DAY=\$(date +%d)
-
-while true; do
-    sleep 60
-    MIN=\$((MIN + 1))
-
-    $PRELOAD
-    $PERF
-
-    if [ "\$MIN" -ge 60 ]; then
-        MIN=0
-        $DEMOTE
-    fi
-
-    NOW=\$(date +%d)
-    if [ "\$NOW" != "\$DAY" ]; then
-        DAY="\$NOW"
-        cmd package bg-dexopt-job
-    fi
-done
-EOF
-        chmod 0755 "$CRONTAB"
-    fi
-
-    "$CRONTAB" &
-    setprop "$SCHED_PID_PROP" "$!"
-    setprop "$SCHED_TYPE_PROP" "shell"
-    log "scheduler: shell (pid=$!)"
-fi
-
-### INITIAL RUN
-"$PRELOAD" &
-"$PERF" &
-"$DEMOTE" &
-"$RUNTIME" &
 
 log "service setup complete"
+exit 0
