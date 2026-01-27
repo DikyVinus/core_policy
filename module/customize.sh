@@ -42,18 +42,28 @@ PROP_SUM="$MODDIR/module.prop.sha256"
 if [ -f "$PROP_FILE" ] && [ -f "$PROP_SUM" ]; then
     expected="$(cat "$PROP_SUM")"
     actual="$(sha256sum "$PROP_FILE" | awk '{print $1}')"
-    [ "$expected" = "$actual" ] || abort "CorePolicy integrity failure"
+    [ "$expected" = "$actual" ] || abort "CorePolicy integrity failure" exit 255
 fi
 
-if [ -d "$MODDIR" ]; then
-    find "$MODDIR" -type f -name '*.sha256' -print0 |
-    while IFS= read -r -d '' sumfile; do
-        target="${sumfile%.sha256}"
-        [ -f "$target" ] || abort "CorePolicy integrity failure"
-        expected="$(cat "$sumfile")"
-        actual="$(sha256sum "$target" | awk '{print $1}')"
-        [ "$expected" = "$actual" ] || abort "CorePolicy integrity failure"
-    done
+payload_files="$(
+    find "$MODDIR" -type f ! -name '*.sha256' -printf '%f\n'
+)"
+
+if printf '%s\n' "$payload_files" | sort | uniq | \
+   grep -qxE 'module\.prop|update' && \
+   [ "$(printf '%s\n' "$payload_files" | wc -l)" -le 2 ]; then
+    exit 0
+fi
+
+find "$MODDIR" -type f -name '*.sha256' -print0 |
+while IFS= read -r -d '' sumfile; do
+    target="${sumfile%.sha256}"
+    [ -f "$target" ] || abort "CorePolicy integrity failure" exit 255
+
+    expected="$(cat "$sumfile")"
+    actual="$(sha256sum "$target" | awk '{print $1}')"
+    [ "$expected" = "$actual" ] || abort "CorePolicy integrity failure" exit 255
+done
 fi
 
 ui_print " "
