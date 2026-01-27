@@ -10,46 +10,44 @@ SCHED_PID_PROP="debug.core.policy.scheduler.pid"
 SCHED_TYPE_PROP="debug.core.policy.scheduler.type"
 
 FIRSTPASS="$(getprop "$FIRSTPASS_PROP")"
-PID="$(getprop "$SCHED_PID_PROP")"
-TYPE="$(getprop "$SCHED_TYPE_PROP")"
+SCHED_PID="$(getprop "$SCHED_PID_PROP")"
+SCHED_TYPE="$(getprop "$SCHED_TYPE_PROP")"
 
-echo "===== CorePolicy System Status ====="
+echo "CorePolicy Status"
 echo
 
-echo "--- core_policy.log ---"
+echo "Log:"
 if [ -f "$LOG" ]; then
     cat "$LOG"
 else
-    echo "(core_policy.log not found)"
+    echo "(no log found)"
 fi
 
 if [ "$FIRSTPASS" = "1" ]; then
     echo
-    echo "--- cronlog ---"
+    echo "Scheduler log :"
     if [ -f "$CRONLOG" ]; then
         tail -n 10 "$CRONLOG"
     else
-        echo "(cron log not found)"
+        echo "(no scheduler log found)"
     fi
 fi
 
 echo
-echo "--- scheduler ---"
-echo "pid : ${PID:-}"
-echo "type: ${TYPE:-}"
-
-echo
-echo "===== END ====="
+echo "Scheduler:"
+echo "type : ${SCHED_TYPE:-unknown}"
+echo "pid  : ${SCHED_PID:-}"
 
 [ "$FIRSTPASS" != "1" ] && setprop "$FIRSTPASS_PROP" 1
 
-[ -z "$PID" ] && exit 0
+[ -z "$SCHED_PID" ] && exit 0
+[ -z "$SCHED_TYPE" ] && exit 0
 
-if kill -0 "$PID" 2>/dev/null; then
+if kill -0 "$SCHED_PID" 2>/dev/null; then
     exit 0
 fi
 
-case "$TYPE" in
+case "$SCHED_TYPE" in
     cron)
         command -v busybox >/dev/null || exit 0
         busybox crond -f -c "$CRONDIR" -L "$CRONLOG" &
@@ -57,7 +55,8 @@ case "$TYPE" in
         ;;
     shell)
         CRONUSER="$(ls "$CRONDIR" 2>/dev/null | head -n1)"
-        [ -n "$CRONUSER" ] && [ -x "$CRONDIR/$CRONUSER" ] || exit 0
+        [ -n "$CRONUSER" ] || exit 0
+        [ -x "$CRONDIR/$CRONUSER" ] || exit 0
         "$CRONDIR/$CRONUSER" &
         NEWPID="$!"
         ;;
@@ -66,4 +65,5 @@ case "$TYPE" in
         ;;
 esac
 
-setprop "$SCHED_PID_PROP" "$NEWPID"
+[ -n "$NEWPID" ] && setprop "$SCHED_PID_PROP" "$NEWPID"
+exit 0
