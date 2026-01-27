@@ -1,7 +1,7 @@
 {
   "version": "v3.0",
   "versionCode": 300,
-  "zipUrl": "https://github.com/DikyVinus/core_policy-private/releases/download/v3.0/core_policy-v3.0.zip",
+  "zipUrl": "https://github.com/DikyVinus/core_policy-private/releases/download/v3.0/core_policy-private-v3.0.zip",
   "changelog": [
     "Deterministic rebuild of all policy binaries (arm64-v8a, armeabi-v7a)",
     "Dynamic preload generator hardened and bounded",
