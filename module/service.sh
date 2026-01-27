@@ -41,7 +41,7 @@ log "service start (uid=$UID)"
 ### VERIFY
 VERIFY="$MODDIR/verify.sh"
 [ -x "$VERIFY" ] || exit 1
-"$VERIFY" || exit 1
+sh "$VERIFY" || exit 1
 
 ### ABI RESOLUTION
 ABI64="$MODDIR/ABI/arm64-v8a"
