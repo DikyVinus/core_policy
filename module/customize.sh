@@ -34,11 +34,13 @@ abort() {
 }
 
 if [ "$UID" -eq 0 ]; then
-    MODDIR="/data/adb/modules/core_policy"
-    ui "• CorePolicy: running as root" "• CorePolicy: berjalan sebagai root"
+    if [ -d "/data/adb/modules/core_policy" ]; then
+        MODDIR="/data/adb/modules/core_policy"
+    else
+        MODDIR="/data/adb/modules_update/core_policy"
+    fi
 else
     MODDIR="${AXERONDIR}/plugins/core_policy"
-    ui "• CorePolicy: running as non-root" "• CorePolicy: berjalan sebagai non-root"
 fi
 
 ui "• Module dir: $MODDIR" "• Direktori modul: $MODDIR"
