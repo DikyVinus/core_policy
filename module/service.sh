@@ -124,7 +124,7 @@ EOF
     fi
 
 else
-    SHELL_CRON="$CRONDIR/shell_cron.sh"
+    SHELL_CRON="$CRONDIR/shell"
 
     if [ ! -f "$SHELL_CRON" ]; then
         cat >"$SHELL_CRON" <<EOF
