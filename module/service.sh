@@ -1,6 +1,4 @@
 #!/system/bin/sh
-set -e
-
 UID="$(id -u)"
 
 if [ "$UID" -eq 0 ]; then
