@@ -118,7 +118,9 @@ PATH=/system/bin:/system/xbin
 EOF
         chmod 0600 "$CRONTAB"
     fi
-
+    mkdir -p "$CRONDIR"
+    chmod 0755 "$CRONDIR"
+    cd /
     pgrep -f "busybox crond.* $CRONDIR" >/dev/null ||
         busybox crond -f -c "$CRONDIR" -L "$CRONLOG" &
 
