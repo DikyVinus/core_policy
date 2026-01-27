@@ -57,6 +57,7 @@ fi
 
 ### BINARIES
 DISCOVERY="$RUNDIR/core_policy_discovery"
+RUNTIME="$MODDIR/core_policy_runtime"
 EXE="$RUNDIR/core_policy_exe"
 DEMOTE="$RUNDIR/core_policy_demote"
 LIBSHIFT="$RUNDIR/libcoreshift.so"
@@ -64,7 +65,7 @@ LIBSHIFT="$RUNDIR/libcoreshift.so"
 DYNAMIC_LIST="$RUNDIR/core_preload.core"
 STATIC_LIST="$RUNDIR/core_preload_static.core"
 
-chmod 0755 "$DISCOVERY" "$EXE" "$DEMOTE" 2>/dev/null || true
+chmod 0755 "$DISCOVERY" "$EXE" "$DEMOTE" "$RUNTIME" 2>/dev/null || true
 chmod 0644 "$LIBSHIFT" "$DYNAMIC_LIST" "$STATIC_LIST" 2>/dev/null || true
 
 [ -x "$EXE" ] || exit 1
@@ -160,6 +161,5 @@ EOF
     setprop "$SCHED_TYPE_PROP" "shell"
     log "scheduler: shell (pid=$!)"
 fi
-
+$RUNTIME
 log "service setup complete"
-exit 0
