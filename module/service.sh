@@ -18,10 +18,8 @@ log() {
     echo "[CorePolicy] $(date '+%Y-%m-%d %H:%M:%S') $*" >>"$LOG"
 }
 
-while :; do
-    [ "$(getprop sys.boot_completed)" = "1" ] || { sleep 5; continue; }
-    timeout 1 dumpsys usagestats  && break
-    sleep 5
+while ! pidof systemui ; do
+    sleep 8
 done
 
 mkdir -p "$CRONDIR"
