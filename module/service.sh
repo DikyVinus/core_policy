@@ -1,5 +1,5 @@
 #!/system/bin/sh
-exec 2>/dev/null 2>&1
+exec 2>/dev/null
 UID="$(id -u)"
 MODDIR=${0%/*}
 if [ "$UID" -eq 0 ]; then
