@@ -81,7 +81,7 @@ if [ ! -s "$DYNAMIC_LIST" ] || [ ! -s "$STATIC_LIST" ]; then
     "$DISCOVERY"
 fi
 
-[ -s "$DYNAMIC_LIST" ] || exit 0
+[ -f "$DYNAMIC_LIST" ] || exit 0
 
 grep -qxF "$LIBSHIFT" "$STATIC_LIST" || echo "$LIBSHIFT" >>"$STATIC_LIST"
 
