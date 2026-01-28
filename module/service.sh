@@ -11,7 +11,7 @@ else
     MODDIR="${AXERONDIR}/plugins/core_policy"
     BINDIR="$AXERONBIN"
     CRONUSER="shell"
-    SU="/data/adb/ksu/bin/su -c"
+    SU="/system/bin/su -c"
 fi
 
 LOG="$MODDIR/core_policy.log"
