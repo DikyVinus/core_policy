@@ -4,17 +4,18 @@ UID="$(id -u)"
 
 if [ "$UID" -eq 0 ]; then
     MODDIR="/data/adb/modules/core_policy"
+    CRONUSER="shell"
     BINDIR="/data/adb/ksu/bin"
-    SU=""
 else
     MODDIR="${AXERONDIR}/plugins/core_policy"
+    CRONUSER="shell"
     BINDIR="$AXERONBIN"
-    SU="/system/bin/su -c"
 fi
 
 LOG="$MODDIR/core_policy.log"
 CRONDIR="$MODDIR/cron"
 CRONLOG="$CRONDIR/cron.log"
+CRONTAB="$CRONDIR/$CRONUSER"
 
 SCHED_PID_PROP="debug.core.policy.scheduler.pid"
 SCHED_TYPE_PROP="debug.core.policy.scheduler.type"
@@ -24,13 +25,17 @@ log() {
 }
 
 ### WAIT FOR SYSTEM
-log "waiting for system readiness"
 while :; do
     [ "$(getprop sys.boot_completed)" = "1" ] || { sleep 5; continue; }
-    timeout 1 dumpsys usagestats >/dev/null 2>&1 && break
+
+    if timeout 1 dumpsys usagestats >/dev/null 2>&1; then
+        break
+    fi
+
     sleep 5
 done
-log "system ready"
+
+# safe to proceed
 
 ### INIT FS
 mkdir -p "$CRONDIR"
@@ -38,17 +43,12 @@ mkdir -p "$CRONDIR"
 : >"$CRONLOG"
 chmod 0644 "$LOG" "$CRONLOG"
 
-# create both cron user files, let busybox choose
-: >"$CRONDIR/shell"
-: >"$CRONDIR/2000"
-chmod 0600 "$CRONDIR/shell" "$CRONDIR/2000"
-
 log "service start (uid=$UID)"
 
 ### VERIFY
 VERIFY="$MODDIR/verify.sh"
-[ -f "$VERIFY" ] || { log "verify.sh missing"; exit 1; }
-sh "$VERIFY" || { log "verify.sh failed"; exit 1; }
+[ -f "$VERIFY" ] || exit 1
+sh "$VERIFY" || exit 1
 
 ### ABI RESOLUTION
 ABI64="$MODDIR/ABI/arm64-v8a"
@@ -75,11 +75,11 @@ STATIC_LIST="$RUNDIR/core_preload_static.core"
 chmod 0755 "$DISCOVERY" "$EXE" "$DEMOTE" "$RUNTIME" 2>/dev/null || true
 chmod 0644 "$LIBSHIFT" "$DYNAMIC_LIST" "$STATIC_LIST" 2>/dev/null || true
 
-[ -x "$EXE" ] || { log "exe missing"; exit 1; }
-[ -x "$DEMOTE" ] || { log "demote missing"; exit 1; }
-[ -f "$LIBSHIFT" ] || { log "libcoreshift missing"; exit 1; }
+[ -x "$EXE" ] || exit 1
+[ -x "$DEMOTE" ] || exit 1
+[ -f "$LIBSHIFT" ] || exit 1
 
-### LINK BINARIES
+### LINK BINARIES (ONE-TIME)
 LINK_GATE="$MODDIR/.linked"
 if [ ! -f "$LINK_GATE" ]; then
     mkdir -p "$BINDIR"
@@ -92,57 +92,83 @@ if [ ! -f "$LINK_GATE" ]; then
     log "executables linked into $BINDIR"
 fi
 
-### DISCOVERY
+### DISCOVERY (ONE-TIME)
 if [ ! -s "$DYNAMIC_LIST" ] || [ ! -s "$STATIC_LIST" ]; then
     log "running discovery"
-    "$DISCOVERY" >>"$LOG" 2>&1
+    "$DISCOVERY"
 fi
 
-[ -s "$DYNAMIC_LIST" ] || { log "dynamic list empty"; exit 0; }
+[ -s "$DYNAMIC_LIST" ] || exit 0
 
-### ENSURE SELF LIB STATIC-LOCKED
-grep -qxF "$LIBSHIFT" "$STATIC_LIST" 2>/dev/null || {
+### ENSURE SELF LIB IS STATIC-LOCKED
+grep -qxF "$LIBSHIFT" "$STATIC_LIST" 2>/dev/null || \
     echo "$LIBSHIFT" >>"$STATIC_LIST"
-    log "added libcoreshift to static list"
-}
 
-### WRITE CRONTABS
-for TAB in shell 2000; do
-    cat >"$CRONDIR/$TAB" <<EOF
+### SCHEDULER
+
+if [ "$UID" -eq 0 ] && command -v busybox >/dev/null 2>&1; then
+    ### CRON
+    if [ ! -f "$CRONTAB" ]; then
+        cat >"$CRONTAB" <<EOF
 SHELL=/system/bin/sh
 PATH=/system/bin:/system/xbin
 
-*/1 * * * * $SU $EXE log >> $CRONDIR/job.log 2>&1
-0   * * * * $SU $DEMOTE >> $CRONDIR/job.log 2>&1
-0   0 * * * cmd package bg-dexopt-job >> $CRONDIR/job.log 2>&1
+*/1 * * * * $EXE
+0   * * * * $DEMOTE
+0   0 * * * cmd package bg-dexopt-job
 EOF
-    chmod 0600 "$CRONDIR/$TAB"
-done
-log "crontabs written (shell, 2000)"
+        chmod 0600 "$CRONTAB"
+    fi
 
-### START CRON
-if command -v busybox >/dev/null 2>&1; then
-    (
-        cd "$MODDIR" || exit 1
-        log "starting crond"
-        busybox crond -c "$CRONDIR" -L "$CRONLOG"
-    ) &
+    pgrep -f "busybox crond.* $CRONDIR" >/dev/null || \
+        busybox crond -c "$CRONDIR" -L "$CRONLOG" &
+
     sleep 1
     CRON_PID="$(pgrep -f "busybox crond.* $CRONDIR" | head -n1)"
     if [ -n "$CRON_PID" ]; then
         setprop "$SCHED_PID_PROP" "$CRON_PID"
         setprop "$SCHED_TYPE_PROP" "cron"
         log "scheduler: cron (pid=$CRON_PID)"
-    else
-        log "cron failed to start"
     fi
+
 else
-    log "busybox not found, cron disabled"
+    SHELL_CRON="$CRONDIR/shell"
+
+    if [ ! -f "$SHELL_CRON" ]; then
+        cat >"$SHELL_CRON" <<EOF
+#!/system/bin/sh
+exec >>"$CRONLOG" 2>&1
+
+MIN=0
+DAY=\$(date +%d)
+
+while true; do
+    sleep 60
+    MIN=\$((MIN + 1))
+
+    $EXE
+
+    if [ "\$MIN" -ge 60 ]; then
+        MIN=0
+        $DEMOTE
+    fi
+
+    NOW=\$(date +%d)
+    if [ "\$NOW" != "\$DAY" ]; then
+        DAY="\$NOW"
+        cmd package bg-dexopt-job
+    fi
+done
+EOF
+        chmod 0755 "$SHELL_CRON"
+    fi
+
+    "$SHELL_CRON" &
+    setprop "$SCHED_PID_PROP" "$!"
+    setprop "$SCHED_TYPE_PROP" "shell"
+    log "scheduler: shell (pid=$!)"
 fi
 
-### RUNTIME
-log "starting runtime"
-$SU "$RUNTIME" >>"$LOG" 2>&1 &
-
+"$RUNTIME" &
 log "service setup complete"
 exit 0
