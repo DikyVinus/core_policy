@@ -4,19 +4,16 @@ UID="$(id -u)"
 
 if [ "$UID" -eq 0 ]; then
     MODDIR="/data/adb/modules/core_policy"
-    CRONUSER="root"
-    BINDIR="/data/adb/ksu/bin"
+    CRONUSER="shell"
 else
     MODDIR="${AXERONDIR}/plugins/core_policy"
     CRONUSER="shell"
-    BINDIR="$AXERONBIN"
 fi
 
-LOG="$MODDIR/core_policy.log"
+TMPDIR="/data/local/tmp/core_policy"
+CRONDIR="$MODDIR/cron"
 
-# relocated cron root (neutral, executable, traversable)
-CRONBASE="/data/local/tmp/core"
-CRONDIR="$CRONBASE/cron"
+LOG="$MODDIR/core_policy.log"
 CRONLOG="$CRONDIR/cron.log"
 CRONTAB="$CRONDIR/$CRONUSER"
 
@@ -35,7 +32,7 @@ while :; do
 done
 
 ### INIT FS
-mkdir -p "$CRONDIR"
+mkdir -p "$CRONDIR" "$TMPDIR"
 : >"$LOG"
 : >"$CRONLOG"
 chmod 0644 "$LOG" "$CRONLOG"
@@ -59,37 +56,33 @@ else
     log "using arm32 ABI"
 fi
 
-### BINARIES
-DISCOVERY="$RUNDIR/core_policy_discovery"
-RUNTIME="$MODDIR/core_policy_runtime"
-EXE="$RUNDIR/core_policy_exe"
-DEMOTE="$RUNDIR/core_policy_demote"
-LIBSHIFT="$RUNDIR/libcoreshift.so"
+### SOURCE BINARIES
+SRC_DISCOVERY="$RUNDIR/core_policy_discovery"
+SRC_EXE="$RUNDIR/core_policy_exe"
+SRC_DEMOTE="$RUNDIR/core_policy_demote"
+SRC_RUNTIME="$MODDIR/core_policy_runtime"
 
+LIBSHIFT="$RUNDIR/libcoreshift.so"
 DYNAMIC_LIST="$RUNDIR/core_preload.core"
 STATIC_LIST="$RUNDIR/core_preload_static.core"
 
-chmod 0755 "$DISCOVERY" "$EXE" "$DEMOTE" "$RUNTIME" 2>/dev/null || true
-chmod 0644 "$LIBSHIFT" "$DYNAMIC_LIST" "$STATIC_LIST" 2>/dev/null || true
+### COPY TO /data/local/tmp (EXECUTION CONTEXT)
+EXE="$TMPDIR/core_policy_exe"
+DEMOTE="$TMPDIR/core_policy_demote"
+DISCOVERY="$TMPDIR/core_policy_discovery"
+RUNTIME="$TMPDIR/core_policy_runtime"
+
+cp -f "$SRC_EXE" "$EXE"
+cp -f "$SRC_DEMOTE" "$DEMOTE"
+cp -f "$SRC_DISCOVERY" "$DISCOVERY"
+cp -f "$SRC_RUNTIME" "$RUNTIME"
+
+chmod 0755 "$EXE" "$DEMOTE" "$DISCOVERY" "$RUNTIME"
 
 [ -x "$EXE" ] || exit 1
 [ -x "$DEMOTE" ] || exit 1
-[ -f "$LIBSHIFT" ] || exit 1
 
-### LINK BINARIES (ONE-TIME)
-LINK_GATE="$MODDIR/.linked"
-if [ ! -f "$LINK_GATE" ]; then
-    mkdir -p "$BINDIR"
-    for bin in "$DISCOVERY" "$EXE" "$DEMOTE"; do
-        name="$(basename "$bin")"
-        target="$BINDIR/$name"
-        [ -L "$target" ] || ln -s "$bin" "$target"
-    done
-    : >"$LINK_GATE"
-    log "executables linked into $BINDIR"
-fi
-
-### DISCOVERY (ONE-TIME)
+### DISCOVERY
 if [ ! -s "$DYNAMIC_LIST" ] || [ ! -s "$STATIC_LIST" ]; then
     log "running discovery"
     "$DISCOVERY"
@@ -97,23 +90,24 @@ fi
 
 [ -s "$DYNAMIC_LIST" ] || exit 0
 
-### ENSURE SELF LIB IS STATIC-LOCKED
+### ENSURE SELF LIB STATIC-LOCKED
 grep -qxF "$LIBSHIFT" "$STATIC_LIST" 2>/dev/null || \
     echo "$LIBSHIFT" >>"$STATIC_LIST"
 
-### SCHEDULER
-if [ "$UID" -eq 0 ] && command -v busybox >/dev/null 2>&1; then
-    # CRON (busybox)
+### SCHEDULER (CRON)
+
+if command -v busybox >/dev/null 2>&1; then
     if [ ! -f "$CRONTAB" ]; then
         cat >"$CRONTAB" <<EOF
 SHELL=/system/bin/sh
 PATH=/system/bin:/system/xbin
 
-*/1 * * * * su -lp 2000 -c $EXE
+*/1 * * * * $EXE
 0   * * * * $DEMOTE
 0   0 * * * cmd package bg-dexopt-job
 EOF
         chmod 0600 "$CRONTAB"
+        log "crontab created for $CRONUSER"
     fi
 
     pgrep -f "busybox crond.* $CRONDIR" >/dev/null || \
@@ -126,42 +120,6 @@ EOF
         setprop "$SCHED_TYPE_PROP" "cron"
         log "scheduler: cron (pid=$CRON_PID)"
     fi
-else
-    # SHELL LOOP FALLBACK
-    SHELL_CRON="$CRONDIR/shell"
-    if [ ! -f "$SHELL_CRON" ]; then
-        cat >"$SHELL_CRON" <<EOF
-#!/system/bin/sh
-exec >>"$CRONLOG" 2>&1
-
-MIN=0
-DAY=\$(date +%d)
-
-while true; do
-    sleep 60
-    MIN=\$((MIN + 1))
-
-    $EXE
-
-    if [ "\$MIN" -ge 60 ]; then
-        MIN=0
-        $DEMOTE
-    fi
-
-    NOW=\$(date +%d)
-    if [ "\$NOW" != "\$DAY" ]; then
-        DAY="\$NOW"
-        cmd package bg-dexopt-job
-    fi
-done
-EOF
-        chmod 0755 "$SHELL_CRON"
-    fi
-
-    "$SHELL_CRON" &
-    setprop "$SCHED_PID_PROP" "$!"
-    setprop "$SCHED_TYPE_PROP" "shell"
-    log "scheduler: shell (pid=$!)"
 fi
 
 "$RUNTIME" &
