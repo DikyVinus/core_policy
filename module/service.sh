@@ -1,15 +1,18 @@
 #!/system/bin/sh
 
 UID="$(id -u)"
+MODDIR=${0%/*}
+
+BB="$(command -v busybox)"
+if [ -n "$BB" ]; then
+    BB="$(readlink -f "$BB" || echo "$BB")"
+    BINDIR="$(dirname "$BB")"
+fi
 
 if [ "$UID" -eq 0 ]; then
-    MODDIR="/data/adb/modules/core_policy"
     CRONUSER="root"
-    BINDIR="/data/adb/ksu/bin"
 else
-    MODDIR="${AXERONDIR}/plugins/core_policy"
     CRONUSER="shell"
-    BINDIR="$AXERONBIN"
 fi
 
 LOG="$MODDIR/core_policy.log"
@@ -24,20 +27,12 @@ log() {
     echo "[CorePolicy] $(date '+%Y-%m-%d %H:%M:%S') $*" >>"$LOG"
 }
 
-### WAIT FOR SYSTEM
 while :; do
     [ "$(getprop sys.boot_completed)" = "1" ] || { sleep 5; continue; }
-
-    if timeout 1 dumpsys usagestats >/dev/null 2>&1; then
-        break
-    fi
-
+    timeout 1 dumpsys usagestats  && break
     sleep 5
 done
 
-# safe to proceed
-
-### INIT FS
 mkdir -p "$CRONDIR"
 : >"$LOG"
 : >"$CRONLOG"
@@ -45,12 +40,10 @@ chmod 0644 "$LOG" "$CRONLOG"
 
 log "service start (uid=$UID)"
 
-### VERIFY
 VERIFY="$MODDIR/verify.sh"
 [ -f "$VERIFY" ] || exit 1
 sh "$VERIFY" || exit 1
 
-### ABI RESOLUTION
 ABI64="$MODDIR/ABI/arm64-v8a"
 ABI32="$MODDIR/ABI/armeabi-v7a"
 
@@ -62,7 +55,6 @@ else
     log "using arm32 ABI"
 fi
 
-### BINARIES
 DISCOVERY="$RUNDIR/core_policy_discovery"
 RUNTIME="$MODDIR/core_policy_runtime"
 EXE="$RUNDIR/core_policy_exe"
@@ -72,14 +64,13 @@ LIBSHIFT="$RUNDIR/libcoreshift.so"
 DYNAMIC_LIST="$RUNDIR/core_preload.core"
 STATIC_LIST="$RUNDIR/core_preload_static.core"
 
-chmod 0755 "$DISCOVERY" "$EXE" "$DEMOTE" "$RUNTIME" 2>/dev/null || true
-chmod 0644 "$LIBSHIFT" "$DYNAMIC_LIST" "$STATIC_LIST" 2>/dev/null || true
+chmod 0755 "$DISCOVERY" "$EXE" "$DEMOTE" "$RUNTIME" || true
+chmod 0644 "$LIBSHIFT" "$DYNAMIC_LIST" "$STATIC_LIST" || true
 
 [ -x "$EXE" ] || exit 1
 [ -x "$DEMOTE" ] || exit 1
 [ -f "$LIBSHIFT" ] || exit 1
 
-### LINK BINARIES (ONE-TIME)
 LINK_GATE="$MODDIR/.linked"
 if [ ! -f "$LINK_GATE" ]; then
     mkdir -p "$BINDIR"
@@ -92,7 +83,6 @@ if [ ! -f "$LINK_GATE" ]; then
     log "executables linked into $BINDIR"
 fi
 
-### DISCOVERY (ONE-TIME)
 if [ ! -s "$DYNAMIC_LIST" ] || [ ! -s "$STATIC_LIST" ]; then
     log "running discovery"
     "$DISCOVERY"
@@ -100,18 +90,13 @@ fi
 
 [ -s "$DYNAMIC_LIST" ] || exit 0
 
-### ENSURE SELF LIB IS STATIC-LOCKED
-grep -qxF "$LIBSHIFT" "$STATIC_LIST" 2>/dev/null || \
-    echo "$LIBSHIFT" >>"$STATIC_LIST"
+grep -qxF "$LIBSHIFT" "$STATIC_LIST" || echo "$LIBSHIFT" >>"$STATIC_LIST"
 
-### SCHEDULER
-
-if [ "$UID" -eq 0 ] && command -v busybox >/dev/null 2>&1; then
-    ### CRON
+if command -v busybox >/dev/null 2>&1; then
     if [ ! -f "$CRONTAB" ]; then
         cat >"$CRONTAB" <<EOF
 SHELL=/system/bin/sh
-PATH=/system/bin:/system/xbin
+PATH=/system/bin:/system/xbin:$BINDIR
 
 */1 * * * * $EXE
 0   * * * * $DEMOTE
@@ -130,10 +115,8 @@ EOF
         setprop "$SCHED_TYPE_PROP" "cron"
         log "scheduler: cron (pid=$CRON_PID)"
     fi
-
 else
     SHELL_CRON="$CRONDIR/shell"
-
     if [ ! -f "$SHELL_CRON" ]; then
         cat >"$SHELL_CRON" <<EOF
 #!/system/bin/sh
