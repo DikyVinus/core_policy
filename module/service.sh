@@ -10,7 +10,7 @@ if [ "$UID" -eq 0 ]; then
 else
     MODDIR="${AXERONDIR}/plugins/core_policy"
     BINDIR="$AXERONBIN"
-    CRONUSER="shell"
+    CRONUSER="$UID"
     SU="/system/bin/su -c"
 fi
 
