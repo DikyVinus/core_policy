@@ -4,7 +4,7 @@ UID="$(id -u)"
 
 if [ "$UID" -eq 0 ]; then
     MODDIR="/data/adb/modules/core_policy"
-    CRONUSER="shell"
+    CRONUSER="root"
     BINDIR="/data/adb/ksu/bin"
 else
     MODDIR="${AXERONDIR}/plugins/core_policy"
@@ -113,7 +113,7 @@ if [ "$UID" -eq 0 ] && command -v busybox >/dev/null 2>&1; then
 SHELL=/system/bin/sh
 PATH=/system/bin:/system/xbin
 
-*/1 * * * * $EXE
+*/1 * * * * su -lp 2000 -c $EXE
 0   * * * * $DEMOTE
 0   0 * * * cmd package bg-dexopt-job
 EOF
