@@ -114,7 +114,10 @@ EOF
         chmod 0600 "$CRONTAB"
     fi
 
-    busybox crond -c "$CRONDIR" -L "$CRONLOG" &
+    (
+    cd "$MODDIR" || exit 1
+    busybox crond -c "$CRONDIR" -L "$CRONLOG"
+) &
     sleep 1
     CRON_PID="$(pgrep -f "busybox crond.* $CRONDIR" | head -n1)"
     if [ -n "$CRON_PID" ]; then
