@@ -1,5 +1,5 @@
 #!/system/bin/sh
-
+exec 2>/dev/null 2>&1
 UID="$(id -u)"
 MODDIR=${0%/*}
 
