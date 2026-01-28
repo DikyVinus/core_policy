@@ -25,9 +25,17 @@ log() {
 }
 
 ### WAIT FOR SYSTEM
-while ! dumpsys usagestats >/dev/null 2>&1; do
-    sleep 2
+while :; do
+    [ "$(getprop sys.boot_completed)" = "1" ] || { sleep 5; continue; }
+
+    if timeout 1 dumpsys usagestats >/dev/null 2>&1; then
+        break
+    fi
+
+    sleep 5
 done
+
+# safe to proceed
 
 ### INIT FS
 mkdir -p "$CRONDIR"
