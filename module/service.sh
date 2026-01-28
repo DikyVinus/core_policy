@@ -13,7 +13,10 @@ else
 fi
 
 LOG="$MODDIR/core_policy.log"
-CRONDIR="$MODDIR/cron"
+
+# relocated cron root (neutral, executable, traversable)
+CRONBASE="/data/local/tmp/core"
+CRONDIR="$CRONBASE/cron"
 CRONLOG="$CRONDIR/cron.log"
 CRONTAB="$CRONDIR/$CRONUSER"
 
@@ -27,15 +30,9 @@ log() {
 ### WAIT FOR SYSTEM
 while :; do
     [ "$(getprop sys.boot_completed)" = "1" ] || { sleep 5; continue; }
-
-    if timeout 1 dumpsys usagestats >/dev/null 2>&1; then
-        break
-    fi
-
+    timeout 1 dumpsys usagestats >/dev/null 2>&1 && break
     sleep 5
 done
-
-# safe to proceed
 
 ### INIT FS
 mkdir -p "$CRONDIR"
@@ -105,9 +102,8 @@ grep -qxF "$LIBSHIFT" "$STATIC_LIST" 2>/dev/null || \
     echo "$LIBSHIFT" >>"$STATIC_LIST"
 
 ### SCHEDULER
-
 if [ "$UID" -eq 0 ] && command -v busybox >/dev/null 2>&1; then
-    ### CRON
+    # CRON (busybox)
     if [ ! -f "$CRONTAB" ]; then
         cat >"$CRONTAB" <<EOF
 SHELL=/system/bin/sh
@@ -130,10 +126,9 @@ EOF
         setprop "$SCHED_TYPE_PROP" "cron"
         log "scheduler: cron (pid=$CRON_PID)"
     fi
-
 else
+    # SHELL LOOP FALLBACK
     SHELL_CRON="$CRONDIR/shell"
-
     if [ ! -f "$SHELL_CRON" ]; then
         cat >"$SHELL_CRON" <<EOF
 #!/system/bin/sh
