@@ -2,24 +2,15 @@
 exec 2>/dev/null 2>&1
 UID="$(id -u)"
 MODDIR=${0%/*}
-
-BB="$(command -v busybox)"
-if [ -n "$BB" ]; then
-    BB="$(readlink -f "$BB" || echo "$BB")"
-    BINDIR="$(dirname "$BB")"
-fi
-
 if [ "$UID" -eq 0 ]; then
     CRONUSER="root"
 else
     CRONUSER="shell"
 fi
-
 LOG="$MODDIR/core_policy.log"
 CRONDIR="$MODDIR/cron"
 CRONLOG="$CRONDIR/cron.log"
 CRONTAB="$CRONDIR/$CRONUSER"
-
 SCHED_PID_PROP="debug.core.policy.scheduler.pid"
 SCHED_TYPE_PROP="debug.core.policy.scheduler.type"
 
@@ -70,7 +61,11 @@ chmod 0644 "$LIBSHIFT" "$DYNAMIC_LIST" "$STATIC_LIST" || true
 [ -x "$EXE" ] || exit 1
 [ -x "$DEMOTE" ] || exit 1
 [ -f "$LIBSHIFT" ] || exit 1
-
+BB="$(command -v busybox)"
+if [ -n "$BB" ]; then
+    BB="$(readlink -f "$BB" || echo "$BB")"
+    BINDIR="$(dirname "$BB")"
+fi
 LINK_GATE="$MODDIR/.linked"
 if [ ! -f "$LINK_GATE" ]; then
     mkdir -p "$BINDIR"
