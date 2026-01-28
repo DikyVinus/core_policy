@@ -115,7 +115,7 @@ EOF
     fi
 
     pgrep -f "busybox crond.* $CRONDIR" >/dev/null || \
-        busybox crond -c "$CRONDIR" -L "$CRONLOG" &
+      $SU busybox crond -c "$CRONDIR" -L "$CRONLOG" &
 
     sleep 1
     CRON_PID="$(pgrep -f "busybox crond.* $CRONDIR" | head -n1)"
@@ -126,6 +126,6 @@ EOF
     fi
 fi
 
-"$RUNTIME" &
+$SU "$RUNTIME" &
 log "service setup complete"
 exit 0
