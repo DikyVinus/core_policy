@@ -1,5 +1,5 @@
 #!/system/bin/sh
-
+UID="$(id -u)"
 MODDIR="${0%/*}"
 LOG="$MODDIR/core_policy.log"
 CRONDIR="$MODDIR/cron"
@@ -23,7 +23,7 @@ else
     echo "(no log found)"
 fi
 
-if [ "$FIRSTPASS" = "1" ]; then
+if [ "$UID" -eq 0 ] && [ "$FIRSTPASS" = "1" ]; then
     echo
     echo "Scheduler log :"
     if [ -f "$CRONLOG" ]; then
