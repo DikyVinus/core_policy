@@ -4,13 +4,15 @@ UID="$(id -u)"
 
 if [ "$UID" -eq 0 ]; then
     MODDIR="/data/adb/modules/core_policy"
+    BINDIR="/data/adb/ksu/bin"
     CRONUSER="shell"
 else
     MODDIR="${AXERONDIR}/plugins/core_policy"
+    BINDIR="$AXERONBIN"
     CRONUSER="shell"
 fi
 
-TMPDIR="/data/local/tmp/core_policy"
+TMPDIR="/data/local/tmp"
 CRONDIR="$MODDIR/cron"
 
 LOG="$MODDIR/core_policy.log"
@@ -56,28 +58,43 @@ else
     log "using arm32 ABI"
 fi
 
-### SOURCE BINARIES
-SRC_DISCOVERY="$RUNDIR/core_policy_discovery"
+### BINARIES (SOURCE)
 SRC_EXE="$RUNDIR/core_policy_exe"
 SRC_DEMOTE="$RUNDIR/core_policy_demote"
+SRC_DISCOVERY="$RUNDIR/core_policy_discovery"
 SRC_RUNTIME="$MODDIR/core_policy_runtime"
 
 LIBSHIFT="$RUNDIR/libcoreshift.so"
 DYNAMIC_LIST="$RUNDIR/core_preload.core"
 STATIC_LIST="$RUNDIR/core_preload_static.core"
 
-### COPY TO /data/local/tmp (EXECUTION CONTEXT)
+chmod 0755 "$SRC_EXE" "$SRC_DEMOTE" "$SRC_DISCOVERY" "$SRC_RUNTIME" 2>/dev/null
+
+### LINK GATE
+LINK_GATE="$MODDIR/.linked"
+if [ ! -f "$LINK_GATE" ]; then
+    mkdir -p "$BINDIR" "$TMPDIR"
+
+    for bin in core_policy_exe core_policy_demote core_policy_discovery; do
+        SRC="$RUNDIR/$bin"
+
+        ln -sf "$SRC" "$BINDIR/$bin"
+        ln -sf "$SRC" "$TMPDIR/$bin"
+
+        log "linked $bin → $BINDIR and $TMPDIR"
+    done
+
+    ln -sf "$SRC_RUNTIME" "$TMPDIR/core_policy_runtime"
+    log "linked runtime → $TMPDIR"
+
+    : >"$LINK_GATE"
+fi
+
+### REBIND EXEC PATHS (IMPORTANT)
 EXE="$TMPDIR/core_policy_exe"
 DEMOTE="$TMPDIR/core_policy_demote"
 DISCOVERY="$TMPDIR/core_policy_discovery"
 RUNTIME="$TMPDIR/core_policy_runtime"
-
-cp -f "$SRC_EXE" "$EXE"
-cp -f "$SRC_DEMOTE" "$DEMOTE"
-cp -f "$SRC_DISCOVERY" "$DISCOVERY"
-cp -f "$SRC_RUNTIME" "$RUNTIME"
-
-chmod 0755 "$EXE" "$DEMOTE" "$DISCOVERY" "$RUNTIME"
 
 [ -x "$EXE" ] || exit 1
 [ -x "$DEMOTE" ] || exit 1
@@ -94,8 +111,7 @@ fi
 grep -qxF "$LIBSHIFT" "$STATIC_LIST" 2>/dev/null || \
     echo "$LIBSHIFT" >>"$STATIC_LIST"
 
-### SCHEDULER (CRON)
-
+### CRON
 if command -v busybox >/dev/null 2>&1; then
     if [ ! -f "$CRONTAB" ]; then
         cat >"$CRONTAB" <<EOF
@@ -124,4 +140,3 @@ fi
 
 "$RUNTIME" &
 log "service setup complete"
-exit 0
