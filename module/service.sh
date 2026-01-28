@@ -113,7 +113,7 @@ EOF
     fi
 
     pgrep -f "busybox crond.* $CRONDIR" >/dev/null || \
-        busybox crond -f -c "$CRONDIR" -L "$CRONLOG" &
+        busybox crond -c "$CRONDIR" -L "$CRONLOG" &
 
     sleep 1
     CRON_PID="$(pgrep -f "busybox crond.* $CRONDIR" | head -n1)"
@@ -161,6 +161,6 @@ EOF
     log "scheduler: shell (pid=$!)"
 fi
 
-"$RUNTIME"
+"$RUNTIME" &
 log "service setup complete"
 exit 0
