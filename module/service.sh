@@ -82,7 +82,7 @@ if [ ! -s "$DYNAMIC_LIST" ] || [ ! -s "$STATIC_LIST" ]; then
     log "running discovery"
     "$DISCOVERY"
 fi
-:> $RUNDIR/.core_boost.cache
+: >$RUNDIR/.core_boost.cache
 [ -f "$DYNAMIC_LIST" ] || exit 0
 
 grep -qxF "$LIBSHIFT" "$STATIC_LIST" || echo "$LIBSHIFT" >>"$STATIC_LIST"
