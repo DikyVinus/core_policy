@@ -22,7 +22,7 @@ log() {
     echo "[CorePolicy] $(date '+%Y-%m-%d %H:%M:%S') $*" >>"$LOG"
 }
 
-while ! pidof com.android.systemui >/dev/null 2>&1; do
+while ! pidof com.android.systemui ; do
     sleep 8
 done
 
@@ -57,16 +57,16 @@ LIBSHIFT="$RUNDIR/libcoreshift.so"
 DYNAMIC_LIST="$RUNDIR/core_preload.core"
 STATIC_LIST="$RUNDIR/core_preload_static.core"
 
-chmod 0755 "$DISCOVERY" "$EXE" "$DEMOTE" "$RUNTIME" 2>/dev/null
-chmod 0644 "$LIBSHIFT" "$DYNAMIC_LIST" "$STATIC_LIST" 2>/dev/null
+chmod 0755 "$DISCOVERY" "$EXE" "$DEMOTE" "$RUNTIME" 
+chmod 0644 "$LIBSHIFT" "$DYNAMIC_LIST" "$STATIC_LIST" 
 
 [ -x "$EXE" ] || exit 1
 [ -x "$DEMOTE" ] || exit 1
 [ -f "$LIBSHIFT" ] || exit 1
 
-BB="$(command -v resetprop 2>/dev/null)"
+BB="$(command -v resetprop)"
 if [ -n "$BB" ]; then
-    BB="$(readlink -f "$BB" 2>/dev/null || echo "$BB")"
+    BB="$(readlink -f "$BB" || echo "$BB")"
     BINDIR="$(dirname "$BB")"
 else
     exit 1
@@ -87,7 +87,7 @@ fi
 
 grep -qxF "$LIBSHIFT" "$STATIC_LIST" || echo "$LIBSHIFT" >>"$STATIC_LIST"
 
-if command -v busybox >/dev/null 2>&1; then
+if command -v busybox ; then
     if [ ! -f "$CRONTAB" ]; then
         cat >"$CRONTAB" <<EOF
 SHELL=/system/bin/sh
@@ -100,7 +100,7 @@ EOF
         chmod 0600 "$CRONTAB"
     fi
 
-    pgrep -f "busybox crond.* $CRONDIR" >/dev/null 2>&1 || \
+    pgrep -f "busybox crond.* $CRONDIR" || \
         busybox crond -c "$CRONDIR" -L "$CRONLOG" &
 
     sleep 1
