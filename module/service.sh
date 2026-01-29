@@ -151,4 +151,3 @@ fi
 "$DEMOTE" &
 
 log "service setup complete"
-exit 0
