@@ -7,11 +7,7 @@ LANG_CODE="$(getprop persist.sys.locale | cut -d- -f1)"
 [ "$LANG_CODE" != "id" ] && LANG_CODE="en"
 
 ui() {
-    if [ "$LANG_CODE" = "id" ]; then
-        ui_print "$2"
-    else
-        ui_print "$1"
-    fi
+    [ "$LANG_CODE" = "id" ] && ui_print "$2" || ui_print "$1"
 }
 
 notify() {
@@ -29,28 +25,35 @@ notify() {
 }
 
 if [ "$UID" -eq 0 ]; then
-    if [ -d "/data/adb/modules/core_policy" ]; then
-        MODDIR="/data/adb/modules/core_policy"
-    else
-        MODDIR="/data/adb/modules_update/core_policy"
-    fi
+    MODDIR="/data/adb/modules/core_policy"
+    [ -d "$MODDIR" ] || MODDIR="/data/adb/modules_update/core_policy"
 else
     MODDIR="${AXERONDIR}/plugins/core_policy"
 fi
 
 ui "• Module dir: $MODDIR" "• Direktori modul: $MODDIR"
 
-[ -d "$MODDIR" ] || notify "Module directory missing"
+spam_if_missing() {
+    MSG="$1"
+    CHECK="$2"
+    while :; do
+        [ -e "$CHECK" ] || notify "$MSG"
+        sleep 15
+    done
+}
+
+spam_if_missing "Module directory missing" "$MODDIR" &
+
+SETTASK="/system/bin/settaskprofile"
+spam_if_missing "settaskprofile binary missing" "$SETTASK" &
 
 PROP_FILE="$MODDIR/module.prop"
-
 EXPECTED_SHA256="396804df69a1d129a30c254bd7b0e99305bc270829995c97d6eb990662b446c6"
 
 if [ -f "$PROP_FILE" ]; then
     ACTUAL_SHA256="$(sha256sum "$PROP_FILE" | awk '{print $1}')"
-    if [ "$ACTUAL_SHA256" != "$EXPECTED_SHA256" ]; then
+    [ "$ACTUAL_SHA256" = "$EXPECTED_SHA256" ] || \
         notify "module.prop checksum mismatch"
-    fi
 else
     notify "module.prop missing"
 fi
