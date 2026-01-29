@@ -59,7 +59,7 @@ chmod 0644 "$LIBSHIFT" "$DYNAMIC_LIST" "$STATIC_LIST" || true
 [ -x "$EXE" ] || exit 1
 [ -x "$DEMOTE" ] || exit 1
 [ -f "$LIBSHIFT" ] || exit 1
-BB="$(command -v busybox)"
+BB="$(command -v resetprop)"
 if [ -n "$BB" ]; then
     BB="$(readlink -f "$BB" || echo "$BB")"
     BINDIR="$(dirname "$BB")"
