@@ -1,16 +1,20 @@
 #!/system/bin/sh
 exec 2>/dev/null
+
 UID="$(id -u)"
 MODDIR=${0%/*}
+
 if [ "$UID" -eq 0 ]; then
     CRONUSER="root"
 else
     CRONUSER="shell"
 fi
+
 LOG="$MODDIR/core_policy.log"
 CRONDIR="$MODDIR/cron"
 CRONLOG="$CRONDIR/cron.log"
 CRONTAB="$CRONDIR/$CRONUSER"
+
 SCHED_PID_PROP="debug.core.policy.scheduler.pid"
 SCHED_TYPE_PROP="debug.core.policy.scheduler.type"
 
@@ -18,7 +22,7 @@ log() {
     echo "[CorePolicy] $(date '+%Y-%m-%d %H:%M:%S') $*" >>"$LOG"
 }
 
-while ! pidof com.android.systemui ; do
+while ! pidof com.android.systemui >/dev/null 2>&1; do
     sleep 8
 done
 
@@ -45,36 +49,34 @@ else
 fi
 
 DISCOVERY="$RUNDIR/core_policy_discovery"
-RUNTIME="$MODDIR/core_policy_runtime"
 EXE="$RUNDIR/core_policy_exe"
 DEMOTE="$RUNDIR/core_policy_demote"
-LIBSHIFT="$RUNDIR/libcoreshift.so"
+RUNTIME="$MODDIR/core_policy_runtime"
 
+LIBSHIFT="$RUNDIR/libcoreshift.so"
 DYNAMIC_LIST="$RUNDIR/core_preload.core"
 STATIC_LIST="$RUNDIR/core_preload_static.core"
 
-chmod 0755 "$DISCOVERY" "$EXE" "$DEMOTE" "$RUNTIME" || true
-chmod 0644 "$LIBSHIFT" "$DYNAMIC_LIST" "$STATIC_LIST" || true
+chmod 0755 "$DISCOVERY" "$EXE" "$DEMOTE" "$RUNTIME" 2>/dev/null
+chmod 0644 "$LIBSHIFT" "$DYNAMIC_LIST" "$STATIC_LIST" 2>/dev/null
 
 [ -x "$EXE" ] || exit 1
 [ -x "$DEMOTE" ] || exit 1
 [ -f "$LIBSHIFT" ] || exit 1
-BB="$(command -v resetprop)"
+
+BB="$(command -v resetprop 2>/dev/null)"
 if [ -n "$BB" ]; then
-    BB="$(readlink -f "$BB" || echo "$BB")"
+    BB="$(readlink -f "$BB" 2>/dev/null || echo "$BB")"
     BINDIR="$(dirname "$BB")"
+else
+    exit 1
 fi
-LINK_GATE="$MODDIR/.linked"
-if [ ! -f "$LINK_GATE" ]; then
-    mkdir -p "$BINDIR"
-    for bin in "$DISCOVERY" "$EXE" "$DEMOTE"; do
-        name="$(basename "$bin")"
-        target="$BINDIR/$name"
-        [ -L "$target" ] || ln -s "$bin" "$target"
-    done
-    : >"$LINK_GATE"
-    log "executables linked into $BINDIR"
-fi
+
+mkdir -p "$BINDIR"
+for bin in "$DISCOVERY" "$EXE" "$DEMOTE"; do
+    ln -sf "$bin" "$BINDIR/$(basename "$bin")"
+done
+log "executables linked into $BINDIR"
 
 if [ ! -s "$DYNAMIC_LIST" ] || [ ! -s "$STATIC_LIST" ]; then
     log "running discovery"
@@ -98,7 +100,7 @@ EOF
         chmod 0600 "$CRONTAB"
     fi
 
-    pgrep -f "busybox crond.* $CRONDIR" >/dev/null || \
+    pgrep -f "busybox crond.* $CRONDIR" >/dev/null 2>&1 || \
         busybox crond -c "$CRONDIR" -L "$CRONLOG" &
 
     sleep 1
@@ -147,5 +149,6 @@ fi
 
 "$RUNTIME" &
 "$DEMOTE" &
+
 log "service setup complete"
 exit 0
