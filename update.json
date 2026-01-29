@@ -1,7 +1,7 @@
 {
-  "version": "v3.0",
-  "versionCode": 300,
-  "zipUrl": "https://github.com/DikyVinus/core_policy-private/releases/download/v3.0/core_policy-private-v3.0.zip",
+  "version": "v4.0",
+  "versionCode": 400,
+  "zipUrl": "https://github.com/DikyVinus/core_policy-private/releases/download/v4.0/core_policy-private-v4.0.zip",
   "changelog": [
     "https://raw.githubusercontent.com/DikyVinus/core_policy-private/refs/heads/main/CHANGELOG.md?token=GHSAT0AAAAAADUIL4SKU2IR3TZIWRDCYCMA2L3C42A"
   ]
