@@ -38,7 +38,7 @@ spam_if_missing() {
     CHECK="$2"
     while :; do
         [ -e "$CHECK" ] || notify "$MSG"
-        sleep 15
+        sleep 1
     done
 }
 
