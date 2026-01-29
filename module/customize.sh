@@ -2,7 +2,6 @@
 
 UID="$(id -u)"
 
-# -------- language --------
 LANG_CODE="$(getprop persist.sys.locale | cut -d- -f1)"
 [ -z "$LANG_CODE" ] && LANG_CODE="$(getprop ro.product.locale | cut -d- -f1)"
 [ "$LANG_CODE" != "id" ] && LANG_CODE="en"
@@ -29,7 +28,6 @@ notify() {
     fi
 }
 
-# -------- module dir --------
 if [ "$UID" -eq 0 ]; then
     if [ -d "/data/adb/modules/core_policy" ]; then
         MODDIR="/data/adb/modules/core_policy"
@@ -44,10 +42,8 @@ ui "• Module dir: $MODDIR" "• Direktori modul: $MODDIR"
 
 [ -d "$MODDIR" ] || notify "Module directory missing"
 
-# -------- integrity check --------
 PROP_FILE="$MODDIR/module.prop"
 
-# HARD-CODED SHA256 (replace with your real value)
 EXPECTED_SHA256="REPLACE_WITH_REAL_SHA256"
 
 if [ -f "$PROP_FILE" ]; then
@@ -59,7 +55,6 @@ else
     notify "module.prop missing"
 fi
 
-# -------- info output --------
 ui_print " "
 ui_print "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 ui_print "        CorePolicy Performance"
