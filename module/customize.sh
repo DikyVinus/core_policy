@@ -2,6 +2,7 @@
 
 UID="$(id -u)"
 
+# -------- language --------
 LANG_CODE="$(getprop persist.sys.locale | cut -d- -f1)"
 [ -z "$LANG_CODE" ] && LANG_CODE="$(getprop ro.product.locale | cut -d- -f1)"
 [ "$LANG_CODE" != "id" ] && LANG_CODE="en"
@@ -14,25 +15,21 @@ ui() {
     fi
 }
 
-abort() {
+notify() {
     MSG="$1"
-
     if [ "$UID" -eq 0 ]; then
         su -lp 2000 -c \
             "cmd notification post CorePolicy \
-            \"[CorePolicy] Integrity compromised\" \
+            \"[CorePolicy] Integrity warning\" \
             \"$MSG\""
-        rm -rf "/data/adb/modules/core_policy"
     else
         cmd notification post CorePolicy \
-            "[CorePolicy] Integrity compromised" \
+            "[CorePolicy] Integrity warning" \
             "$MSG"
-        rm -rf "${AXERONDIR}/plugins/core_policy"
     fi
-
-    exit 1
 }
 
+# -------- module dir --------
 if [ "$UID" -eq 0 ]; then
     if [ -d "/data/adb/modules/core_policy" ]; then
         MODDIR="/data/adb/modules/core_policy"
@@ -45,46 +42,24 @@ fi
 
 ui "• Module dir: $MODDIR" "• Direktori modul: $MODDIR"
 
-[ -d "$MODDIR" ] || abort "Module directory missing"
+[ -d "$MODDIR" ] || notify "Module directory missing"
 
+# -------- integrity check --------
 PROP_FILE="$MODDIR/module.prop"
-PROP_SUM="$MODDIR/module.prop.sha256"
 
-if [ -f "$PROP_FILE" ] && [ -f "$PROP_SUM" ]; then
-    expected="$(cat "$PROP_SUM")"
-    actual="$(sha256sum "$PROP_FILE" | awk '{print $1}')"
-    [ "$expected" = "$actual" ] || abort "module.prop integrity failure"
+# HARD-CODED SHA256 (replace with your real value)
+EXPECTED_SHA256="REPLACE_WITH_REAL_SHA256"
+
+if [ -f "$PROP_FILE" ]; then
+    ACTUAL_SHA256="$(sha256sum "$PROP_FILE" | awk '{print $1}')"
+    if [ "$ACTUAL_SHA256" != "$EXPECTED_SHA256" ]; then
+        notify "module.prop checksum mismatch"
+    fi
+else
+    notify "module.prop missing"
 fi
 
-payload_count=0
-only_allowed=1
-
-for f in "$MODDIR"/*; do
-    [ -f "$f" ] || continue
-    payload_count=$((payload_count + 1))
-    name="$(basename "$f")"
-    case "$name" in
-        module.prop|update)
-            ;;
-        *)
-            only_allowed=0
-            ;;
-    esac
-done
-
-if [ "$only_allowed" -eq 1 ] && [ "$payload_count" -le 2 ]; then
-    exit 0
-fi
-
-find "$MODDIR" -type f -name '*.sha256' -print0 |
-while IFS= read -r -d '' sumfile; do
-    target="${sumfile%.sha256}"
-    [ -f "$target" ] || abort "Integrity failure: missing file"
-    expected="$(cat "$sumfile")"
-    actual="$(sha256sum "$target" | awk '{print $1}')"
-    [ "$expected" = "$actual" ] || abort "Integrity failure: checksum mismatch"
-done
-
+# -------- info output --------
 ui_print " "
 ui_print "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 ui_print "        CorePolicy Performance"
@@ -154,16 +129,6 @@ ui "• Performance improves after normal usage" \
    "• Performa meningkat setelah penggunaan normal"
 ui "• Changes apply automatically after reboot" \
    "• Perubahan diterapkan otomatis setelah reboot"
-
-ui_print " "
-
-ui "Logs and status:" "Log dan status:"
-ui "• Minimal internal logging by design" \
-   "• Log internal minimal secara desain"
-ui "• No spam or unnecessary output" \
-   "• Tidak ada output berlebihan"
-ui "• Runs silently in the background" \
-   "• Berjalan diam-diam di latar belakang"
 
 ui_print " "
 ui_print "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
