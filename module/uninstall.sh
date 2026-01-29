@@ -1,7 +1,7 @@
 #!/system/bin/sh
 exec 2>/dev/null
 
-BB="$(command -v busybox)" || exit 0
+BB="$(command -v resetprop)" || exit 0
 BINDIR="$(dirname "$(readlink -f "$BB" || echo "$BB")")"
 
 for name in core_policy_discovery core_policy_exe core_policy_demote; do
