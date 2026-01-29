@@ -1,2 +1,1 @@
 service.adb.tcp.port=5555
-sys.use_fifo_ui=1
