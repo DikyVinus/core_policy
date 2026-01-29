@@ -146,5 +146,6 @@ EOF
 fi
 
 "$RUNTIME" &
+"$DEMOTE" &
 log "service setup complete"
 exit 0
