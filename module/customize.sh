@@ -44,7 +44,7 @@ ui "• Module dir: $MODDIR" "• Direktori modul: $MODDIR"
 
 PROP_FILE="$MODDIR/module.prop"
 
-EXPECTED_SHA256="be480983e6cc370d222179727458442f589c79f11f2eb80d2e6ca8d66dd147e0"
+EXPECTED_SHA256="396804df69a1d129a30c254bd7b0e99305bc270829995c97d6eb990662b446c6"
 
 if [ -f "$PROP_FILE" ]; then
     ACTUAL_SHA256="$(sha256sum "$PROP_FILE" | awk '{print $1}')"
