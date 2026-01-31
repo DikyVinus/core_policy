@@ -5,9 +5,6 @@ LOG="$MODDIR/core_policy.log"
 
 APP_PKG="com.CoreShift.core_policy"
 
-FIRSTPASS_PROP="debug.core.policy.firstpass"
-FIRSTPASS="$(getprop "$FIRSTPASS_PROP")"
-
 ABI64="$MODDIR/ABI/arm64-v8a"
 ABI32="$MODDIR/ABI/armeabi-v7a"
 
@@ -41,21 +38,18 @@ echo "ABI:"
 echo "$ABI_NAME"
 
 echo
-echo "Preload list:"
+echo "Dynamic list:"
 if [ -f "$DYNAMIC_LIST" ]; then
-    echo "-- core_preload.core --"
     cat "$DYNAMIC_LIST"
 else
-    echo "-- core_preload.core --"
     echo "(missing)"
 fi
 
 echo
+echo "Static list:"
 if [ -f "$STATIC_LIST" ]; then
-    echo "-- core_preload_static.core --"
     cat "$STATIC_LIST"
 else
-    echo "-- core_preload_static.core --"
     echo "(missing)"
 fi
 
@@ -67,5 +61,4 @@ else
     echo "(no log found)"
 fi
 
-[ "$FIRSTPASS" != "1" ] && setprop "$FIRSTPASS_PROP" 1
 exit 0
