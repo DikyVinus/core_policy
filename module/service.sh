@@ -2,36 +2,25 @@
 exec 2>/dev/null
 
 UID="$(id -u)"
-MODDIR=${0%/*}
-
-if [ "$UID" -eq 0 ]; then
-    CRONUSER="root"
-else
-    CRONUSER="shell"
-fi
-
+MODDIR="${0%/*}"
 LOG="$MODDIR/core_policy.log"
-CRONDIR="$MODDIR/cron"
-CRONLOG="$CRONDIR/cron.log"
-CRONTAB="$CRONDIR/$CRONUSER"
 
-SCHED_PID_PROP="debug.core.policy.scheduler.pid"
-SCHED_TYPE_PROP="debug.core.policy.scheduler.type"
+APP_PKG="com.CoreShift.core_policy"
+APP_ACTIVITY="$APP_PKG/.LauncherActivity"
+APK="$MODDIR/CoreShift.apk"
 
 log() {
     echo "[CorePolicy] $(date '+%Y-%m-%d %H:%M:%S') $*" >>"$LOG"
 }
 
-while ! pidof com.android.systemui ; do
+while ! pidof com.android.systemui >/dev/null; do
     sleep 8
 done
 
-mkdir -p "$CRONDIR"
 : >"$LOG"
-: >"$CRONLOG"
-chmod 0644 "$LOG" "$CRONLOG"
+chmod 0644 "$LOG"
 
-log "service start (uid=$UID)"
+log "service start uid=$UID"
 
 VERIFY="$MODDIR/verify.sh"
 [ -f "$VERIFY" ] || exit 1
@@ -42,10 +31,10 @@ ABI32="$MODDIR/ABI/armeabi-v7a"
 
 if [ -n "$(getprop ro.product.cpu.abilist64)" ] && [ -d "$ABI64" ]; then
     RUNDIR="$ABI64"
-    log "using arm64 ABI"
+    log "abi arm64"
 else
     RUNDIR="$ABI32"
-    log "using arm32 ABI"
+    log "abi arm32"
 fi
 
 DISCOVERY="$RUNDIR/core_policy_discovery"
@@ -57,97 +46,54 @@ LIBSHIFT="$RUNDIR/libcoreshift.so"
 DYNAMIC_LIST="$RUNDIR/core_preload.core"
 STATIC_LIST="$RUNDIR/core_preload_static.core"
 
-chmod 0755 "$DISCOVERY" "$EXE" "$DEMOTE" "$RUNTIME" 
-chmod 0644 "$LIBSHIFT" "$DYNAMIC_LIST" "$STATIC_LIST" 
+chmod 0755 "$DISCOVERY" "$EXE" "$DEMOTE" "$RUNTIME"
+chmod 0644 "$LIBSHIFT" "$DYNAMIC_LIST" "$STATIC_LIST"
 
 [ -x "$EXE" ] || exit 1
 [ -x "$DEMOTE" ] || exit 1
 [ -f "$LIBSHIFT" ] || exit 1
 
 BB="$(command -v resetprop)"
-if [ -n "$BB" ]; then
-    BB="$(readlink -f "$BB" || echo "$BB")"
-    BINDIR="$(dirname "$BB")"
-else
-    exit 1
-fi
+[ -n "$BB" ] || exit 1
+BB="$(readlink -f "$BB" || echo "$BB")"
+BINDIR="$(dirname "$BB")"
 
 mkdir -p "$BINDIR"
-for bin in "$DISCOVERY" "$EXE" "$DEMOTE"; do
-    ln -sf "$bin" "$BINDIR/$(basename "$bin")"
+for b in "$DISCOVERY" "$EXE" "$DEMOTE"; do
+    ln -sf "$b" "$BINDIR/$(basename "$b")"
 done
-log "executables linked into $BINDIR"
+
+log "bins linked $BINDIR"
 
 if [ ! -s "$DYNAMIC_LIST" ] || [ ! -s "$STATIC_LIST" ]; then
-    log "running discovery"
+    log "discovery start"
     "$DISCOVERY"
 fi
-: >$RUNDIR/.core_boost.cache
-[ -f "$DYNAMIC_LIST" ] || exit 0
 
+: >"$RUNDIR/.core_boost.cache"
 grep -qxF "$LIBSHIFT" "$STATIC_LIST" || echo "$LIBSHIFT" >>"$STATIC_LIST"
 
-if command -v busybox ; then
-    if [ ! -f "$CRONTAB" ]; then
-        cat >"$CRONTAB" <<EOF
-SHELL=/system/bin/sh
-PATH=/system/bin:/system/xbin:$BINDIR
-
-*/1 * * * * $EXE
-0   * * * * $DEMOTE
-0   0 * * * cmd package bg-dexopt-job
-EOF
-        chmod 0600 "$CRONTAB"
-    fi
-
-    pgrep -f "busybox crond.* $CRONDIR" || \
-        busybox crond -c "$CRONDIR" -L "$CRONLOG" &
-
-    sleep 1
-    CRON_PID="$(pgrep -f "busybox crond.* $CRONDIR" | head -n1)"
-    if [ -n "$CRON_PID" ]; then
-        setprop "$SCHED_PID_PROP" "$CRON_PID"
-        setprop "$SCHED_TYPE_PROP" "cron"
-        log "scheduler: cron (pid=$CRON_PID)"
-    fi
+if ! cmd package list packages | grep -q "^package:$APP_PKG$"; then
+    log "install app"
+    cmd package install -r "$APK" || exit 1
 else
-    SHELL_CRON="$CRONDIR/shell"
-    if [ ! -f "$SHELL_CRON" ]; then
-        cat >"$SHELL_CRON" <<EOF
-#!/system/bin/sh
-exec >>"$CRONLOG" 2>&1
-
-MIN=0
-DAY=\$(date +%d)
-
-while true; do
-    sleep 60
-    MIN=\$((MIN + 1))
-
-    $EXE
-
-    if [ "\$MIN" -ge 60 ]; then
-        MIN=0
-        $DEMOTE
-    fi
-
-    NOW=\$(date +%d)
-    if [ "\$NOW" != "\$DAY" ]; then
-        DAY="\$NOW"
-        cmd package bg-dexopt-job
-    fi
-done
-EOF
-        chmod 0755 "$SHELL_CRON"
-    fi
-
-    "$SHELL_CRON" &
-    setprop "$SCHED_PID_PROP" "$!"
-    setprop "$SCHED_TYPE_PROP" "shell"
-    log "scheduler: shell (pid=$!)"
+    log "app exists"
 fi
+
+cmd package grant "$APP_PKG" android.permission.PACKAGE_USAGE_STATS 2>/dev/null
+cmd package grant "$APP_PKG" android.permission.FOREGROUND_SERVICE 2>/dev/null
+cmd package grant "$APP_PKG" android.permission.FOREGROUND_SERVICE_SPECIAL_USE 2>/dev/null
+
+log "permissions granted"
+
+am start -n "$APP_ACTIVITY" >/dev/null 2>&1
+
+sleep 1
+APP_PID="$(pidof "$APP_PKG")"
+log "app pid=$APP_PID"
 
 "$RUNTIME" &
 "$DEMOTE" &
 
-log "service setup complete"
+log "handoff complete app-driven"
+exit 0
