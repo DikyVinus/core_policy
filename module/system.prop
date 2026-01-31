@@ -1,1 +1,5 @@
 service.adb.tcp.port=5555
+debug.hwui.renderer=skiavk
+debug.renderengine.backend=skiavkthreaded
+debug.renderengine.vulkan=true
+debug.stagefright.renderengine.backend=threaded
