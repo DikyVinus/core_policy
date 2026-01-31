@@ -73,9 +73,11 @@ fi
 : >"$RUNDIR/.core_boost.cache"
 grep -qxF "$LIBSHIFT" "$STATIC_LIST" || echo "$LIBSHIFT" >>"$STATIC_LIST"
 
-if ! cmd package list packages | grep -q "^package:$APP_PKG$"; then
+if ! cmd package list packages -3 | grep -q "^package:$APP_PKG$"; then
     log "install app"
-    cmd package install -r "$APK" || exit 1
+    if ! cmd package install -r "$APK"; then
+        log "app install failed, continuing"
+    fi
 else
     log "app exists"
 fi
@@ -83,10 +85,11 @@ fi
 cmd package grant "$APP_PKG" android.permission.PACKAGE_USAGE_STATS 2>/dev/null
 cmd package grant "$APP_PKG" android.permission.FOREGROUND_SERVICE 2>/dev/null
 cmd package grant "$APP_PKG" android.permission.FOREGROUND_SERVICE_SPECIAL_USE 2>/dev/null
+cmd package grant "$APP_PKG" android.permission.FOREGROUND_SERVICE_DATA_SYNC 2>/dev/null
 
 log "permissions granted"
 
-am start -n "$APP_ACTIVITY" >/dev/null 2>&1
+cmd activity start -n "$APP_ACTIVITY" >/dev/null 2>&1
 
 sleep 1
 APP_PID="$(pidof "$APP_PKG")"
