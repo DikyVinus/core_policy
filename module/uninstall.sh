@@ -1,7 +1,7 @@
 #!/system/bin/sh
 exec 2>/dev/null
 
-APP_PKG="com.CoreShift.core_policy"
+APP_PKG="com.coreshift.policy"
 
 cmd package uninstall "$APP_PKG"
 
