@@ -1,8 +1,11 @@
 #!/system/bin/sh
+
 UID="$(id -u)"
 MODDIR="${0%/*}"
 LOG="$MODDIR/core_policy.log"
-DAEMON_LOG="$MODDIR/core_policy_daemon.log"
+
+APP_PKG="com.coreshift.policy"
+APP_SERVICE="$APP_PKG/.TopAppService"
 
 ABI64="$MODDIR/ABI/arm64-v8a"
 ABI32="$MODDIR/ABI/armeabi-v7a"
@@ -15,27 +18,49 @@ else
     ABI_NAME="arm32"
 fi
 
-DAEMON="$RUNDIR/core_policy_daemon"
+EXE="$RUNDIR/core_policy_exe"
+DEMOTE="$RUNDIR/core_policy_demote"
 DYNAMIC_LIST="$RUNDIR/core_preload.core"
 STATIC_LIST="$RUNDIR/core_preload_static.core"
-
-DAEMON_PID="$(pidof core_policy_daemon)"
 
 echo "CorePolicy Status"
 echo
 
-echo "Daemon:"
-if [ -n "$DAEMON_PID" ]; then
-    echo "state : running"
-    echo "pid   : $DAEMON_PID"
-else
-    echo "state : not running"
-    echo "pid   : -"
-fi
+echo "Mode:"
+echo "app-driven (daemonless)"
+
+echo
+echo "UID:"
+echo "$UID"
 
 echo
 echo "ABI:"
 echo "$ABI_NAME"
+
+echo
+echo "App:"
+if cmd package list packages | grep -q "^package:$APP_PKG$"; then
+    echo "installed : yes"
+else
+    echo "installed : no"
+fi
+
+echo
+echo "Accessibility:"
+ENABLED="$(cmd settings get secure enabled_accessibility_services 2>/dev/null)"
+case "$ENABLED" in
+    *"$APP_SERVICE"*)
+        echo "enabled : yes"
+        ;;
+    *)
+        echo "enabled : no"
+        ;;
+esac
+
+echo
+echo "Binaries:"
+[ -x "$EXE" ] && echo "exe    : ok" || echo "exe    : missing"
+[ -x "$DEMOTE" ] && echo "demote : ok" || echo "demote : missing"
 
 echo
 echo "Dynamic list:"
@@ -59,14 +84,6 @@ if [ -f "$LOG" ]; then
     cat "$LOG"
 else
     echo "(no log found)"
-fi
-
-echo
-echo "Daemon log:"
-if [ -f "$DAEMON_LOG" ]; then
-    cat "$DAEMON_LOG"
-else
-    echo "(no daemon log found)"
 fi
 
 exit 0
