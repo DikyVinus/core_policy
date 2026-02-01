@@ -5,10 +5,6 @@ UID="$(id -u)"
 MODDIR="${0%/*}"
 LOG="$MODDIR/core_policy.log"
 
-APP_PKG="com.CoreShift.core_policy"
-APP_ACTIVITY="$APP_PKG/.LauncherActivity"
-APK="$MODDIR/CoreShift.apk"
-
 log() {
     echo "[CorePolicy] $(date '+%Y-%m-%d %H:%M:%S') $*" >>"$LOG"
 }
@@ -40,17 +36,18 @@ fi
 DISCOVERY="$RUNDIR/core_policy_discovery"
 EXE="$RUNDIR/core_policy_exe"
 DEMOTE="$RUNDIR/core_policy_demote"
-RUNTIME="$MODDIR/core_policy_runtime"
+DAEMON="$RUNDIR/core_policy_daemon"
 
 LIBSHIFT="$RUNDIR/libcoreshift.so"
 DYNAMIC_LIST="$RUNDIR/core_preload.core"
 STATIC_LIST="$RUNDIR/core_preload_static.core"
 
-chmod 0755 "$DISCOVERY" "$EXE" "$DEMOTE" "$RUNTIME"
+chmod 0755 "$DISCOVERY" "$EXE" "$DEMOTE" "$DAEMON"
 chmod 0644 "$LIBSHIFT" "$DYNAMIC_LIST" "$STATIC_LIST"
 
 [ -x "$EXE" ] || exit 1
 [ -x "$DEMOTE" ] || exit 1
+[ -x "$DAEMON" ] || exit 1
 [ -f "$LIBSHIFT" ] || exit 1
 
 BB="$(command -v resetprop)"
@@ -73,30 +70,13 @@ fi
 : >"$RUNDIR/.core_boost.cache"
 grep -qxF "$LIBSHIFT" "$STATIC_LIST" || echo "$LIBSHIFT" >>"$STATIC_LIST"
 
-if ! cmd package list packages -3 | grep -q "^package:$APP_PKG$"; then
-    log "install app"
-    if ! cmd package install -r "$APK"; then
-        log "app install failed, continuing"
-    fi
+if pgrep -f "$DAEMON" >/dev/null; then
+    log "daemon already running"
 else
-    log "app exists"
+    "$DAEMON" &
+    DAEMON_PID="$!"
+    log "daemon started pid=$DAEMON_PID"
 fi
 
-cmd package grant "$APP_PKG" android.permission.PACKAGE_USAGE_STATS 2>/dev/null
-cmd package grant "$APP_PKG" android.permission.FOREGROUND_SERVICE 2>/dev/null
-cmd package grant "$APP_PKG" android.permission.FOREGROUND_SERVICE_SPECIAL_USE 2>/dev/null
-cmd package grant "$APP_PKG" android.permission.FOREGROUND_SERVICE_DATA_SYNC 2>/dev/null
-
-log "permissions granted"
-
-cmd activity start -n "$APP_ACTIVITY" >/dev/null 2>&1
-
-sleep 1
-APP_PID="$(pidof "$APP_PKG")"
-log "app pid=$APP_PID"
-
-"$RUNTIME" &
-"$DEMOTE" &
-
-log "handoff complete app-driven"
+log "handoff complete native-daemon"
 exit 0
