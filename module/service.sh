@@ -1,3 +1,4 @@
+cat <<'EOF' > service.sh
 #!/system/bin/sh
 
 UID="$(id -u)"
@@ -16,7 +17,7 @@ log() {
     echo "[CorePolicy] $(date '+%Y-%m-%d %H:%M:%S') $*" >>"$LOG"
 }
 
-while ! pidof com.android.systemui; do
+while ! pidof com.android.systemui >/dev/null; do
     sleep 5
 done
 
@@ -79,12 +80,9 @@ if ! cmd package list packages | grep -q "^package:$APP_PKG$"; then
     cmd package install -r "$APK" || exit 1
 fi
 
-until cmd package path "$APP_PKG"; do
+until cmd package path "$APP_PKG" >/dev/null; do
     sleep 1
 done
-
-cmd package grant "$APP_PKG" android.permission.FOREGROUND_SERVICE
-cmd package grant "$APP_PKG" android.permission.POST_NOTIFICATIONS
 
 cmd appops set "$APP_PKG" RUN_IN_BACKGROUND allow
 cmd appops set "$APP_PKG" RUN_ANY_IN_BACKGROUND allow
@@ -113,3 +111,4 @@ chmod 0600 "$GATE"
 
 log "handoff complete"
 exit 0
+EOF
