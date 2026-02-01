@@ -85,5 +85,3 @@ if [ -f "$LOG" ]; then
 else
     echo "(no log found)"
 fi
-
-exit 0
