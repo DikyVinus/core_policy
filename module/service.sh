@@ -16,8 +16,8 @@ log() {
     echo "[CorePolicy] $(date '+%Y-%m-%d %H:%M:%S') $*" >>"$LOG"
 }
 
-while ! pidof com.android.systemui >/dev/null; do
-    sleep 5
+while ! pidof com.android.systemui ; do
+    sleep 8
 done
 
 : >"$LOG"
