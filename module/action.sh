@@ -2,8 +2,7 @@
 UID="$(id -u)"
 MODDIR="${0%/*}"
 LOG="$MODDIR/core_policy.log"
-
-APP_PKG="com.CoreShift.core_policy"
+DAEMON_LOG="$MODDIR/core_policy_daemon.log"
 
 ABI64="$MODDIR/ABI/arm64-v8a"
 ABI32="$MODDIR/ABI/armeabi-v7a"
@@ -16,18 +15,19 @@ else
     ABI_NAME="arm32"
 fi
 
+DAEMON="$RUNDIR/core_policy_daemon"
 DYNAMIC_LIST="$RUNDIR/core_preload.core"
 STATIC_LIST="$RUNDIR/core_preload_static.core"
 
-APP_PID="$(pidof "$APP_PKG")"
+DAEMON_PID="$(pidof core_policy_daemon)"
 
 echo "CorePolicy Status"
 echo
 
-echo "App:"
-if [ -n "$APP_PID" ]; then
+echo "Daemon:"
+if [ -n "$DAEMON_PID" ]; then
     echo "state : running"
-    echo "pid   : $APP_PID"
+    echo "pid   : $DAEMON_PID"
 else
     echo "state : not running"
     echo "pid   : -"
@@ -54,11 +54,19 @@ else
 fi
 
 echo
-echo "Log:"
+echo "Service log:"
 if [ -f "$LOG" ]; then
     cat "$LOG"
 else
     echo "(no log found)"
+fi
+
+echo
+echo "Daemon log:"
+if [ -f "$DAEMON_LOG" ]; then
+    cat "$DAEMON_LOG"
+else
+    echo "(no daemon log found)"
 fi
 
 exit 0
