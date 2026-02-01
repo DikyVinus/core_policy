@@ -1,4 +1,3 @@
-cat <<'EOF' > service.sh
 #!/system/bin/sh
 
 UID="$(id -u)"
@@ -110,5 +109,3 @@ touch "$GATE"
 chmod 0600 "$GATE"
 
 log "handoff complete"
-exit 0
-EOF
