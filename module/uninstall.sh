@@ -18,4 +18,3 @@ fi
 
 cmd package uninstall "$APP_PKG"
 
-exit 0
