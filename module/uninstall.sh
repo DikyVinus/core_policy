@@ -1,8 +1,8 @@
 #!/system/bin/sh
 exec 2>/dev/null
 
-APP_PKG="com.coreshift.policy"
-APP_SERVICE="$APP_PKG/.TopAppService"
+APP_PKG="core.coreshift.policy"
+APP_SERVICE="$APP_PKG/.CoreShiftAccessibility"
 
 ENABLED="$(cmd settings get secure enabled_accessibility_services)"
 
