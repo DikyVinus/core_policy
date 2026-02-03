@@ -8,8 +8,13 @@ APP_PKG="core.coreshift.policy"
 APP_SERVICE="$APP_PKG/.CoreShiftAccessibility"
 
 ROOT_BIN_DIR="/data/data/$APP_PKG/files/bin"
-DYNAMIC_LIST="$ROOT_BIN_DIR/core_preload.core"
-STATIC_LIST="$ROOT_BIN_DIR/core_preload_static.core"
+EXT_BIN_DIR="/sdcard/Android/data/$APP_PKG/files/bin"
+
+ROOT_DYNAMIC_LIST="$ROOT_BIN_DIR/core_preload.core"
+ROOT_STATIC_LIST="$ROOT_BIN_DIR/core_preload_static.core"
+
+EXT_DYNAMIC_LIST="$EXT_BIN_DIR/core_preload.core"
+EXT_STATIC_LIST="$EXT_BIN_DIR/core_preload_static.core"
 
 echo "CorePolicy Status"
 echo
@@ -19,6 +24,7 @@ if [ "$UID" -eq 0 ]; then
 else
     echo "shell"
 fi
+
 echo
 echo "App:"
 if cmd package list packages | grep -q "^package:$APP_PKG$"; then
@@ -49,25 +55,23 @@ esac
 if [ "$UID" -eq 0 ]; then
     echo
     echo "Dynamic list:"
-    if [ -f "$DYNAMIC_LIST" ]; then
-        cat "$DYNAMIC_LIST"
-    else
-        echo "(missing)"
-    fi
+    [ -f "$ROOT_DYNAMIC_LIST" ] && cat "$ROOT_DYNAMIC_LIST"
 
     echo
     echo "Static list:"
-    if [ -f "$STATIC_LIST" ]; then
-        cat "$STATIC_LIST"
-    else
-        echo "(missing)"
+    [ -f "$ROOT_STATIC_LIST" ] && cat "$ROOT_STATIC_LIST"
+else
+    if [ -f "$EXT_DYNAMIC_LIST" ] || [ -f "$EXT_STATIC_LIST" ]; then
+        echo
+        echo "Dynamic list:"
+        [ -f "$EXT_DYNAMIC_LIST" ] && cat "$EXT_DYNAMIC_LIST"
+
+        echo
+        echo "Static list:"
+        [ -f "$EXT_STATIC_LIST" ] && cat "$EXT_STATIC_LIST"
     fi
 fi
 
 echo
 echo "Service log:"
-if [ -f "$LOG" ]; then
-    cat "$LOG"
-else
-    echo "(no log found)"
-fi
+[ -f "$LOG" ] && cat "$LOG"
