@@ -7,43 +7,31 @@ LOG="$MODDIR/core_policy.log"
 APP_PKG="core.coreshift.policy"
 APP_SERVICE="$APP_PKG/.CoreShiftAccessibility"
 
-
-ABI64="$MODDIR/ABI/arm64-v8a"
-ABI32="$MODDIR/ABI/armeabi-v7a"
-
-if [ -n "$(getprop ro.product.cpu.abilist64)" ] && [ -d "$ABI64" ]; then
-    RUNDIR="$ABI64"
-    ABI_NAME="arm64"
-else
-    RUNDIR="$ABI32"
-    ABI_NAME="arm32"
-fi
-
-EXE="$RUNDIR/core_policy_exe"
-DEMOTE="$RUNDIR/core_policy_demote"
-DYNAMIC_LIST="$RUNDIR/core_preload.core"
-STATIC_LIST="$RUNDIR/core_preload_static.core"
+ROOT_BIN_DIR="/data/data/$APP_PKG/files/bin"
+DYNAMIC_LIST="$ROOT_BIN_DIR/core_preload.core"
+STATIC_LIST="$ROOT_BIN_DIR/core_preload_static.core"
 
 echo "CorePolicy Status"
 echo
-
-echo "Mode:"
-echo "app-driven (daemonless)"
-
-echo
-echo "UID:"
-echo "$UID"
-
-echo
-echo "ABI:"
-echo "$ABI_NAME"
-
+echo "MODE:"
+if [ "$UID" -eq 0 ]; then
+    echo "root"
+else
+    echo "shell"
+fi
 echo
 echo "App:"
 if cmd package list packages | grep -q "^package:$APP_PKG$"; then
     echo "installed : yes"
 else
     echo "installed : no"
+fi
+
+PID="$(pidof "$APP_PKG" 2>/dev/null)"
+if [ -n "$PID" ]; then
+    echo "running   : yes ($PID)"
+else
+    echo "running   : no"
 fi
 
 echo
@@ -58,25 +46,22 @@ case "$ENABLED" in
         ;;
 esac
 
-echo
-echo "Binaries:"
-[ -x "$EXE" ] && echo "exe    : ok" || echo "exe    : missing"
-[ -x "$DEMOTE" ] && echo "demote : ok" || echo "demote : missing"
+if [ "$UID" -eq 0 ]; then
+    echo
+    echo "Dynamic list:"
+    if [ -f "$DYNAMIC_LIST" ]; then
+        cat "$DYNAMIC_LIST"
+    else
+        echo "(missing)"
+    fi
 
-echo
-echo "Dynamic list:"
-if [ -f "$DYNAMIC_LIST" ]; then
-    cat "$DYNAMIC_LIST"
-else
-    echo "(missing)"
-fi
-
-echo
-echo "Static list:"
-if [ -f "$STATIC_LIST" ]; then
-    cat "$STATIC_LIST"
-else
-    echo "(missing)"
+    echo
+    echo "Static list:"
+    if [ -f "$STATIC_LIST" ]; then
+        cat "$STATIC_LIST"
+    else
+        echo "(missing)"
+    fi
 fi
 
 echo
