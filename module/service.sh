@@ -101,11 +101,7 @@ esac
 
 cmd settings put secure accessibility_enabled 1
 
-"$EXE"
-"$RUNTIME" &
-"$DEMOTE" &
-
-touch "$GATE"
+: >"$GATE"
 chmod 0600 "$GATE"
 
 log "handoff complete"
