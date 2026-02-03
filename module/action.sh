@@ -4,8 +4,9 @@ UID="$(id -u)"
 MODDIR="${0%/*}"
 LOG="$MODDIR/core_policy.log"
 
-APP_PKG="com.coreshift.policy"
-APP_SERVICE="$APP_PKG/.TopAppService"
+APP_PKG="core.coreshift.policy"
+APP_SERVICE="$APP_PKG/.CoreShiftAccessibility"
+
 
 ABI64="$MODDIR/ABI/arm64-v8a"
 ABI32="$MODDIR/ABI/armeabi-v7a"
