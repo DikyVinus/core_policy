@@ -16,8 +16,6 @@ while ! pidof com.android.systemui; do
     sleep 8
 done
 
-log "boot gate passed"
-
 if cmd package path "$APP_PKG"; then
     cmd activity start -n "$APP_ACTIVITY"
     exit 0
