@@ -43,13 +43,15 @@ log "appops configured"
 
 ENABLED="$(cmd settings get secure enabled_accessibility_services)"
 
-ENABLED="$(cmd settings get secure accessibility_enabled 2>/dev/null)"
-
-if [ "$ENABLED" = "1" ]; then
-    echo "enabled : yes"
-else
-    echo "enabled : no"
-fi
+case "$ENABLED" in
+    *"$APP_ACCESSIBILITY"*) ;;
+    ""|"null")
+        cmd settings put secure enabled_accessibility_services "$APP_ACCESSIBILITY"
+        ;;
+    *)
+        cmd settings put secure enabled_accessibility_services "$ENABLED:$APP_ACCESSIBILITY"
+        ;;
+esac
 
 cmd settings put secure accessibility_enabled 1
 
