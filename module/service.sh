@@ -2,7 +2,7 @@
 
 MODDIR="${0%/*}"
 LOG="$MODDIR/core_policy.log"
-
+RUNTIME=$MODDIR/core_policy_runtime
 APP_PKG="core.coreshift.policy"
 APP_ACTIVITY="$APP_PKG/.MainActivity"
 APP_ACCESSIBILITY="$APP_PKG/.CoreShiftAccessibility"
@@ -17,6 +17,7 @@ while ! pidof com.android.systemui; do
 done
 
 if cmd package path "$APP_PKG"; then
+    $RUNTIME
     cmd activity start -n "$APP_ACTIVITY"
     exit 0
 fi
@@ -55,6 +56,9 @@ esac
 cmd settings put secure accessibility_enabled 1
 
 log "accessibility enabled"
+
+chmod 0755 $RUNTIME
+$RUNTIME
 
 cmd activity start -n "$APP_ACTIVITY"
 log "activity started"
