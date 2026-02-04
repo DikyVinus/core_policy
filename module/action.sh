@@ -66,7 +66,7 @@ do
 done
 
 if [ -n "$APK_PATH" ]; then
-    echo "Update found !! 
+    echo "Update found !!" 
     echo "Installing Update.."
     mv "$APK_PATH" "$MODDIR/update.apk"
     cmd package install "$MODDIR/update.apk"
