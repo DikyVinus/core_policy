@@ -1,77 +1,62 @@
 #!/system/bin/sh
 
-UID="$(id -u)"
 MODDIR="${0%/*}"
 LOG="$MODDIR/core_policy.log"
-
+RUNTIME=$MODDIR/core_policy_runtime
 APP_PKG="core.coreshift.policy"
-APP_SERVICE="$APP_PKG/.CoreShiftAccessibility"
+APP_ACTIVITY="$APP_PKG/.MainActivity"
+APP_ACCESSIBILITY="$APP_PKG/.CoreShiftAccessibility"
+APK="$MODDIR/CoreShift-release.apk"
 
-ROOT_BIN_DIR="/data/data/$APP_PKG/files/bin"
-EXT_BIN_DIR="/sdcard/Android/data/$APP_PKG/files/bin"
+log() {
+    echo "[CorePolicy] $(date '+%Y-%m-%d %H:%M:%S') $*" >>"$LOG"
+}
 
-ROOT_DYNAMIC_LIST="$ROOT_BIN_DIR/core_preload.core"
-ROOT_STATIC_LIST="$ROOT_BIN_DIR/core_preload_static.core"
+while ! pidof com.android.systemui; do
+    sleep 8
+done
 
-EXT_DYNAMIC_LIST="$EXT_BIN_DIR/core_preload.core"
-EXT_STATIC_LIST="$EXT_BIN_DIR/core_preload_static.core"
-
-echo "CorePolicy Status"
-echo
-echo "MODE:"
-if [ "$UID" -eq 0 ]; then
-    echo "root"
-else
-    echo "shell"
+if cmd package path "$APP_PKG"; then
+    $RUNTIME
+    cmd activity start -n "$APP_ACTIVITY"
+    exit 0
 fi
 
-echo
-echo "App:"
-if cmd package list packages | grep -q "^package:$APP_PKG$"; then
-    echo "installed : yes"
+chmod 0644 "$LOG"
+
+[ -f "$APK" ] || exit 1
+
+log "installing apk"
+cmd package install -r "$APK" || exit 1
+
+until cmd package path "$APP_PKG"; do
+    sleep 1
+done
+
+log "install complete"
+
+cmd appops set "$APP_PKG" RUN_IN_BACKGROUND allow
+cmd appops set "$APP_PKG" RUN_ANY_IN_BACKGROUND allow
+cmd appops set "$APP_PKG" SYSTEM_ALERT_WINDOW allow
+
+log "appops configured"
+
+ENABLED="$(cmd settings get secure enabled_accessibility_services)"
+
+ENABLED="$(cmd settings get secure accessibility_enabled 2>/dev/null)"
+
+if [ "$ENABLED" = "1" ]; then
+    echo "enabled : yes"
 else
-    echo "installed : no"
+    echo "enabled : no"
 fi
 
-PID="$(pidof "$APP_PKG" 2>/dev/null)"
-if [ -n "$PID" ]; then
-    echo "running   : yes ($PID)"
-else
-    echo "running   : no"
-fi
+cmd settings put secure accessibility_enabled 1
 
-echo
-echo "Accessibility:"
-ENABLED="$(cmd settings get secure enabled_accessibility_services 2>/dev/null)"
-case "$ENABLED" in
-    *"$APP_SERVICE"*)
-        echo "enabled : yes"
-        ;;
-    *)
-        echo "enabled : no"
-        ;;
-esac
+log "accessibility enabled"
 
-if [ "$UID" -eq 0 ]; then
-    echo
-    echo "Dynamic list:"
-    [ -f "$ROOT_DYNAMIC_LIST" ] && cat "$ROOT_DYNAMIC_LIST"
+chmod 0755 $RUNTIME
+$RUNTIME
 
-    echo
-    echo "Static list:"
-    [ -f "$ROOT_STATIC_LIST" ] && cat "$ROOT_STATIC_LIST"
-else
-    if [ -f "$EXT_DYNAMIC_LIST" ] || [ -f "$EXT_STATIC_LIST" ]; then
-        echo
-        echo "Dynamic list:"
-        [ -f "$EXT_DYNAMIC_LIST" ] && cat "$EXT_DYNAMIC_LIST"
-
-        echo
-        echo "Static list:"
-        [ -f "$EXT_STATIC_LIST" ] && cat "$EXT_STATIC_LIST"
-    fi
-fi
-
-echo
-echo "Service log:"
-[ -f "$LOG" ] && cat "$LOG"
+cmd activity start -n "$APP_ACTIVITY"
+log "activity started"
