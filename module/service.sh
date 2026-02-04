@@ -41,6 +41,7 @@ cmd appops set "$APP_PKG" SYSTEM_ALERT_WINDOW allow
 
 log "appops configured"
 
+cmd settings put secure accessibility_enabled 1
 ENABLED="$(cmd settings get secure enabled_accessibility_services)"
 
 case "$ENABLED" in
@@ -52,8 +53,6 @@ case "$ENABLED" in
         cmd settings put secure enabled_accessibility_services "$ENABLED:$APP_ACCESSIBILITY"
         ;;
 esac
-
-cmd settings put secure accessibility_enabled 1
 
 log "accessibility enabled"
 
