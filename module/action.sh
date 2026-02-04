@@ -1,63 +1,75 @@
 #!/system/bin/sh
 
+UID="$(id -u)"
 MODDIR="${0%/*}"
 LOG="$MODDIR/core_policy.log"
-RUNTIME=$MODDIR/core_policy_runtime
+
 APP_PKG="core.coreshift.policy"
-APP_ACTIVITY="$APP_PKG/.MainActivity"
-APP_ACCESSIBILITY="$APP_PKG/.CoreShiftAccessibility"
-APK="$MODDIR/CoreShift-release.apk"
+APP_SERVICE="$APP_PKG/.CoreShiftAccessibility"
 
-log() {
-    echo "[CorePolicy] $(date '+%Y-%m-%d %H:%M:%S') $*" >>"$LOG"
-}
+ROOT_BIN_DIR="/data/data/$APP_PKG/files/bin"
+EXT_BIN_DIR="/sdcard/Android/data/$APP_PKG/files/bin"
 
-while ! pidof com.android.systemui; do
-    sleep 8
-done
+ROOT_DYNAMIC_LIST="$ROOT_BIN_DIR/core_preload.core"
+ROOT_STATIC_LIST="$ROOT_BIN_DIR/core_preload_static.core"
 
-if cmd package path "$APP_PKG"; then
-    $RUNTIME
-    cmd activity start -n "$APP_ACTIVITY"
-    exit 0
+EXT_DYNAMIC_LIST="$EXT_BIN_DIR/core_preload.core"
+EXT_STATIC_LIST="$EXT_BIN_DIR/core_preload_static.core"
+
+echo "CorePolicy Status"
+echo
+echo "MODE:"
+if [ "$UID" -eq 0 ]; then
+    echo "root"
+else
+    echo "shell"
 fi
 
-chmod 0644 "$LOG"
+echo
+echo "App:"
+if cmd package list packages | grep -q "^package:$APP_PKG$"; then
+    echo "installed : yes"
+else
+    echo "installed : no"
+fi
 
-[ -f "$APK" ] || exit 1
+PID="$(pidof "$APP_PKG" 2>/dev/null)"
+if [ -n "$PID" ]; then
+    echo "running   : yes ($PID)"
+else
+    echo "running   : no"
+fi
 
-log "installing apk"
-cmd package install -r "$APK" || exit 1
+echo
+echo "Accessibility:"
+ENABLED="$(cmd settings get secure accessibility_enabled )"
 
-until cmd package path "$APP_PKG"; do
-    sleep 1
-done
+if [ "$ENABLED" = "1" ]; then
+    echo "enabled : yes"
+else
+    echo "enabled : no"
+fi
 
-log "install complete"
+if [ "$UID" -eq 0 ]; then
+    echo
+    echo "Dynamic list:"
+    [ -f "$ROOT_DYNAMIC_LIST" ] && cat "$ROOT_DYNAMIC_LIST"
 
-cmd appops set "$APP_PKG" RUN_IN_BACKGROUND allow
-cmd appops set "$APP_PKG" RUN_ANY_IN_BACKGROUND allow
-cmd appops set "$APP_PKG" SYSTEM_ALERT_WINDOW allow
+    echo
+    echo "Static list:"
+    [ -f "$ROOT_STATIC_LIST" ] && cat "$ROOT_STATIC_LIST"
+else
+    if [ -f "$EXT_DYNAMIC_LIST" ] || [ -f "$EXT_STATIC_LIST" ]; then
+        echo
+        echo "Dynamic list:"
+        [ -f "$EXT_DYNAMIC_LIST" ] && cat "$EXT_DYNAMIC_LIST"
 
-log "appops configured"
+        echo
+        echo "Static list:"
+        [ -f "$EXT_STATIC_LIST" ] && cat "$EXT_STATIC_LIST"
+    fi
+fi
 
-cmd settings put secure accessibility_enabled 1
-ENABLED="$(cmd settings get secure enabled_accessibility_services)"
-
-case "$ENABLED" in
-    *"$APP_ACCESSIBILITY"*) ;;
-    ""|"null")
-        cmd settings put secure enabled_accessibility_services "$APP_ACCESSIBILITY"
-        ;;
-    *)
-        cmd settings put secure enabled_accessibility_services "$ENABLED:$APP_ACCESSIBILITY"
-        ;;
-esac
-
-log "accessibility enabled"
-
-chmod 0755 $RUNTIME
-$RUNTIME
-
-cmd activity start -n "$APP_ACTIVITY"
-log "activity started"
+echo
+echo "Service log:"
+[ -f "$LOG" ] && cat "$LOG"
