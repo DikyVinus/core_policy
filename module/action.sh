@@ -1,4 +1,3 @@
-cat <<'EOF' > action.sh
 #!/system/bin/sh
 
 UID="$(id -u)"
@@ -69,9 +68,8 @@ done
 if [ -n "$APK_PATH" ]; then
     echo "Update found !! 
     echo "Installing Update.."
-    cp "$APK_PATH" "$MODDIR/update.apk"
+    mv "$APK_PATH" "$MODDIR/update.apk"
     cmd package install "$MODDIR/update.apk"
-    rm "APK_PATH"
 fi
 
 if [ "$UID" -eq 0 ]; then
@@ -97,4 +95,3 @@ fi
 echo
 echo "Service log:"
 [ -f "$LOG" ] && cat "$LOG"
-EOF
