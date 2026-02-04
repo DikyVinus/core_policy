@@ -1,3 +1,4 @@
+cat <<'EOF' > action.sh
 #!/system/bin/sh
 
 UID="$(id -u)"
@@ -15,6 +16,9 @@ ROOT_STATIC_LIST="$ROOT_BIN_DIR/core_preload_static.core"
 
 EXT_DYNAMIC_LIST="$EXT_BIN_DIR/core_preload.core"
 EXT_STATIC_LIST="$EXT_BIN_DIR/core_preload_static.core"
+
+APK_NAME="CoreShift-release.apk"
+APK_PATH=""
 
 echo "CorePolicy Status"
 echo
@@ -42,12 +46,32 @@ fi
 
 echo
 echo "Accessibility:"
-ENABLED="$(cmd settings get secure accessibility_enabled )"
-
+ENABLED="$(cmd settings get secure accessibility_enabled 2>/dev/null)"
 if [ "$ENABLED" = "1" ]; then
     echo "enabled : yes"
 else
     echo "enabled : no"
+fi
+
+echo
+echo "APK:"
+for p in \
+    "/sdcard/$APK_NAME" \
+    "/sdcard/Download/$APK_NAME" \
+    "/sdcard/Download/Telegram/$APK_NAME"
+do
+    if [ -f "$p" ]; then
+        APK_PATH="$p"
+        break
+    fi
+done
+
+if [ -n "$APK_PATH" ]; then
+    echo "Update found !! 
+    echo "Installing Update.."
+    cp "$APK_PATH" "$MODDIR/update.apk"
+    cmd package install "$MODDIR/update.apk"
+    rm "APK_PATH"
 fi
 
 if [ "$UID" -eq 0 ]; then
@@ -73,3 +97,4 @@ fi
 echo
 echo "Service log:"
 [ -f "$LOG" ] && cat "$LOG"
+EOF
