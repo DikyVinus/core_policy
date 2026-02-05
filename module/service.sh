@@ -27,18 +27,19 @@ if [ ! -f "$READY_FLAG" ]; then
 
     if [ "$IS_64" -eq 1 ]; then
         if [ -f "$MODDIR/arm64" ]; then
-            mv "$MODDIR/arm64" "$RUNTIME_BIN" && : > "$READY_FLAG"
+            mv "$MODDIR/arm64" "$CORESHIFT_BIN" && : > "$READY_FLAG"
         fi
     else
         if [ -f "$MODDIR/arm" ]; then
-            mv "$MODDIR/arm" "$RUNTIME_BIN" && : > "$READY_FLAG"
+            mv "$MODDIR/arm" "$CORESHIFT_BIN" && : > "$READY_FLAG"
         fi
     fi
+    chmod 0644 "$LOG"
+    chmod 0755 "$CORESHIFT_BIN"
+    chmod 0755 "$RUNTIME_BIN"
 fi
 
-chmod 0644 "$LOG"
-chmod 0755 "$CORESHIFT_BIN"
-chmod 0755 "$RUNTIME_BIN"
+
 
 log "starting coreshift demote"
 "$CORESHIFT_BIN" demote &
