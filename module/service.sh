@@ -51,6 +51,6 @@ DAEMON_PID=$!
 log "coreshift daemon pid=$DAEMON_PID"
 
 log "starting core policy runtime"
-"$RUNTIME_BIN" "$DAEMON_PID" &
+"$RUNTIME_BIN" &
 
 log "core policy services launched (daemon pid=$DAEMON_PID)"
