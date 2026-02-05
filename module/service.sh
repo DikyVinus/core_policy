@@ -2,11 +2,10 @@
 
 MODDIR="${0%/*}"
 LOG="$MODDIR/core_policy.log"
-RUNTIME=$MODDIR/core_policy_runtime
-APP_PKG="core.coreshift.policy"
-APP_ACTIVITY="$APP_PKG/.MainActivity"
-APP_ACCESSIBILITY="$APP_PKG/.CoreShiftAccessibility"
-APK="$MODDIR/CoreShift-release.apk"
+READY_FLAG="$MODDIR/.runtime_ready"
+
+CORESHIFT_BIN="$MODDIR/system/bin/coreshift"
+RUNTIME_BIN="$MODDIR/system/bin/core_policy_runtime"
 
 log() {
     echo "[CorePolicy] $(date '+%Y-%m-%d %H:%M:%S') $*" >>"$LOG"
@@ -16,48 +15,41 @@ while ! pidof com.android.systemui; do
     sleep 8
 done
 
-if cmd package path "$APP_PKG"; then
-    $RUNTIME
-    cmd activity start -n "$APP_ACTIVITY"
-    exit 0
+if [ ! -f "$READY_FLAG" ]; then
+    ZYGOTE="$(getprop ro.zygote)"
+    IS_64=0
+
+    case "$ZYGOTE" in
+        zygote64* ) IS_64=1 ;;
+    esac
+
+    mkdir -p "$MODDIR/system/bin"
+
+    if [ "$IS_64" -eq 1 ]; then
+        if [ -f "$MODDIR/arm64" ]; then
+            mv "$MODDIR/arm64" "$RUNTIME_BIN" && : > "$READY_FLAG"
+        fi
+    else
+        if [ -f "$MODDIR/arm" ]; then
+            mv "$MODDIR/arm" "$RUNTIME_BIN" && : > "$READY_FLAG"
+        fi
+    fi
 fi
 
 chmod 0644 "$LOG"
+chmod 0755 "$CORESHIFT_BIN"
+chmod 0755 "$RUNTIME_BIN"
 
-[ -f "$APK" ] || exit 1
+log "starting coreshift demote"
+"$CORESHIFT_BIN" demote &
 
-log "installing apk"
-cmd package install -r "$APK" || exit 1
+log "starting coreshift daemon"
+"$CORESHIFT_BIN" daemon &
+DAEMON_PID=$!
 
-until cmd package path "$APP_PKG"; do
-    sleep 1
-done
+log "coreshift daemon pid=$DAEMON_PID"
 
-log "install complete"
+log "starting core policy runtime"
+"$RUNTIME_BIN" "$DAEMON_PID" &
 
-cmd appops set "$APP_PKG" RUN_IN_BACKGROUND allow
-cmd appops set "$APP_PKG" RUN_ANY_IN_BACKGROUND allow
-cmd appops set "$APP_PKG" SYSTEM_ALERT_WINDOW allow
-
-log "appops configured"
-
-cmd settings put secure accessibility_enabled 1
-ENABLED="$(cmd settings get secure enabled_accessibility_services)"
-
-case "$ENABLED" in
-    *"$APP_ACCESSIBILITY"*) ;;
-    ""|"null")
-        cmd settings put secure enabled_accessibility_services "$APP_ACCESSIBILITY"
-        ;;
-    *)
-        cmd settings put secure enabled_accessibility_services "$ENABLED:$APP_ACCESSIBILITY"
-        ;;
-esac
-
-log "accessibility enabled"
-
-chmod 0755 $RUNTIME
-$RUNTIME
-
-cmd activity start -n "$APP_ACTIVITY"
-log "activity started"
+log "core policy services launched (daemon pid=$DAEMON_PID)"

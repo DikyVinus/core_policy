@@ -1,97 +1,64 @@
 #!/system/bin/sh
+set -e
 
-UID="$(id -u)"
 MODDIR="${0%/*}"
 LOG="$MODDIR/core_policy.log"
 
-APP_PKG="core.coreshift.policy"
-APP_SERVICE="$APP_PKG/.CoreShiftAccessibility"
+BIN_DIR="$MODDIR/system/bin"
+CORESHIFT_BIN="$BIN_DIR/coreshift"
+RUNTIME_BIN="$BIN_DIR/core_policy_runtime"
 
-ROOT_BIN_DIR="/data/data/$APP_PKG/files/bin"
-EXT_BIN_DIR="/sdcard/Android/data/$APP_PKG/files/bin"
+DYNAMIC_LIST="$BIN_DIR/core_preload.core"
+STATIC_LIST="$BIN_DIR/core_preload_static.core"
 
-ROOT_DYNAMIC_LIST="$ROOT_BIN_DIR/core_preload.core"
-ROOT_STATIC_LIST="$ROOT_BIN_DIR/core_preload_static.core"
-
-EXT_DYNAMIC_LIST="$EXT_BIN_DIR/core_preload.core"
-EXT_STATIC_LIST="$EXT_BIN_DIR/core_preload_static.core"
-
-APK_NAME="CoreShift-release.apk"
-APK_PATH=""
+UID="$(id -u)"
 
 echo "CorePolicy Status"
 echo
 echo "MODE:"
-if [ "$UID" -eq 0 ]; then
-    echo "root"
+[ "$UID" -eq 0 ] && echo "root" || echo "shell"
+
+echo
+echo "Binaries:"
+[ -x "$CORESHIFT_BIN" ] && echo "coreshift        : present" || echo "coreshift        : missing"
+[ -x "$RUNTIME_BIN" ] && echo "core_policy_runtime   : present" || echo "core_policy_runtime   : missing"
+
+echo
+echo "Processes:"
+DAEMON_PID="$(pidof coreshift 2>/dev/null || true)"
+if [ -n "$DAEMON_PID" ]; then
+    echo "coreshift daemon : running ($DAEMON_PID)"
 else
-    echo "shell"
+    echo "coreshift daemon : not running"
+fi
+
+RUNTIME_PID="$(pidof core_policy_runtime 2>/dev/null || true)"
+if [ -n "$RUNTIME_PID" ]; then
+    echo "policy runtime   : running ($RUNTIME_PID)"
+else
+    echo "policy runtime   : not running"
 fi
 
 echo
-echo "App:"
-if cmd package list packages | grep -q "^package:$APP_PKG$"; then
-    echo "installed : yes"
+echo "Dynamic list ($DYNAMIC_LIST):"
+if [ -f "$DYNAMIC_LIST" ]; then
+    cat "$DYNAMIC_LIST"
 else
-    echo "installed : no"
-fi
-
-PID="$(pidof "$APP_PKG" 2>/dev/null)"
-if [ -n "$PID" ]; then
-    echo "running   : yes ($PID)"
-else
-    echo "running   : no"
+    echo "(missing)"
 fi
 
 echo
-echo "Accessibility:"
-ENABLED="$(cmd settings get secure accessibility_enabled 2>/dev/null)"
-if [ "$ENABLED" = "1" ]; then
-    echo "enabled : yes"
+echo "Static list ($STATIC_LIST):"
+if [ -f "$STATIC_LIST" ]; then
+    cat "$STATIC_LIST"
 else
-    echo "enabled : no"
-fi
-
-echo
-echo "APK:"
-for p in \
-    "/sdcard/$APK_NAME" \
-    "/sdcard/Download/$APK_NAME" \
-    "/sdcard/Download/Telegram/$APK_NAME"
-do
-    if [ -f "$p" ]; then
-        APK_PATH="$p"
-        break
-    fi
-done
-
-if [ -n "$APK_PATH" ]; then
-    echo "Update found !!" 
-    echo "Installing Update.."
-    mv "$APK_PATH" "$MODDIR/update.apk"
-    cmd package install "$MODDIR/update.apk"
-fi
-
-if [ "$UID" -eq 0 ]; then
-    echo
-    echo "Dynamic list:"
-    [ -f "$ROOT_DYNAMIC_LIST" ] && cat "$ROOT_DYNAMIC_LIST"
-
-    echo
-    echo "Static list:"
-    [ -f "$ROOT_STATIC_LIST" ] && cat "$ROOT_STATIC_LIST"
-else
-    if [ -f "$EXT_DYNAMIC_LIST" ] || [ -f "$EXT_STATIC_LIST" ]; then
-        echo
-        echo "Dynamic list:"
-        [ -f "$EXT_DYNAMIC_LIST" ] && cat "$EXT_DYNAMIC_LIST"
-
-        echo
-        echo "Static list:"
-        [ -f "$EXT_STATIC_LIST" ] && cat "$EXT_STATIC_LIST"
-    fi
+    echo "(missing)"
 fi
 
 echo
 echo "Service log:"
-[ -f "$LOG" ] && cat "$LOG"
+if [ -f "$LOG" ]; then
+    cat "$LOG"
+else
+    echo "(no log)"
+fi
