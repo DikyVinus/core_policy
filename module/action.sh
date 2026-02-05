@@ -25,18 +25,11 @@ echo "Binaries:"
 
 echo
 echo "Processes:"
-DAEMON_PID="$(pidof coreshift 2>/dev/null || true)"
+DAEMON_PID="$(pidof coreshift || true)"
 if [ -n "$DAEMON_PID" ]; then
     echo "coreshift daemon : running ($DAEMON_PID)"
 else
     echo "coreshift daemon : not running"
-fi
-
-RUNTIME_PID="$(pidof core_policy_runtime 2>/dev/null || true)"
-if [ -n "$RUNTIME_PID" ]; then
-    echo "policy runtime   : running ($RUNTIME_PID)"
-else
-    echo "policy runtime   : not running"
 fi
 
 echo
