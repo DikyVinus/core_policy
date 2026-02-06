@@ -5,7 +5,6 @@ LOG="$MODDIR/core_policy.log"
 READY_FLAG="$MODDIR/.runtime_ready"
 
 CORESHIFT_BIN="$MODDIR/system/bin/coreshift"
-RUNTIME_BIN="$MODDIR/system/bin/core_policy_runtime"
 
 log() {
     echo "[CorePolicy] $(date '+%Y-%m-%d %H:%M:%S') $*" >>"$LOG"
@@ -49,8 +48,5 @@ log "starting coreshift daemon"
 DAEMON_PID=$!
 
 log "coreshift daemon pid=$DAEMON_PID"
-
-log "starting core policy runtime"
-"$RUNTIME_BIN" &
 
 log "core policy services launched (daemon pid=$DAEMON_PID)"
