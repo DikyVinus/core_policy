@@ -36,16 +36,23 @@ ui "• Module dir: $MODDIR" "• Direktori modul: $MODDIR"
 spam_if_missing() {
     MSG="$1"
     CHECK="$2"
+
+    START=$(date +%s)
+    TIMEOUT=20
+
     while :; do
+        NOW=$(date +%s)
+        [ $((NOW - START)) -ge "$TIMEOUT" ] && break
+
         [ -e "$CHECK" ] || notify "$MSG"
         sleep 1
     done
 }
 
-spam_if_missing "Module directory missing" "$MODDIR" &
+busybox setsid -c spam_if_missing "Module directory missing" "$MODDIR" &
 
 SETTASK="/system/bin/settaskprofile"
-spam_if_missing "settaskprofile binary missing" "$SETTASK" &
+busybox setsid -c spam_if_missing "settaskprofile binary missing" "$SETTASK" &
 
 PROP_FILE="$MODDIR/module.prop"
 EXPECTED_SHA256="396804df69a1d129a30c254bd7b0e99305bc270829995c97d6eb990662b446c6"
