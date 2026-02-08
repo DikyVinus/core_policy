@@ -2,12 +2,10 @@
 set -e
 
 MODDIR="${0%/*}"
+BIN_DIR="$MODDIR/system/bin"
 LOG="$MODDIR/core_policy.log"
 
-BIN_DIR="$MODDIR/system/bin"
 CORESHIFT_BIN="$BIN_DIR/coreshift"
-RUNTIME_BIN="$BIN_DIR/core_policy_runtime"
-
 DYNAMIC_LIST="$BIN_DIR/core_preload.core"
 STATIC_LIST="$BIN_DIR/core_preload_static.core"
 
@@ -21,35 +19,24 @@ echo "MODE:"
 echo
 echo "Binaries:"
 [ -x "$CORESHIFT_BIN" ] && echo "coreshift        : present" || echo "coreshift        : missing"
+
 echo
 echo "Processes:"
-DAEMON_PID="$(pidof coreshift || true)"
-if [ -n "$DAEMON_PID" ]; then
+if DAEMON_PID="$(pidof coreshift 2>/dev/null)"; then
     echo "coreshift daemon : running ($DAEMON_PID)"
 else
     echo "coreshift daemon : not running"
 fi
 
-echo
-echo "Dynamic list ($DYNAMIC_LIST):"
-if [ -f "$DYNAMIC_LIST" ]; then
-    cat "$DYNAMIC_LIST"
-else
-    echo "(missing)"
-fi
+dump_file() {
+    echo
+    echo "$1 ($2):"
+    [ -f "$2" ] && cat "$2" || echo "(missing)"
+}
 
-echo
-echo "Static list ($STATIC_LIST):"
-if [ -f "$STATIC_LIST" ]; then
-    cat "$STATIC_LIST"
-else
-    echo "(missing)"
-fi
+dump_file "Dynamic list" "$DYNAMIC_LIST"
+dump_file "Static list"  "$STATIC_LIST"
 
 echo
 echo "Service log:"
-if [ -f "$LOG" ]; then
-    cat "$LOG"
-else
-    echo "(no log)"
-fi
+[ -f "$LOG" ] && cat "$LOG" || echo "(no log)"
