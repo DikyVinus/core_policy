@@ -17,6 +17,20 @@ esac
 
 ui() { ui_print "$1"; }
 
+curl_fetch() {
+    name="$1"
+    out="$2"
+
+    command -v curl >/dev/null || return 1
+    mkdir -p "$(dirname "$out")" || return 1
+
+    curl -fsSL --max-time 5 \
+        "$BASE_URL/$name" \
+        -o "$out" || return 1
+
+    [ -s "$out" ]
+}
+
 is_root() {
     [ "$UID" -eq 0 ] && return 0
     [ -w /data/adb ] && return 0
@@ -63,19 +77,25 @@ else
     done
 fi
 
-[ -n "$MODDIR" ] || exit 1
+case "$MODDIR" in
+    */modules_update/*)
+        MODDIR="${MODDIR%/modules_update/*}/modules/core_policy"
+        ;;
+esac
 
-LANG_XML_URL="https://raw.githubusercontent.com/DikyVinus/core_policy/main/lang.xml"
-LANG_XML_CACHE="$MODDIR/corepolicy_lang.xml"
+[ -d "$MODDIR" ] || exit 1
 
-fetch_lang_xml() {
-    command -v curl || return 1
-    curl -fsSL --max-time 5 "$LANG_XML_URL" -o "$LANG_XML_CACHE" || return 1
-    [ -s "$LANG_XML_CACHE" ]
-}
+BASE_URL="https://raw.githubusercontent.com/DikyVinus/core_policy/main"
+LANG_XML_CACHE="$MODDIR/lang.xml"
+CLI_XML_CACHE="$MODDIR/system/bin/cli.xml"
 
 LANG_XML=""
-fetch_lang_xml && LANG_XML="$LANG_XML_CACHE"
+
+if curl_fetch "lang.xml" "$LANG_XML_CACHE"; then
+    LANG_XML="$LANG_XML_CACHE"
+fi
+
+curl_fetch "cli.xml" "$CLI_XML_CACHE" || true
 
 xml_get() {
     [ -n "$LANG_XML" ] || return 1
