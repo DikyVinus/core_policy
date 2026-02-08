@@ -39,6 +39,7 @@ if [ ! -f "$READY_FLAG" ]; then
 fi
 
 log "starting coreshift daemon"
+"$CORESHIFT_BIN" preload &
 "$CORESHIFT_BIN" daemon &
 DAEMON_PID=$!
 
