@@ -29,7 +29,7 @@ if [ ! -f "$READY_FLAG" ]; then
 
     chmod 0644 "$LOG"
 
-    if ! command -v coreshift >/dev/null 2>&1; then
+    if ! command -v coreshift; then
         IFS=:
         for P in $PATH; do
             case "$P" in
