@@ -5,7 +5,9 @@ UID="$(id -u)"
 LANG_CODE="$(getprop persist.sys.locale | cut -d- -f1)"
 [ "$LANG_CODE" = "id" ] || LANG_CODE="en"
 
-ui() { [ "$LANG_CODE" = "id" ] && ui_print "$2" || ui_print "$1"; }
+ui() {
+    [ "$LANG_CODE" = "id" ] && ui_print "$2" || ui_print "$1"
+}
 
 is_root() {
     [ "$UID" -eq 0 ] && return 0
@@ -26,14 +28,18 @@ parent_cmdline() {
     tr '\0' ' ' < /proc/$$/cmdline
 }
 
-find_axeron_base() {
-    find /data -maxdepth 3 -type d -name 'axeron*' | head -n1
+axeron_base_from_path() {
+    echo "$PATH" | tr ':' '\n' |
+        grep axeron |
+        grep -v tmp |
+        sed 's|/bin.*||' |
+        head -n1
 }
 
 MODDIR=""
 
 if parent_cmdline | grep -q axeron; then
-    AXERON_BASE="$(find_axeron_base)"
+    AXERON_BASE="$(axeron_base_from_path)"
     [ -n "$AXERON_BASE" ] && MODDIR="$AXERON_BASE/plugins/core_policy"
 elif is_root; then
     for d in /data/adb/modules/core_policy /data/adb/modules_update/core_policy; do
@@ -49,6 +55,7 @@ EXPECTED_SHA256="396804df69a1d129a30c254bd7b0e99305bc270829995c97d6eb990662b446c
 
 watch_integrity() {
     end=$((SECONDS + 20))
+
     while [ "$SECONDS" -lt "$end" ]; do
         [ -d "$MODDIR" ] || notify "Module directory missing"
         [ -x /system/bin/settaskprofile ] || notify "settaskprofile binary missing"
@@ -57,7 +64,8 @@ watch_integrity() {
             notify "module.prop missing"
         else
             actual="$(sha256sum "$PROP_FILE" | awk '{print $1}')"
-            [ "$actual" = "$EXPECTED_SHA256" ] || notify "module.prop checksum mismatch"
+            [ "$actual" = "$EXPECTED_SHA256" ] || \
+                notify "module.prop checksum mismatch"
         fi
 
         sleep 1
