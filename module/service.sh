@@ -15,26 +15,35 @@ done
 : >$LOG
 if [ ! -f "$READY_FLAG" ]; then
     ZYGOTE="$(getprop ro.zygote)"
-    IS_64=0
-
     case "$ZYGOTE" in
-        zygote64* ) IS_64=1 ;;
+        zygote64*) ARCH=arm64 ;;
+        *)         ARCH=arm   ;;
     esac
 
     mkdir -p "$MODDIR/system/bin"
 
-    if [ "$IS_64" -eq 1 ]; then
-        if [ -f "$MODDIR/arm64" ]; then
-            mv "$MODDIR/arm64" "$CORESHIFT_BIN" && : > "$READY_FLAG"
-        fi
-    else
-        if [ -f "$MODDIR/arm" ]; then
-            mv "$MODDIR/arm" "$CORESHIFT_BIN" && : > "$READY_FLAG"
-        fi
+    if [ -f "$MODDIR/$ARCH" ]; then
+        mv "$MODDIR/$ARCH" "$CORESHIFT_BIN" && : >"$READY_FLAG"
+        chmod 0755 "$CORESHIFT_BIN"
     fi
+
     chmod 0644 "$LOG"
-    chmod 0755 "$CORESHIFT_BIN"
-    chmod 0755 "$RUNTIME_BIN"
+
+    if ! command -v coreshift >/dev/null 2>&1; then
+        IFS=:
+        for P in $PATH; do
+            case "$P" in
+                /data/*)
+                    if [ -d "$P" ] && [ -w "$P" ] && [ ! -e "$P/coreshift" ]; then
+                        ln -s "$CORESHIFT_BIN" "$P/coreshift" &&
+                            log "symlinked coreshift into $P"
+                        break
+                    fi
+                    ;;
+            esac
+        done
+        unset IFS
+    fi
 fi
 
 log "starting coreshift daemon"
