@@ -5,7 +5,7 @@ LOG="$MODDIR/core_policy.log"
 READY_FLAG="$MODDIR/.runtime_ready"
 
 CORESHIFT_BIN="$MODDIR/system/bin/coreshift"
-
+: >$LOG
 log() {
     echo "[CorePolicy] $(date '+%Y-%m-%d %H:%M:%S') $*" >>"$LOG"
 }
@@ -37,11 +37,6 @@ if [ ! -f "$READY_FLAG" ]; then
     chmod 0755 "$CORESHIFT_BIN"
     chmod 0755 "$RUNTIME_BIN"
 fi
-
-
-
-log "starting coreshift demote"
-"$CORESHIFT_BIN" demote &
 
 log "starting coreshift daemon"
 "$CORESHIFT_BIN" daemon &
