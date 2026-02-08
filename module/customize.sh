@@ -80,31 +80,30 @@ run_bg() {
     fi
 }
 
+
 MODDIR=""
+UPDATE_DIR=""
 
 if parent_cmdline | grep -q axeron; then
     AXERON_BASE="$(axeron_base_from_path)"
-    [ -n "$AXERON_BASE" ] && MODDIR="$AXERON_BASE/plugins/core_policy"
+    MODDIR="$AXERON_BASE/plugins/core_policy"
+elif is_root; then
+    MODDIR="/data/adb/modules/core_policy"
+    UPDATE_DIR="/data/adb/modules_update/core_policy"
 else
-    for d in \
-    /data/adb/modules/core_policy \
-    /data/adb/modules_update/core_policy
-do
-    [ -d "$d" ] && MODDIR="$d" && break
-done
+    exit 1
 fi
 
 PROP_FILE=""
 
-if [ -f "$MODDIR/module.prop" ]; then
+if [ -n "$UPDATE_DIR" ] && [ -f "$UPDATE_DIR/module.prop" ]; then
+    PROP_FILE="$UPDATE_DIR/module.prop"
+elif [ -f "$MODDIR/module.prop" ]; then
     PROP_FILE="$MODDIR/module.prop"
-else
-    BASE_DIR="$(dirname "$MODDIR")"
-    if [ -f "$BASE_DIR/core_policy/module.prop" ]; then
-        PROP_FILE="$BASE_DIR/core_policy/module.prop"
-    fi
 fi
+
 EXPECTED_SHA256="396804df69a1d129a30c254bd7b0e99305bc270829995c97d6eb990662b446c6"
+
 
 watch_integrity() {
     end=$((SECONDS + 20))
@@ -122,35 +121,27 @@ watch_integrity() {
     done
 }
 
+
 BASE_URL="https://raw.githubusercontent.com/DikyVinus/core_policy/main"
 
-ACTIVE_DIR="$MODDIR"
-BASE_DIR="$(dirname "$MODDIR")"
-FINAL_DIR="$BASE_DIR/modules/core_policy"
+mkdir -p "$MODDIR/system/bin" || notify "failed mkdir MODDIR/system/bin"
+[ -n "$UPDATE_DIR" ] && mkdir -p "$UPDATE_DIR/system/bin"
 
-mkdir -p "$ACTIVE_DIR/system/bin" || notify "failed mkdir active system/bin"
-mkdir -p "$FINAL_DIR/system/bin"  || notify "failed mkdir final system/bin"
+MOD_LANG="$MODDIR/lang.xml"
+MOD_CLI="$MODDIR/system/bin/cli.xml"
 
-ACTIVE_LANG="$ACTIVE_DIR/lang.xml"
-FINAL_LANG="$FINAL_DIR/lang.xml"
+UPD_LANG="$UPDATE_DIR/lang.xml"
+UPD_CLI="$UPDATE_DIR/system/bin/cli.xml"
 
-ACTIVE_CLI="$ACTIVE_DIR/system/bin/cli.xml"
-FINAL_CLI="$FINAL_DIR/system/bin/cli.xml"
-
-if curl_fetch "lang.xml" "$ACTIVE_LANG"; then
-    cp -f "$ACTIVE_LANG" "$FINAL_LANG"  || true
-    LANG_XML="$ACTIVE_LANG"
+if curl_fetch "lang.xml" "$MOD_LANG"; then
+    LANG_XML="$MOD_LANG"
+    [ -n "$UPDATE_DIR" ] && cp -f "$MOD_LANG" "$UPD_LANG" 2>/dev/null || true
 fi
 
-if curl_fetch "cli.xml" "$ACTIVE_CLI"; then
-    cp -f "$ACTIVE_CLI" "$FINAL_CLI"  || true
+if curl_fetch "cli.xml" "$MOD_CLI"; then
+    [ -n "$UPDATE_DIR" ] && cp -f "$MOD_CLI" "$UPD_CLI" 2>/dev/null || true
 fi
 
-case "$MODDIR" in
-    */modules_update/*)
-        MODDIR="/data/adb/modules/core_policy"
-        ;;
-esac
 
 run_bg
 
