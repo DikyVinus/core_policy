@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <corepolicy>
 
+  <!-- Header -->
   <section id="header">
     <en>CorePolicy Performance</en>
     <id>Performa CorePolicy</id>
@@ -9,6 +10,7 @@
     <ja>CorePolicy パフォーマンス</ja>
   </section>
 
+  <!-- Intro -->
   <section id="intro">
     <en>This module optimizes system performance automatically.</en>
     <id>Modul ini mengoptimalkan performa sistem secara otomatis.</id>
@@ -25,6 +27,7 @@
     <ja>設定は不要です。</ja>
   </section>
 
+  <!-- What it does -->
   <section id="what_title">
     <en>What CorePolicy does:</en>
     <id>Fungsi CorePolicy:</id>
@@ -73,6 +76,7 @@
     <ja>• Android 標準のスケジューリングを使用</ja>
   </section>
 
+  <!-- Adaptive -->
   <section id="adaptive_title">
     <en>Smart and adaptive behavior:</en>
     <id>Perilaku adaptif dan cerdas:</id>
@@ -81,6 +85,31 @@
     <ja>スマートで適応的な動作：</ja>
   </section>
 
+  <section id="adaptive_auto">
+    <en>• Automatically adjusts to device capabilities</en>
+    <id>• Menyesuaikan otomatis dengan kemampuan perangkat</id>
+    <zh>• 自动适配设备性能</zh>
+    <ar>• يتكيف تلقائيًا مع قدرات الجهاز</ar>
+    <ja>• デバイス性能に自動適応</ja>
+  </section>
+
+  <section id="adaptive_no_bg">
+    <en>• Never forces performance on background apps</en>
+    <id>• Tidak memaksa performa pada aplikasi latar belakang</id>
+    <zh>• 不强制提升后台应用性能</zh>
+    <ar>• لا يفرض الأداء على تطبيقات الخلفية</ar>
+    <ja>• バックグラウンドアプリを強制加速しない</ja>
+  </section>
+
+  <section id="adaptive_safe">
+    <en>• Falls back safely if a feature is unavailable</en>
+    <id>• Menggunakan fallback aman jika fitur tidak tersedia</id>
+    <zh>• 功能不可用时安全回退</zh>
+    <ar>• يعود بأمان إذا لم تكن الميزة متاحة</ar>
+    <ja>• 機能未対応時は安全にフォールバック</ja>
+  </section>
+
+  <!-- Safety -->
   <section id="safety_title">
     <en>Safety guarantees:</en>
     <id>Jaminan keamanan:</id>
@@ -89,6 +118,39 @@
     <ja>安全保証：</ja>
   </section>
 
+  <section id="safety_sys">
+    <en>• No system files are replaced</en>
+    <id>• Tidak mengganti file sistem</id>
+    <zh>• 不替换系统文件</zh>
+    <ar>• لا يتم استبدال ملفات النظام</ar>
+    <ja>• システムファイルを置き換えません</ja>
+  </section>
+
+  <section id="safety_kernel">
+    <en>• No permanent kernel changes</en>
+    <id>• Tidak melakukan perubahan kernel permanen</id>
+    <zh>• 不进行永久内核修改</zh>
+    <ar>• لا توجد تغييرات دائمة على النواة</ar>
+    <ja>• カーネルに恒久的な変更なし</ja>
+  </section>
+
+  <section id="safety_boot">
+    <en>• No boot blocking</en>
+    <id>• Tidak menghambat proses boot</id>
+    <zh>• 不阻塞启动过程</zh>
+    <ar>• لا يمنع الإقلاع</ar>
+    <ja>• 起動を妨げません</ja>
+  </section>
+
+  <section id="safety_wakelock">
+    <en>• No continuous background wakelocks</en>
+    <id>• Tidak menahan wakelock latar belakang terus-menerus</id>
+    <zh>• 不持续占用后台唤醒锁</zh>
+    <ar>• لا يحتجز قفل إيقاظ في الخلفية</ar>
+    <ja>• バックグラウンドの常駐ウェイクロックなし</ja>
+  </section>
+
+  <!-- Compatibility -->
   <section id="compat_title">
     <en>Compatibility:</en>
     <id>Kompatibilitas:</id>
@@ -97,6 +159,31 @@
     <ja>互換性：</ja>
   </section>
 
+  <section id="compat_android">
+    <en>• Works on Android 10+</en>
+    <id>• Berfungsi pada Android 10 ke atas</id>
+    <zh>• 支持 Android 10 及以上</zh>
+    <ar>• يعمل على أندرويد 10 وما فوق</ar>
+    <ja>• Android 10 以上に対応</ja>
+  </section>
+
+  <section id="compat_root">
+    <en>• Supports root and non-root modes</en>
+    <id>• Mendukung mode root dan non-root</id>
+    <zh>• 支持 root 与非 root 模式</zh>
+    <ar>• يدعم وضع الجذر وغير الجذر</ar>
+    <ja>• root / 非 root モード対応</ja>
+  </section>
+
+  <section id="compat_rom">
+    <en>• Compatible with AOSP and OEM ROMs</en>
+    <id>• Kompatibel dengan ROM AOSP dan OEM</id>
+    <zh>• 兼容 AOSP 和 OEM ROM</zh>
+    <ar>• متوافق مع AOSP و ROMات الشركات</ar>
+    <ja>• AOSP および OEM ROM に対応</ja>
+  </section>
+
+  <!-- Finish -->
   <section id="installed">
     <en>CorePolicy installed successfully</en>
     <id>CorePolicy berhasil dipasang</id>
