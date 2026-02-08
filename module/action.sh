@@ -6,37 +6,66 @@ BIN_DIR="$MODDIR/system/bin"
 LOG="$MODDIR/core_policy.log"
 
 CORESHIFT_BIN="$BIN_DIR/coreshift"
-DYNAMIC_LIST="$BIN_DIR/core_preload.core"
-STATIC_LIST="$BIN_DIR/core_preload_static.core"
+SERVICE_SH="$MODDIR/service.sh"
 
 UID="$(id -u)"
 
 echo "CorePolicy Status"
 echo
+
 echo "MODE:"
-[ "$UID" -eq 0 ] && echo "root" || echo "shell"
+if [ "$UID" -eq 0 ]; then
+    echo "root"
+else
+    echo "shell"
+fi
 
 echo
 echo "Binaries:"
-[ -x "$CORESHIFT_BIN" ] && echo "coreshift        : present" || echo "coreshift        : missing"
+if [ -x "$CORESHIFT_BIN" ]; then
+    echo "coreshift        : present"
+else
+    echo "coreshift        : missing"
+fi
 
 echo
 echo "Processes:"
-if DAEMON_PID="$(pidof coreshift 2>/dev/null)"; then
+DAEMON_PID="$(pidof coreshift || true)"
+
+if [ -n "$DAEMON_PID" ]; then
     echo "coreshift daemon : running ($DAEMON_PID)"
 else
     echo "coreshift daemon : not running"
+    echo "attempting recovery..."
+
+    if echo "$(tr '\0' ' ' </proc/$$/cmdline)" | grep -q axeron; then
+        
+        busybox setsid sh "$SERVICE_SH" &
+        echo "spawned via busybox setsid (axeron)"
+    else
+    
+        sh "$SERVICE_SH"  &
+        echo "spawned via service.sh (root)"
+    fi
 fi
 
 dump_file() {
     echo
     echo "$1 ($2):"
-    [ -f "$2" ] && cat "$2" || echo "(missing)"
+    if [ -f "$2" ]; then
+        cat "$2"
+    else
+        echo "(missing)"
+    fi
 }
 
-dump_file "Dynamic list" "$DYNAMIC_LIST"
-dump_file "Static list"  "$STATIC_LIST"
+dump_file "Dynamic list" "$BIN_DIR/core_preload.core"
+dump_file "Static list"  "$BIN_DIR/core_preload_static.core"
 
 echo
 echo "Service log:"
-[ -f "$LOG" ] && cat "$LOG" || echo "(no log)"
+if [ -f "$LOG" ]; then
+    cat "$LOG"
+else
+    echo "(no log)"
+fi
