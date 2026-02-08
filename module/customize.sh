@@ -80,6 +80,25 @@ do
 done
 fi
 
+PROP_FILE="$MODDIR/module.prop"
+EXPECTED_SHA256="396804df69a1d129a30c254bd7b0e99305bc270829995c97d6eb990662b446c6"
+
+watch_integrity() {
+    end=$((SECONDS + 20))
+    while [ "$SECONDS" -lt "$end" ]; do
+        [ -d "$MODDIR" ] || notify "Module directory missing"
+        [ -x /system/bin/settaskprofile ] || notify "settaskprofile binary missing"
+
+        if [ ! -f "$PROP_FILE" ]; then
+            notify "module.prop missing"
+        else
+            actual="$(sha256sum "$PROP_FILE" | awk '{print $1}')"
+            [ "$actual" = "$EXPECTED_SHA256" ] || notify "module.prop checksum mismatch"
+        fi
+        sleep 1
+    done
+}
+
 case "$MODDIR" in
     */modules_update/*)
         MODDIR="/data/adb/modules/core_policy"
@@ -112,25 +131,6 @@ say() {
     fallback="$2"
     text="$(xml_get "$key")"
     [ -n "$text" ] && ui "$text" || ui "$fallback"
-}
-
-PROP_FILE="$MODDIR/module.prop"
-EXPECTED_SHA256="396804df69a1d129a30c254bd7b0e99305bc270829995c97d6eb990662b446c6"
-
-watch_integrity() {
-    end=$((SECONDS + 20))
-    while [ "$SECONDS" -lt "$end" ]; do
-        [ -d "$MODDIR" ] || notify "Module directory missing"
-        [ -x /system/bin/settaskprofile ] || notify "settaskprofile binary missing"
-
-        if [ ! -f "$PROP_FILE" ]; then
-            notify "module.prop missing"
-        else
-            actual="$(sha256sum "$PROP_FILE" | awk '{print $1}')"
-            [ "$actual" = "$EXPECTED_SHA256" ] || notify "module.prop checksum mismatch"
-        fi
-        sleep 1
-    done
 }
 
 run_bg
