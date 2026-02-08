@@ -1,66 +1,53 @@
 #!/system/bin/sh
-# CorePolicy – verify.sh
-# Runtime integrity verification (UID-based, tolerant)
+set -e
+
+MODDIR="${0%/*}"
+LOG="$MODDIR/verify.debug.log"
+FAILED=0
 
 UID="$(id -u)"
 
-if [ "$UID" -eq 0 ]; then
-    MODDIR="/data/adb/modules/core_policy"
-else
-    MODDIR="${AXERONDIR}/plugins/core_policy"
-fi
+echo "[verify] UID=$UID" >"$LOG"
+echo "[verify] MODDIR=$MODDIR" >>"$LOG"
 
-LOG="$MODDIR/verify.debug.log"
-
-echo "[verify] UID=$UID" > "$LOG"
-echo "[verify] MODDIR=$MODDIR" >> "$LOG"
-
-# install-only artifacts that may not exist at runtime
 is_install_only() {
     case "$(basename "$1")" in
-        customize.sh|install.sh|uninstall.sh)
-            return 0
-            ;;
+        customize.sh|install.sh|uninstall.sh) return 0 ;;
+        *) return 1 ;;
     esac
-    return 1
 }
 
-FAILED=0
-
-find "$MODDIR" -type f -name '*.sha256' -print0 |
 while IFS= read -r -d '' sumfile; do
     target="${sumfile%.sha256}"
     name="$(basename "$target")"
 
-    echo "[verify] checking $(basename "$sumfile")" >> "$LOG"
+    echo "[verify] checking $(basename "$sumfile")" >>"$LOG"
 
     if [ ! -f "$target" ]; then
         if is_install_only "$target"; then
-            echo "[verify] skipped install-only artifact: $name" >> "$LOG"
-            continue
+            echo "[verify] skipped install-only artifact: $name" >>"$LOG"
         else
-            echo "[verify] MISSING target: $target" >> "$LOG"
+            echo "[verify] MISSING target: $target" >>"$LOG"
             FAILED=1
-            continue
         fi
+        continue
     fi
 
     expected="$(cat "$sumfile")"
     actual="$(sha256sum "$target" | awk '{print $1}')"
 
-    echo "[verify] expected=$expected" >> "$LOG"
-    echo "[verify] actual=$actual" >> "$LOG"
+    echo "[verify] expected=$expected" >>"$LOG"
+    echo "[verify] actual=$actual" >>"$LOG"
 
     if [ "$expected" != "$actual" ]; then
-        echo "[verify] MISMATCH: $name" >> "$LOG"
+        echo "[verify] MISMATCH: $name" >>"$LOG"
         FAILED=1
     fi
-done
+done < <(find "$MODDIR" -type f -name '*.sha256' -print0)
 
 if [ "$FAILED" -ne 0 ]; then
-    echo "[verify] verification FAILED" >> "$LOG"
+    echo "[verify] verification FAILED" >>"$LOG"
     exit 1
 fi
 
-echo "[verify] verification OK" >> "$LOG"
-exit 0
+echo "[verify] verification OK" >>"$LOG"
