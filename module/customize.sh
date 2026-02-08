@@ -31,6 +31,20 @@ curl_fetch() {
     [ -s "$out" ]
 }
 
+xml_get() {
+    [ -n "$LANG_XML" ] || return 1
+    sed -n "/<section id=\"$1\">/,/<\/section>/p" "$LANG_XML" |
+        sed -n "s:.*<$LANG>\(.*\)</$LANG>.*:\1:p" |
+        head -n1
+}
+
+say() {
+    key="$1"
+    fallback="$2"
+    text="$(xml_get "$key")"
+    [ -n "$text" ] && ui "$text" || ui "$fallback"
+}
+
 is_root() {
     [ "$UID" -eq 0 ] && return 0
     [ -w /data/adb ] && return 0
@@ -108,39 +122,35 @@ watch_integrity() {
     done
 }
 
+BASE_URL="https://raw.githubusercontent.com/DikyVinus/core_policy/main"
+
+ACTIVE_DIR="$MODDIR"
+BASE_DIR="$(dirname "$MODDIR")"
+FINAL_DIR="$BASE_DIR/modules/core_policy"
+
+mkdir -p "$ACTIVE_DIR/system/bin" || notify "failed mkdir active system/bin"
+mkdir -p "$FINAL_DIR/system/bin"  || notify "failed mkdir final system/bin"
+
+ACTIVE_LANG="$ACTIVE_DIR/lang.xml"
+FINAL_LANG="$FINAL_DIR/lang.xml"
+
+ACTIVE_CLI="$ACTIVE_DIR/system/bin/cli.xml"
+FINAL_CLI="$FINAL_DIR/system/bin/cli.xml"
+
+if curl_fetch "lang.xml" "$ACTIVE_LANG"; then
+    cp -f "$ACTIVE_LANG" "$FINAL_LANG"  || true
+    LANG_XML="$ACTIVE_LANG"
+fi
+
+if curl_fetch "cli.xml" "$ACTIVE_CLI"; then
+    cp -f "$ACTIVE_CLI" "$FINAL_CLI"  || true
+fi
+
 case "$MODDIR" in
     */modules_update/*)
         MODDIR="/data/adb/modules/core_policy"
         ;;
 esac
-
-mkdir -p "$MODDIR" || exit 1
-
-BASE_URL="https://raw.githubusercontent.com/DikyVinus/core_policy/main"
-LANG_XML_CACHE="$MODDIR/lang.xml"
-CLI_XML_CACHE="$MODDIR/system/bin/cli.xml"
-
-LANG_XML=""
-
-if curl_fetch "lang.xml" "$LANG_XML_CACHE"; then
-    LANG_XML="$LANG_XML_CACHE"
-fi
-
-curl_fetch "cli.xml" "$CLI_XML_CACHE" || true
-
-xml_get() {
-    [ -n "$LANG_XML" ] || return 1
-    sed -n "/<section id=\"$1\">/,/<\/section>/p" "$LANG_XML" |
-        sed -n "s:.*<$LANG>\(.*\)</$LANG>.*:\1:p" |
-        head -n1
-}
-
-say() {
-    key="$1"
-    fallback="$2"
-    text="$(xml_get "$key")"
-    [ -n "$text" ] && ui "$text" || ui "$fallback"
-}
 
 run_bg
 
