@@ -24,12 +24,26 @@ notify() {
     fi
 }
 
+UID="$(id -u)"
+MODDIR=""
+
 if [ "$UID" -eq 0 ]; then
-    MODDIR="/data/adb/modules/core_policy"
-    [ -d "$MODDIR" ] || MODDIR="/data/adb/modules_update/core_policy"
+    case ":$PATH:" in
+        *:*/ksu/bin:*|*:*/kernelsu/bin:*)
+            MODDIR="/data/adb/modules/core_policy"
+            [ -d "$MODDIR" ] || MODDIR="/data/adb/modules_update/core_policy"
+            ;;
+    esac
 else
-    MODDIR="${AXERONDIR}/plugins/core_policy"
+    case ":$PATH:" in
+        *:*axeron*/*)
+            AXERON_BASE="$(echo "$PATH" | tr ':' '\n' | sed -n 's|\(.*axeron[^/]*\)/.*|\1|p' | head -n1)"
+            [ -n "$AXERON_BASE" ] && MODDIR="$AXERON_BASE/plugins/core_policy"
+            ;;
+    esac
 fi
+
+[ -n "$MODDIR" ] || exit 1
 
 ui "• Module dir: $MODDIR" "• Direktori modul: $MODDIR"
 
