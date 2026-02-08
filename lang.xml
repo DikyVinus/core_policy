@@ -1,7 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <corepolicy>
 
-  <!-- Header -->
+ 
+  <!-- Module directory -->
+  <section id="moddir">
+    <en>• Module directory:</en>
+    <id>• Direktori modul:</id>
+    <zh>• 模块目录：</zh>
+    <ar>• دليل الوحدة:</ar>
+    <ja>• モジュールディレクトリ：</ja>
+    <es>• Directorio del módulo:</es>
+    <hi>• मॉड्यूल निर्देशिका:</hi>
+    <pt>• Diretório do módulo:</pt>
+    <ru>• Каталог модуля:</ru>
+    <de>• Modulverzeichnis:</de>
+  </section>
+
+   <!-- Header -->
   <section id="header">
     <en>CorePolicy Performance</en>
     <id>Performa CorePolicy</id>
