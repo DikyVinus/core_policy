@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<corepolicy>
+
+  <section id="header">
+    <en>CorePolicy Performance</en>
+    <id>Performa CorePolicy</id>
+    <zh>CorePolicy 性能</zh>
+    <ar>أداء CorePolicy</ar>
+    <ja>CorePolicy パフォーマンス</ja>
+  </section>
+
+  <section id="intro">
+    <en>This module optimizes system performance automatically.</en>
+    <id>Modul ini mengoptimalkan performa sistem secara otomatis.</id>
+    <zh>此模块可自动优化系统性能。</zh>
+    <ar>تعمل هذه الوحدة على تحسين أداء النظام تلقائيًا.</ar>
+    <ja>このモジュールはシステムのパフォーマンスを自動的に最適化します。</ja>
+  </section>
+
+  <section id="no_config">
+    <en>No configuration is required.</en>
+    <id>Tidak memerlukan konfigurasi.</id>
+    <zh>无需任何配置。</zh>
+    <ar>لا يتطلب أي إعداد.</ar>
+    <ja>設定は不要です。</ja>
+  </section>
+
+  <section id="what_title">
+    <en>What CorePolicy does:</en>
+    <id>Fungsi CorePolicy:</id>
+    <zh>CorePolicy 的功能：</zh>
+    <ar>ما الذي يفعله CorePolicy:</ar>
+    <ja>CorePolicy の機能：</ja>
+  </section>
+
+  <section id="detect_hw">
+    <en>• Detects device RAM and CPU capabilities</en>
+    <id>• Mendeteksi kemampuan RAM dan CPU perangkat</id>
+    <zh>• 检测设备的 RAM 和 CPU 能力</zh>
+    <ar>• يكتشف قدرات الذاكرة والمعالج</ar>
+    <ja>• デバイスの RAM と CPU 能力を検出</ja>
+  </section>
+
+  <section id="identify_apps">
+    <en>• Identifies frequently used apps</en>
+    <id>• Mengidentifikasi aplikasi yang sering digunakan</id>
+    <zh>• 识别常用应用程序</zh>
+    <ar>• يحدد التطبيقات الأكثر استخدامًا</ar>
+    <ja>• よく使われるアプリを識別</ja>
+  </section>
+
+  <section id="preload_libs">
+    <en>• Preloads critical native libraries (.so)</en>
+    <id>• Melakukan preload library native penting (.so)</id>
+    <zh>• 预加载关键本地库 (.so)</zh>
+    <ar>• تحميل المكتبات الأصلية الهامة مسبقًا (.so)</ar>
+    <ja>• 重要なネイティブライブラリ (.so) を事前読み込み</ja>
+  </section>
+
+  <section id="boost_apps">
+    <en>• Boosts foreground and top apps safely</en>
+    <id>• Meningkatkan performa aplikasi foreground secara aman</id>
+    <zh>• 安全提升前台和顶层应用性能</zh>
+    <ar>• يعزز أداء التطبيقات الأمامية بأمان</ar>
+    <ja>• フォアグラウンドアプリを安全に高速化</ja>
+  </section>
+
+  <section id="scheduler">
+    <en>• Uses Android-native scheduling policies</en>
+    <id>• Menggunakan kebijakan penjadwalan bawaan Android</id>
+    <zh>• 使用 Android 原生调度策略</zh>
+    <ar>• يستخدم سياسات جدولة أندرويد الأصلية</ar>
+    <ja>• Android 標準のスケジューリングを使用</ja>
+  </section>
+
+  <section id="adaptive_title">
+    <en>Smart and adaptive behavior:</en>
+    <id>Perilaku adaptif dan cerdas:</id>
+    <zh>智能自适应行为：</zh>
+    <ar>سلوك ذكي وتكيفي:</ar>
+    <ja>スマートで適応的な動作：</ja>
+  </section>
+
+  <section id="safety_title">
+    <en>Safety guarantees:</en>
+    <id>Jaminan keamanan:</id>
+    <zh>安全保证：</zh>
+    <ar>ضمانات الأمان:</ar>
+    <ja>安全保証：</ja>
+  </section>
+
+  <section id="compat_title">
+    <en>Compatibility:</en>
+    <id>Kompatibilitas:</id>
+    <zh>兼容性：</zh>
+    <ar>التوافق:</ar>
+    <ja>互換性：</ja>
+  </section>
+
+  <section id="installed">
+    <en>CorePolicy installed successfully</en>
+    <id>CorePolicy berhasil dipasang</id>
+    <zh>CorePolicy 安装成功</zh>
+    <ar>تم تثبيت CorePolicy بنجاح</ar>
+    <ja>CorePolicy が正常にインストールされました</ja>
+  </section>
+
+  <section id="reboot">
+    <en>Reboot to activate</en>
+    <id>Reboot untuk mengaktifkan</id>
+    <zh>重启以激活</zh>
+    <ar>أعد التشغيل للتفعيل</ar>
+    <ja>再起動して有効化</ja>
+  </section>
+
+</corepolicy>
