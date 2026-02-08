@@ -80,7 +80,16 @@ do
 done
 fi
 
-PROP_FILE="$MODDIR/module.prop"
+PROP_FILE=""
+
+if [ -f "$MODDIR/module.prop" ]; then
+    PROP_FILE="$MODDIR/module.prop"
+else
+    BASE_DIR="$(dirname "$MODDIR")"
+    if [ -f "$BASE_DIR/core_policy/module.prop" ]; then
+        PROP_FILE="$BASE_DIR/core_policy/module.prop"
+    fi
+fi
 EXPECTED_SHA256="396804df69a1d129a30c254bd7b0e99305bc270829995c97d6eb990662b446c6"
 
 watch_integrity() {
