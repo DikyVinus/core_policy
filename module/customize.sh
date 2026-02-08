@@ -72,18 +72,21 @@ if parent_cmdline | grep -q axeron; then
     AXERON_BASE="$(axeron_base_from_path)"
     [ -n "$AXERON_BASE" ] && MODDIR="$AXERON_BASE/plugins/core_policy"
 else
-    for d in /data/adb/modules/core_policy /data/adb/modules_update/core_policy; do
-        [ -d "$d" ] && MODDIR="$d" && break
-    done
+    for d in \
+    /data/adb/modules/core_policy \
+    /data/adb/modules_update/core_policy
+do
+    [ -d "$d" ] && MODDIR="$d" && break
+done
 fi
 
 case "$MODDIR" in
     */modules_update/*)
-        MODDIR="${MODDIR%/modules_update/*}/modules/core_policy"
+        MODDIR="/data/adb/modules/core_policy"
         ;;
 esac
 
-[ -d "$MODDIR" ] || exit 1
+mkdir -p "$MODDIR" || exit 1
 
 BASE_URL="https://raw.githubusercontent.com/DikyVinus/core_policy/main"
 LANG_XML_CACHE="$MODDIR/lang.xml"
