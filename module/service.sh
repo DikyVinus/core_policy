@@ -5,7 +5,6 @@ LOG="$MODDIR/core_policy.log"
 READY_FLAG="$MODDIR/.runtime_ready"
 
 CORESHIFT_BIN="$MODDIR/system/bin/coreshift"
-: >$LOG
 log() {
     echo "[CorePolicy] $(date '+%Y-%m-%d %H:%M:%S') $*" >>"$LOG"
 }
@@ -13,7 +12,7 @@ log() {
 while ! pidof com.android.systemui; do
     sleep 8
 done
-
+: >$LOG
 if [ ! -f "$READY_FLAG" ]; then
     ZYGOTE="$(getprop ro.zygote)"
     IS_64=0
