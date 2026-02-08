@@ -6,11 +6,13 @@ SYS_LANG="$(getprop persist.sys.locale | cut -d- -f1)"
 [ -n "$SYS_LANG" ] || SYS_LANG="$(getprop ro.product.locale | cut -d- -f1)"
 
 case "$CLI_LANG" in
-    en|id|zh|ar|ja) LANG="$CLI_LANG" ;;
-    *) case "$SYS_LANG" in
-           en|id|zh|ar|ja) LANG="$SYS_LANG" ;;
-           *) LANG="en" ;;
-       esac ;;
+    en|id|zh|ar|ja|es|hi|pt|ru|de) LANG="$CLI_LANG" ;;
+    *)
+        case "$SYS_LANG" in
+            en|id|zh|ar|ja|es|hi|pt|ru|de) LANG="$SYS_LANG" ;;
+            *) LANG="en" ;;
+        esac
+        ;;
 esac
 
 ui() { ui_print "$1"; }
@@ -109,6 +111,9 @@ ui "━━━━━━━━━━━━━━━━━━━━━━━━━�
 say header "CorePolicy Performance"
 ui "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 ui " "
+
+say moddir "• Module directory:"
+ui "$MODDIR"
 
 say intro "This module optimizes system performance automatically."
 say no_config "No configuration is required."
