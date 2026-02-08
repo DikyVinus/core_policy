@@ -40,7 +40,17 @@ axeron_base_from_path() {
         sed -n 's|\(.*\/axeron[^/]*\).*|\1|p' |
         head -n1
 }
+is_axeron() {
+    tr '\0' ' ' < /proc/$$/cmdline | grep -q axeron
+}
 
+run_bg() {
+    if is_root && ! is_axeron; then
+        watch_integrity &
+    else
+        busybox setsid sh -c watch_integrity &
+    fi
+}
 
 MODDIR=""
 
@@ -100,11 +110,7 @@ watch_integrity() {
     done
 }
 
-if is_root; then
-    watch_integrity &
-else
-    busybox setsid sh -c watch_integrity &
-fi
+run_bg
 
 ui " "
 ui "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
