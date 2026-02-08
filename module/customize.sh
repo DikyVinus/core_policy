@@ -24,10 +24,6 @@ notify() {
     fi
 }
 
-UID="$(id -u)"
-MODDIR=""
-
-UID="$(id -u)"
 MODDIR=""
 
 if [ "$UID" -eq 0 ]; then
