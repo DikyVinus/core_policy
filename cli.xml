@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<coreshift_cli>
+
+  <!-- General -->
+  <section id="title">
+    <en>coreshift | foreground performance control</en>
+    <id>coreshift | kontrol performa aplikasi aktif</id>
+    <zh>coreshift｜前台性能控制</zh>
+    <ar>coreshift | التحكم في أداء الواجهة الأمامية</ar>
+    <ja>coreshift｜フォアグラウンド性能制御</ja>
+    <es>coreshift | control de rendimiento en primer plano</es>
+    <hi>coreshift | अग्रभूमि प्रदर्शन नियंत्रण</hi>
+    <pt>coreshift | controle de desempenho em primeiro plano</pt>
+    <ru>coreshift | управление производительностью переднего плана</ru>
+    <de>coreshift | Steuerung der Vordergrundleistung</de>
+  </section>
+
+  <!-- Usage -->
+  <section id="usage">
+    <en>USAGE</en>
+    <id>PENGGUNAAN</id>
+    <zh>用法</zh>
+    <ar>طريقة الاستخدام</ar>
+    <ja>使用方法</ja>
+    <es>USO</es>
+    <hi>उपयोग</hi>
+    <pt>USO</pt>
+    <ru>ИСПОЛЬЗОВАНИЕ</ru>
+    <de>VERWENDUNG</de>
+  </section>
+
+  <section id="usage_preload">
+    <en>  coreshift preload</en>
+    <id>  coreshift preload</id>
+    <zh>  coreshift preload</zh>
+    <ar>  coreshift preload</ar>
+    <ja>  coreshift preload</ja>
+    <es>  coreshift preload</es>
+    <hi>  coreshift preload</hi>
+    <pt>  coreshift preload</pt>
+    <ru>  coreshift preload</ru>
+    <de>  coreshift preload</de>
+  </section>
+
+  <section id="usage_rollback">
+    <en>  coreshift rollback</en>
+    <id>  coreshift rollback</id>
+    <zh>  coreshift rollback</zh>
+    <ar>  coreshift rollback</ar>
+    <ja>  coreshift rollback</ja>
+    <es>  coreshift rollback</es>
+    <hi>  coreshift rollback</hi>
+    <pt>  coreshift rollback</pt>
+    <ru>  coreshift rollback</ru>
+    <de>  coreshift rollback</de>
+  </section>
+
+  <section id="usage_boost">
+    <en>  coreshift boost &lt;package&gt;</en>
+    <id>  coreshift boost &lt;package&gt;</id>
+    <zh>  coreshift boost &lt;包名&gt;</zh>
+    <ar>  coreshift boost &lt;الحزمة&gt;</ar>
+    <ja>  coreshift boost &lt;パッケージ&gt;</ja>
+    <es>  coreshift boost &lt;paquete&gt;</es>
+    <hi>  coreshift boost &lt;पैकेज&gt;</hi>
+    <pt>  coreshift boost &lt;pacote&gt;</pt>
+    <ru>  coreshift boost &lt;пакет&gt;</ru>
+    <de>  coreshift boost &lt;Paket&gt;</de>
+  </section>
+
+  <section id="usage_demote">
+    <en>  coreshift demote</en>
+    <id>  coreshift demote</id>
+    <zh>  coreshift demote</zh>
+    <ar>  coreshift demote</ar>
+    <ja>  coreshift demote</ja>
+    <es>  coreshift demote</es>
+    <hi>  coreshift demote</hi>
+    <pt>  coreshift demote</pt>
+    <ru>  coreshift demote</ru>
+    <de>  coreshift demote</de>
+  </section>
+
+  <section id="usage_daemon">
+    <en>  coreshift daemon</en>
+    <id>  coreshift daemon</id>
+    <zh>  coreshift daemon</zh>
+    <ar>  coreshift daemon</ar>
+    <ja>  coreshift daemon</ja>
+    <es>  coreshift daemon</es>
+    <hi>  coreshift daemon</hi>
+    <pt>  coreshift daemon</pt>
+    <ru>  coreshift daemon</ru>
+    <de>  coreshift daemon</de>
+  </section>
+
+  <!-- Command descriptions -->
+  <section id="cmd_preload">
+    <en>generate preload lists and lock memory</en>
+    <id>membuat daftar preload dan mengunci memori</id>
+    <zh>生成预加载列表并锁定内存</zh>
+    <ar>إنشاء قوائم التحميل المسبق وقفل الذاكرة</ar>
+    <ja>プリロードリストを生成しメモリをロック</ja>
+    <es>genera listas de precarga y bloquea memoria</es>
+    <hi>प्रीलोड सूची बनाता है और मेमोरी लॉक करता है</hi>
+    <pt>gera listas de pré-carregamento e bloqueia memória</pt>
+    <ru>создаёт списки предзагрузки и блокирует память</ru>
+    <de>erstellt Preload-Listen und sperrt Speicher</de>
+  </section>
+
+  <section id="cmd_rollback">
+    <en>undo preload and restore system state</en>
+    <id>membatalkan preload dan memulihkan sistem</id>
+    <zh>撤销预加载并恢复系统状态</zh>
+    <ar>إلغاء التحميل المسبق واستعادة حالة النظام</ar>
+    <ja>プリロードを解除し状態を復元</ja>
+    <es>revierte la precarga y restaura el sistema</es>
+    <hi>प्रीलोड हटाकर सिस्टम स्थिति बहाल करता है</hi>
+    <pt>desfaz o pré-carregamento e restaura o sistema</pt>
+    <ru>отменяет предзагрузку и восстанавливает систему</ru>
+    <de>macht Preload rückgängig und stellt Zustand her</de>
+  </section>
+
+  <section id="cmd_boost">
+    <en>boost a running application package</en>
+    <id>meningkatkan performa paket aplikasi aktif</id>
+    <zh>提升正在运行的应用性能</zh>
+    <ar>تعزيز أداء حزمة تطبيق قيد التشغيل</ar>
+    <ja>実行中アプリの性能を強化</ja>
+    <es>aumenta el rendimiento de una app en ejecución</es>
+    <hi>चल रहे ऐप के प्रदर्शन को बढ़ाता है</hi>
+    <pt>aumenta o desempenho do app em execução</pt>
+    <ru>повышает производительность запущенного приложения</ru>
+    <de>steigert Leistung einer laufenden App</de>
+  </section>
+
+  <section id="cmd_demote">
+    <en>demote background processes</en>
+    <id>menurunkan prioritas proses latar belakang</id>
+    <zh>降低后台进程优先级</zh>
+    <ar>خفض أولوية عمليات الخلفية</ar>
+    <ja>バックグラウンドプロセスを降格</ja>
+    <es>reduce la prioridad de procesos en segundo plano</es>
+    <hi>पृष्ठभूमि प्रक्रियाओं की प्राथमिकता घटाता है</hi>
+    <pt>rebaixa processos em segundo plano</pt>
+    <ru>понижает приоритет фоновых процессов</ru>
+    <de>senkt Priorität von Hintergrundprozessen</de>
+  </section>
+
+  <section id="cmd_daemon">
+    <en>continuous foreground boost and background demotion</en>
+    <id>boost aplikasi aktif dan demosi latar belakang terus-menerus</id>
+    <zh>持续前台加速与后台降级</zh>
+    <ar>تعزيز مستمر للتطبيقات الأمامية مع خفض الخلفية</ar>
+    <ja>前景強化と背景降格を継続実行</ja>
+    <es>aceleración continua del primer plano y reducción del fondo</es>
+    <hi>लगातार अग्रभूमि बूस्ट और पृष्ठभूमि डिमोट</hi>
+    <pt>aceleração contínua do primeiro plano e redução do fundo</pt>
+    <ru>постоянное ускорение переднего плана и понижение фона</ru>
+    <de>kontinuierliche Vordergrund-Boosts und Hintergrund-Drosselung</de>
+  </section>
+
+</coreshift_cli>
