@@ -21,8 +21,6 @@ echo "MODE:"
 echo
 echo "Binaries:"
 [ -x "$CORESHIFT_BIN" ] && echo "coreshift        : present" || echo "coreshift        : missing"
-[ -x "$RUNTIME_BIN" ] && echo "core_policy_runtime   : present" || echo "core_policy_runtime   : missing"
-
 echo
 echo "Processes:"
 DAEMON_PID="$(pidof coreshift || true)"
