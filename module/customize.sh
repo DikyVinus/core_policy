@@ -1,81 +1,57 @@
 #!/system/bin/sh
-
 UID="$(id -u)"
 
 LANG_CODE="$(getprop persist.sys.locale | cut -d- -f1)"
-[ -z "$LANG_CODE" ] && LANG_CODE="$(getprop ro.product.locale | cut -d- -f1)"
-[ "$LANG_CODE" != "id" ] && LANG_CODE="en"
+[ "$LANG_CODE" = "id" ] || LANG_CODE="en"
 
-ui() {
-    [ "$LANG_CODE" = "id" ] && ui_print "$2" || ui_print "$1"
-}
+ui() { [ "$LANG_CODE" = "id" ] && ui_print "$2" || ui_print "$1"; }
 
 notify() {
-    MSG="$1"
-    if [ "$UID" -eq 0 ]; then
-        su -lp 2000 -c \
-            "cmd notification post CorePolicy \
-            \"[CorePolicy] Integrity warning\" \
-            \"$MSG\""
-    else
-        cmd notification post CorePolicy \
-            "[CorePolicy] Integrity warning" \
-            "$MSG"
-    fi
+    CMD="cmd notification post CorePolicy \"[CorePolicy] Integrity warning\" \"$1\""
+    [ "$UID" -eq 0 ] && su -lp 2000 -c "$CMD" || sh -c "$CMD"
 }
 
-MODDIR=""
-
 if [ "$UID" -eq 0 ]; then
-    MODDIR="/data/adb/modules/core_policy"
-    [ -d "$MODDIR" ] || MODDIR="/data/adb/modules_update/core_policy"
+    for d in /data/adb/modules/core_policy /data/adb/modules_update/core_policy; do
+        [ -d "$d" ] && MODDIR="$d" && break
+    done
 else
-    case ":$PATH:" in
-        *:*axeron*/*)
-            AXERON_BASE="$(
-                echo "$PATH" | tr ':' '\n' |
-                sed -n 's|\(.*axeron[^/]*\)/.*|\1|p' |
-                head -n1
-            )"
-            [ -n "$AXERON_BASE" ] && MODDIR="$AXERON_BASE/plugins/core_policy"
-            ;;
-    esac
+    MODDIR="$(
+        echo "$PATH" | tr ':' '\n' |
+        sed -n 's|\(.*axeron[^/]*\)/.*|\1/plugins/core_policy|p' |
+        head -n1
+    )"
 fi
 
 [ -n "$MODDIR" ] || exit 1
-
 ui "• Module dir: $MODDIR" "• Direktori modul: $MODDIR"
-
-spam_if_missing() {
-    MSG="$1"
-    CHECK="$2"
-
-    START=$(date +%s)
-    TIMEOUT=20
-
-    while :; do
-        NOW=$(date +%s)
-        [ $((NOW - START)) -ge "$TIMEOUT" ] && break
-
-        [ -e "$CHECK" ] || notify "$MSG"
-        sleep 1
-    done
-}
-
-busybox setsid -c spam_if_missing "Module directory missing" "$MODDIR" &
-
-SETTASK="/system/bin/settaskprofile"
-busybox setsid -c spam_if_missing "settaskprofile binary missing" "$SETTASK" &
 
 PROP_FILE="$MODDIR/module.prop"
 EXPECTED_SHA256="396804df69a1d129a30c254bd7b0e99305bc270829995c97d6eb990662b446c6"
 
-if [ -f "$PROP_FILE" ]; then
-    ACTUAL_SHA256="$(sha256sum "$PROP_FILE" | awk '{print $1}')"
-    [ "$ACTUAL_SHA256" = "$EXPECTED_SHA256" ] || \
-        notify "module.prop checksum mismatch"
+watch_integrity() {
+    end=$((SECONDS + 20))
+
+    while [ "$SECONDS" -lt "$end" ]; do
+        [ -d "$MODDIR" ] || notify "Module directory missing"
+        [ -x /system/bin/settaskprofile ] || notify "settaskprofile binary missing"
+
+        if [ ! -f "$PROP_FILE" ]; then
+            notify "module.prop missing"
+        else
+            actual="$(sha256sum "$PROP_FILE" | awk '{print $1}')"
+            [ "$actual" = "$EXPECTED_SHA256" ] || \
+                notify "module.prop checksum mismatch"
+        fi
+
+        sleep 1
+    done
+}
+
+if [ "$UID" -eq 0 ]; then
+    watch_integrity &
 else
-    notify "module.prop missing"
+    busybox setsid sh -c watch_integrity >/dev/null 2>&1 &
 fi
 
 ui_print " "
