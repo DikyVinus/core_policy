@@ -8,6 +8,11 @@
     <zh>CorePolicy 性能</zh>
     <ar>أداء CorePolicy</ar>
     <ja>CorePolicy パフォーマンス</ja>
+    <es>Rendimiento de CorePolicy</es>
+    <hi>CorePolicy प्रदर्शन</hi>
+    <pt>Desempenho do CorePolicy</pt>
+    <ru>Производительность CorePolicy</ru>
+    <de>CorePolicy-Leistung</de>
   </section>
 
   <!-- Intro -->
@@ -17,6 +22,11 @@
     <zh>此模块可自动优化系统性能。</zh>
     <ar>تعمل هذه الوحدة على تحسين أداء النظام تلقائيًا.</ar>
     <ja>このモジュールはシステムのパフォーマンスを自動的に最適化します。</ja>
+    <es>Este módulo optimiza automáticamente el rendimiento del sistema.</es>
+    <hi>यह मॉड्यूल सिस्टम प्रदर्शन को स्वचालित रूप से अनुकूलित करता है।</hi>
+    <pt>Este módulo otimiza automaticamente o desempenho do sistema.</pt>
+    <ru>Этот модуль автоматически оптимизирует производительность системы.</ru>
+    <de>Dieses Modul optimiert die Systemleistung automatisch.</de>
   </section>
 
   <section id="no_config">
@@ -25,6 +35,11 @@
     <zh>无需任何配置。</zh>
     <ar>لا يتطلب أي إعداد.</ar>
     <ja>設定は不要です。</ja>
+    <es>No se requiere configuración.</es>
+    <hi>कोई कॉन्फ़िगरेशन आवश्यक नहीं है।</hi>
+    <pt>Nenhuma configuração é necessária.</pt>
+    <ru>Настройка не требуется.</ru>
+    <de>Keine Konfiguration erforderlich.</de>
   </section>
 
   <!-- What it does -->
@@ -34,6 +49,11 @@
     <zh>CorePolicy 的功能：</zh>
     <ar>ما الذي يفعله CorePolicy:</ar>
     <ja>CorePolicy の機能：</ja>
+    <es>Qué hace CorePolicy:</es>
+    <hi>CorePolicy क्या करता है:</hi>
+    <pt>O que o CorePolicy faz:</pt>
+    <ru>Что делает CorePolicy:</ru>
+    <de>Was CorePolicy macht:</de>
   </section>
 
   <section id="detect_hw">
@@ -42,6 +62,11 @@
     <zh>• 检测设备的 RAM 和 CPU 能力</zh>
     <ar>• يكتشف قدرات الذاكرة والمعالج</ar>
     <ja>• デバイスの RAM と CPU 能力を検出</ja>
+    <es>• Detecta la RAM y la capacidad de la CPU del dispositivo</es>
+    <hi>• डिवाइस की RAM और CPU क्षमताओं का पता लगाता है</hi>
+    <pt>• Detecta a RAM e a capacidade da CPU do dispositivo</pt>
+    <ru>• Определяет возможности ОЗУ и процессора устройства</ru>
+    <de>• Erkennt RAM- und CPU-Fähigkeiten des Geräts</de>
   </section>
 
   <section id="identify_apps">
@@ -50,6 +75,11 @@
     <zh>• 识别常用应用程序</zh>
     <ar>• يحدد التطبيقات الأكثر استخدامًا</ar>
     <ja>• よく使われるアプリを識別</ja>
+    <es>• Identifica las aplicaciones más utilizadas</es>
+    <hi>• अक्सर उपयोग किए जाने वाले ऐप्स की पहचान करता है</hi>
+    <pt>• Identifica aplicativos usados com frequência</pt>
+    <ru>• Определяет часто используемые приложения</ru>
+    <de>• Erkennt häufig verwendete Apps</de>
   </section>
 
   <section id="preload_libs">
@@ -58,6 +88,11 @@
     <zh>• 预加载关键本地库 (.so)</zh>
     <ar>• تحميل المكتبات الأصلية الهامة مسبقًا (.so)</ar>
     <ja>• 重要なネイティブライブラリ (.so) を事前読み込み</ja>
+    <es>• Precarga bibliotecas nativas críticas (.so)</es>
+    <hi>• महत्वपूर्ण नेटिव लाइब्रेरी (.so) को प्रीलोड करता है</hi>
+    <pt>• Pré-carrega bibliotecas nativas críticas (.so)</pt>
+    <ru>• Предварительно загружает важные нативные библиотеки (.so)</ru>
+    <de>• Lädt kritische native Bibliotheken (.so) vor</de>
   </section>
 
   <section id="boost_apps">
@@ -66,6 +101,11 @@
     <zh>• 安全提升前台和顶层应用性能</zh>
     <ar>• يعزز أداء التطبيقات الأمامية بأمان</ar>
     <ja>• フォアグラウンドアプリを安全に高速化</ja>
+    <es>• Aumenta el rendimiento de apps en primer plano de forma segura</es>
+    <hi>• अग्रभूमि ऐप्स के प्रदर्शन को सुरक्षित रूप से बढ़ाता है</hi>
+    <pt>• Aumenta com segurança o desempenho de apps em primeiro plano</pt>
+    <ru>• Безопасно повышает производительность активных приложений</ru>
+    <de>• Beschleunigt Vordergrund-Apps sicher</de>
   </section>
 
   <section id="scheduler">
@@ -74,6 +114,11 @@
     <zh>• 使用 Android 原生调度策略</zh>
     <ar>• يستخدم سياسات جدولة أندرويد الأصلية</ar>
     <ja>• Android 標準のスケジューリングを使用</ja>
+    <es>• Usa políticas de planificación nativas de Android</es>
+    <hi>• Android की मूल शेड्यूलिंग नीतियों का उपयोग करता है</hi>
+    <pt>• Usa políticas de agendamento nativas do Android</pt>
+    <ru>• Использует встроенные политики планирования Android</ru>
+    <de>• Verwendet Android-native Scheduling-Richtlinien</de>
   </section>
 
   <!-- Adaptive -->
@@ -83,6 +128,11 @@
     <zh>智能自适应行为：</zh>
     <ar>سلوك ذكي وتكيفي:</ar>
     <ja>スマートで適応的な動作：</ja>
+    <es>Comportamiento inteligente y adaptativo:</es>
+    <hi>स्मार्ट और अनुकूली व्यवहार:</hi>
+    <pt>Comportamento inteligente e adaptativo:</pt>
+    <ru>Умное и адаптивное поведение:</ru>
+    <de>Intelligentes und adaptives Verhalten:</de>
   </section>
 
   <section id="adaptive_auto">
@@ -91,6 +141,11 @@
     <zh>• 自动适配设备性能</zh>
     <ar>• يتكيف تلقائيًا مع قدرات الجهاز</ar>
     <ja>• デバイス性能に自動適応</ja>
+    <es>• Se ajusta automáticamente a las capacidades del dispositivo</es>
+    <hi>• डिवाइस क्षमताओं के अनुसार स्वतः समायोजित होता है</hi>
+    <pt>• Ajusta-se automaticamente às capacidades do dispositivo</pt>
+    <ru>• Автоматически адаптируется к возможностям устройства</ru>
+    <de>• Passt sich automatisch an die Gerätefähigkeiten an</de>
   </section>
 
   <section id="adaptive_no_bg">
@@ -99,6 +154,11 @@
     <zh>• 不强制提升后台应用性能</zh>
     <ar>• لا يفرض الأداء على تطبيقات الخلفية</ar>
     <ja>• バックグラウンドアプリを強制加速しない</ja>
+    <es>• Nunca fuerza el rendimiento en apps en segundo plano</es>
+    <hi>• बैकग्राउंड ऐप्स पर प्रदर्शन को मजबूर नहीं करता</hi>
+    <pt>• Nunca força desempenho em apps em segundo plano</pt>
+    <ru>• Никогда не форсирует производительность фоновых приложений</ru>
+    <de>• Erzwingt keine Leistung bei Hintergrund-Apps</de>
   </section>
 
   <section id="adaptive_safe">
@@ -107,6 +167,11 @@
     <zh>• 功能不可用时安全回退</zh>
     <ar>• يعود بأمان إذا لم تكن الميزة متاحة</ar>
     <ja>• 機能未対応時は安全にフォールバック</ja>
+    <es>• Usa retroceso seguro si una función no está disponible</es>
+    <hi>• यदि कोई सुविधा उपलब्ध नहीं है तो सुरक्षित रूप से वापस जाता है</hi>
+    <pt>• Retorna com segurança se um recurso não estiver disponível</pt>
+    <ru>• Безопасно откатывается при недоступности функции</ru>
+    <de>• Fällt sicher zurück, wenn eine Funktion nicht verfügbar ist</de>
   </section>
 
   <!-- Safety -->
@@ -116,6 +181,11 @@
     <zh>安全保证：</zh>
     <ar>ضمانات الأمان:</ar>
     <ja>安全保証：</ja>
+    <es>Garantías de seguridad:</es>
+    <hi>सुरक्षा गारंटी:</hi>
+    <pt>Garantias de segurança:</pt>
+    <ru>Гарантии безопасности:</ru>
+    <de>Sicherheitsgarantien:</de>
   </section>
 
   <section id="safety_sys">
@@ -124,6 +194,11 @@
     <zh>• 不替换系统文件</zh>
     <ar>• لا يتم استبدال ملفات النظام</ar>
     <ja>• システムファイルを置き換えません</ja>
+    <es>• No se reemplazan archivos del sistema</es>
+    <hi>• सिस्टम फ़ाइलें बदली नहीं जातीं</hi>
+    <pt>• Nenhum arquivo do sistema é substituído</pt>
+    <ru>• Системные файлы не заменяются</ru>
+    <de>• Keine Systemdateien werden ersetzt</de>
   </section>
 
   <section id="safety_kernel">
@@ -132,6 +207,11 @@
     <zh>• 不进行永久内核修改</zh>
     <ar>• لا توجد تغييرات دائمة على النواة</ar>
     <ja>• カーネルに恒久的な変更なし</ja>
+    <es>• Sin cambios permanentes en el kernel</es>
+    <hi>• कर्नेल में कोई स्थायी परिवर्तन नहीं</hi>
+    <pt>• Nenhuma alteração permanente no kernel</pt>
+    <ru>• Нет постоянных изменений ядра</ru>
+    <de>• Keine dauerhaften Kernel-Änderungen</de>
   </section>
 
   <section id="safety_boot">
@@ -140,6 +220,11 @@
     <zh>• 不阻塞启动过程</zh>
     <ar>• لا يمنع الإقلاع</ar>
     <ja>• 起動を妨げません</ja>
+    <es>• No bloquea el arranque</es>
+    <hi>• बूट प्रक्रिया को अवरुद्ध नहीं करता</hi>
+    <pt>• Não bloqueia a inicialização</pt>
+    <ru>• Не блокирует загрузку</ru>
+    <de>• Blockiert den Bootvorgang nicht</de>
   </section>
 
   <section id="safety_wakelock">
@@ -148,6 +233,11 @@
     <zh>• 不持续占用后台唤醒锁</zh>
     <ar>• لا يحتجز قفل إيقاظ في الخلفية</ar>
     <ja>• バックグラウンドの常駐ウェイクロックなし</ja>
+    <es>• Sin wakelocks continuos en segundo plano</es>
+    <hi>• निरंतर बैकग्राउंड वेकलॉक नहीं</hi>
+    <pt>• Sem wakelocks contínuos em segundo plano</pt>
+    <ru>• Нет постоянных фоновых wakelock</ru>
+    <de>• Keine dauerhaften Hintergrund-Wakelocks</de>
   </section>
 
   <!-- Compatibility -->
@@ -157,6 +247,11 @@
     <zh>兼容性：</zh>
     <ar>التوافق:</ar>
     <ja>互換性：</ja>
+    <es>Compatibilidad:</es>
+    <hi>संगतता:</hi>
+    <pt>Compatibilidade:</pt>
+    <ru>Совместимость:</ru>
+    <de>Kompatibilität:</de>
   </section>
 
   <section id="compat_android">
@@ -165,6 +260,11 @@
     <zh>• 支持 Android 10 及以上</zh>
     <ar>• يعمل على أندرويد 10 وما فوق</ar>
     <ja>• Android 10 以上に対応</ja>
+    <es>• Funciona en Android 10 o superior</es>
+    <hi>• Android 10+ पर काम करता है</hi>
+    <pt>• Funciona no Android 10+</pt>
+    <ru>• Работает на Android 10+</ru>
+    <de>• Funktioniert ab Android 10</de>
   </section>
 
   <section id="compat_root">
@@ -173,6 +273,11 @@
     <zh>• 支持 root 与非 root 模式</zh>
     <ar>• يدعم وضع الجذر وغير الجذر</ar>
     <ja>• root / 非 root モード対応</ja>
+    <es>• Admite modos root y sin root</es>
+    <hi>• रूट और नॉन-रूट मोड का समर्थन करता है</hi>
+    <pt>• Suporta modos root e não-root</pt>
+    <ru>• Поддерживает root и без root</ru>
+    <de>• Unterstützt Root- und Non-Root-Modi</de>
   </section>
 
   <section id="compat_rom">
@@ -181,6 +286,11 @@
     <zh>• 兼容 AOSP 和 OEM ROM</zh>
     <ar>• متوافق مع AOSP و ROMات الشركات</ar>
     <ja>• AOSP および OEM ROM に対応</ja>
+    <es>• Compatible con ROMs AOSP y OEM</es>
+    <hi>• AOSP और OEM ROM के साथ संगत</hi>
+    <pt>• Compatível com ROMs AOSP e OEM</pt>
+    <ru>• Совместим с AOSP и OEM-прошивками</ru>
+    <de>• Kompatibel mit AOSP- und OEM-ROMs</de>
   </section>
 
   <!-- Finish -->
@@ -190,6 +300,11 @@
     <zh>CorePolicy 安装成功</zh>
     <ar>تم تثبيت CorePolicy بنجاح</ar>
     <ja>CorePolicy が正常にインストールされました</ja>
+    <es>CorePolicy instalado correctamente</es>
+    <hi>CorePolicy सफलतापूर्वक स्थापित हुआ</hi>
+    <pt>CorePolicy instalado com sucesso</pt>
+    <ru>CorePolicy успешно установлен</ru>
+    <de>CorePolicy erfolgreich installiert</de>
   </section>
 
   <section id="reboot">
@@ -198,6 +313,11 @@
     <zh>重启以激活</zh>
     <ar>أعد التشغيل للتفعيل</ar>
     <ja>再起動して有効化</ja>
+    <es>Reinicia para activar</es>
+    <hi>सक्रिय करने के लिए पुनः आरंभ करें</hi>
+    <pt>Reinicie para ativar</pt>
+    <ru>Перезагрузите для активации</ru>
+    <de>Neustart zur Aktivierung</de>
   </section>
 
 </corepolicy>
