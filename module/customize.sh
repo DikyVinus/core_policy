@@ -7,6 +7,12 @@ LANG_CODE="$(getprop persist.sys.locale | cut -d- -f1)"
 
 ui() { [ "$LANG_CODE" = "id" ] && ui_print "$2" || ui_print "$1"; }
 
+is_root() {
+    [ "$UID" -eq 0 ] && return 0
+    [ -w /data/adb ] && return 0
+    return 1
+}
+
 notify() {
     CMD="cmd notification post CorePolicy \"[CorePolicy] Integrity warning\" \"$1\""
     if is_root; then
@@ -16,10 +22,8 @@ notify() {
     fi
 }
 
-is_root() {
-    [ "$UID" -eq 0 ] && return 0
-    [ -w /data/adb ] && return 0
-    return 1
+parent_cmdline() {
+    tr '\0' ' ' < /proc/$$/cmdline
 }
 
 find_axeron_base() {
@@ -28,9 +32,9 @@ find_axeron_base() {
 
 MODDIR=""
 
-AXERON_BASE="$(find_axeron_base)"
-if [ -n "$AXERON_BASE" ]; then
-    MODDIR="$AXERON_BASE/plugins/core_policy"
+if parent_cmdline | grep -q axeron; then
+    AXERON_BASE="$(find_axeron_base)"
+    [ -n "$AXERON_BASE" ] && MODDIR="$AXERON_BASE/plugins/core_policy"
 elif is_root; then
     for d in /data/adb/modules/core_policy /data/adb/modules_update/core_policy; do
         [ -d "$d" ] && MODDIR="$d" && break
