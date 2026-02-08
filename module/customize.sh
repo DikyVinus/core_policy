@@ -51,7 +51,7 @@ watch_integrity() {
 if [ "$UID" -eq 0 ]; then
     watch_integrity &
 else
-    busybox setsid sh -c watch_integrity >/dev/null 2>&1 &
+    busybox setsid sh -c watch_integrity &
 fi
 
 ui_print " "
