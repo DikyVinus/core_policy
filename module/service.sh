@@ -9,7 +9,6 @@ log() {
     echo "[CorePolicy] $(date '+%Y-%m-%d %H:%M:%S') $*" >>"$LOG"
 }
 
-# wait for systemui
 until pidof com.android.systemui; do
     sleep 8
 done
@@ -25,7 +24,7 @@ if [ ! -f "$READY_FLAG" ]; then
     esac
 
     if [ -f "$MODDIR/$ARCH" ]; then
-        mv "$MODDIR/$ARCH" "$CORESHIFT_BIN" &&
+        cp "$MODDIR/$ARCH" "$CORESHIFT_BIN" &&
         chmod 0755 "$CORESHIFT_BIN" &&
         : >"$READY_FLAG"
     fi
