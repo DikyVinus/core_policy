@@ -60,7 +60,7 @@ This release significantly refines preload and boost logic while introducing a *
 - No persistent state written by CLI operations.
 
 ### Supported CLI Languages (10)
-The CLI automatically selects language based on system locale or explicit argument.
+The CLI automatically selects language based on system locale.
 
 Supported language codes:
 - `en` – English
