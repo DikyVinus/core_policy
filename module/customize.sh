@@ -2,7 +2,6 @@
 exec 2>/dev/null
 
 UID="$(id -u)"
-CLI_LANG="$1"
 
 command -v ui_print >/dev/null 2>&1 || ui_print() { echo "$@"; }
 ui() { ui_print "$1"; }
