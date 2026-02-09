@@ -1,93 +1,33 @@
 #!/system/bin/sh
 exec 2>/dev/null
+
 UID="$(id -u)"
 CLI_LANG="$1"
+
 command -v ui_print >/dev/null 2>&1 || ui_print() { echo "$@"; }
+ui() { ui_print "$1"; }
+
 SYS_LANG="$(getprop persist.sys.locale | cut -d- -f1)"
 [ -n "$SYS_LANG" ] || SYS_LANG="$(getprop ro.product.locale | cut -d- -f1)"
 
-case "$CLI_LANG" in
-    en|id|zh|ar|ja|es|hi|pt|ru|de) LANG="$CLI_LANG" ;;
-    *)
-        case "$SYS_LANG" in
-            en|id|zh|ar|ja|es|hi|pt|ru|de) LANG="$SYS_LANG" ;;
-            *) LANG="en" ;;
-        esac
-        ;;
+case "$SYS_LANG" in
+    en|id|zh|ar|ja|es|hi|pt|ru|de) LANG="$SYS_LANG" ;;
+    *) LANG="en" ;;
 esac
 
-ui() { ui_print "$1"; }
+is_root() { [ "$UID" -eq 0 ] || [ -w /data/adb ]; }
 
-curl_fetch() {
-    name="$1"
-    out="$2"
-
-    command -v curl >/dev/null 2>&1 || return 1
-    mkdir -p "$(dirname "$out")" || return 1
-
-    curl -fsSL --max-time 5 \
-        "$BASE_URL/$name" \
-        -o "$out" || return 1
-
-    [ -s "$out" ]
-}
-
-xml_get() {
-    [ -n "$LANG_XML" ] || return 1
-    sed -n "/<section id=\"$1\">/,/<\/section>/p" "$LANG_XML" |
-        sed -n "s:.*<$LANG>\(.*\)</$LANG>.*:\1:p" |
-        head -n1
-}
-
-say() {
-    key="$1"
-    fallback="$2"
-    text="$(xml_get "$key")"
-    [ -n "$text" ] && ui "$text" || ui "$fallback"
-}
-
-is_root() {
-    [ "$UID" -eq 0 ] && return 0
-    [ -w /data/adb ] && return 0
-    return 1
-}
-
-notify() {
-    CMD="cmd notification post CorePolicy \"[CorePolicy] Integrity warning\" \"$1\""
-    if is_root; then
-        su -lp 2000 -c "$CMD"
-    else
-        sh -c "$CMD"
-    fi
-}
-
-parent_cmdline() { tr '\0' ' ' < /proc/$$/cmdline; }
-
-axeron_base_from_path() {
+axeron_base() {
     echo "$PATH" | tr ':' '\n' |
-        grep -v tmp |
         sed -n 's|\(.*\/axeron[^/]*\).*|\1|p' |
         head -n1
 }
-is_axeron() {
-    tr '\0' ' ' < /proc/$$/cmdline | grep -q axeron
-}
 
-run_bg() {
-    if is_root && ! is_axeron; then
-        watch_integrity &
-    else
-        busybox setsid sh -c watch_integrity &
-    fi
-}
+AXERON_BASE="$(axeron_base)"
 
-
-MODDIR=""
-UPDATE_DIR=""
-
-if parent_cmdline | grep -q axeron; then
-    AXERON_BASE="$(axeron_base_from_path)"
+if [ -n "$AXERON_BASE" ]; then
     MODDIR="$AXERON_BASE/plugins/core_policy"
+    UPDATE_DIR=""
 elif is_root; then
     MODDIR="/data/adb/modules/core_policy"
     UPDATE_DIR="/data/adb/modules_update/core_policy"
@@ -95,16 +35,16 @@ else
     exit 1
 fi
 
-PROP_FILE=""
-
-if [ -n "$UPDATE_DIR" ] && [ -f "$UPDATE_DIR/module.prop" ]; then
-    PROP_FILE="$UPDATE_DIR/module.prop"
-elif [ -f "$MODDIR/module.prop" ]; then
-    PROP_FILE="$MODDIR/module.prop"
-fi
-
 EXPECTED_SHA256="396804df69a1d129a30c254bd7b0e99305bc270829995c97d6eb990662b446c6"
 
+PROP_FILE=""
+[ -f "$UPDATE_DIR/module.prop" ] && PROP_FILE="$UPDATE_DIR/module.prop"
+[ -z "$PROP_FILE" ] && [ -f "$MODDIR/module.prop" ] && PROP_FILE="$MODDIR/module.prop"
+
+notify() {
+    cmd="cmd notification post CorePolicy \"[CorePolicy] Integrity warning\" \"$1\""
+    is_root && su -lp 2000 -c "$cmd" || sh -c "$cmd"
+}
 
 watch_integrity() {
     end=$((SECONDS + 20))
@@ -112,39 +52,43 @@ watch_integrity() {
         [ -d "$MODDIR" ] || notify "Module directory missing"
         [ -x /system/bin/settaskprofile ] || notify "settaskprofile binary missing"
 
-        if [ ! -f "$PROP_FILE" ]; then
-            notify "module.prop missing"
+        if [ -f "$PROP_FILE" ]; then
+            cur="$(sha256sum "$PROP_FILE" | awk '{print $1}')"
+            [ "$cur" = "$EXPECTED_SHA256" ] || notify "module.prop checksum mismatch"
         else
-            actual="$(sha256sum "$PROP_FILE" | awk '{print $1}')"
-            [ "$actual" = "$EXPECTED_SHA256" ] || notify "module.prop checksum mismatch"
+            notify "module.prop missing"
         fi
         sleep 1
     done
 }
 
+if command -v busybox >/dev/null 2>&1; then
+    busybox setsid sh -c watch_integrity &
+else
+    watch_integrity &
+fi
 
 BASE_URL="https://raw.githubusercontent.com/DikyVinus/core_policy/main"
-
-mkdir -p "$MODDIR/system/bin" || notify "failed mkdir MODDIR/system/bin"
-[ -n "$UPDATE_DIR" ] && mkdir -p "$UPDATE_DIR/system/bin"
-
-MOD_LANG="$MODDIR/lang.xml"
-MOD_CLI="$MODDIR/system/bin/cli.xml"
-
+LANG_XML="$MODDIR/lang.xml"
 UPD_LANG="$UPDATE_DIR/lang.xml"
-UPD_CLI="$UPDATE_DIR/system/bin/cli.xml"
 
-if curl_fetch "lang.xml" "$MOD_LANG"; then
-    LANG_XML="$MOD_LANG"
-    [ -n "$UPDATE_DIR" ] && cp -f "$MOD_LANG" "$UPD_LANG" 2>/dev/null || true
+if command -v curl >/dev/null 2>&1; then
+    mkdir -p "$MODDIR"
+    curl -fsSL --max-time 5 "$BASE_URL/lang.xml" -o "$LANG_XML" &&
+        [ -n "$UPDATE_DIR" ] && cp -f "$LANG_XML" "$UPD_LANG"
 fi
 
-if curl_fetch "cli.xml" "$MOD_CLI"; then
-    [ -n "$UPDATE_DIR" ] && cp -f "$MOD_CLI" "$UPD_CLI" 2>/dev/null || true
-fi
+xml_get() {
+    [ -f "$LANG_XML" ] || return 1
+    sed -n "/<section id=\"$1\">/,/<\/section>/p" "$LANG_XML" |
+        sed -n "s:.*<$LANG>\(.*\)</$LANG>.*:\1:p" |
+        head -n1
+}
 
-
-run_bg
+say() {
+    t="$(xml_get "$1")"
+    ui "${t:-$2}"
+}
 
 ui " "
 ui "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
