@@ -9,7 +9,7 @@ This release significantly refines preload and boost logic while introducing a *
 ## Architectural Changes
 - Unified all policy logic into a single execution path.
 - Merged previously separate policy libraries into one shared core to eliminate duplicated state and redundant execution.
-- Collapsed `core_policy_perf` and preload handling directly into `core_policy_exe`, removing inter-process handoff overhead.
+- Collapsed `core_policy_perf` and preload handling directly into `coreshift`, removing inter-process handoff overhead.
 - Reduced runtime dependency graph by removing unnecessary helper binaries.
 - Centralized environment detection (root / non-root / Axeron) to avoid repeated checks.
 
