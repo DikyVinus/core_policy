@@ -17,8 +17,10 @@ is_install_only() {
     esac
 }
 
-find "$MODDIR" -type f -name '*.sha256' -print0 |
-while IFS= read -r -d "$(printf '\0')" sumfile; do
+set -- "$MODDIR"/*.sha256
+[ "$1" = "$MODDIR/*.sha256" ] && set --
+
+for sumfile; do
     target="${sumfile%.sha256}"
     name="$(basename "$target")"
 
