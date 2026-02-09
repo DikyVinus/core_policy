@@ -56,17 +56,17 @@
   </section>
 
   <section id="usage_boost">
-    <en>  coreshift boost &lt;package&gt;</en>
-    <id>  coreshift boost &lt;package&gt;</id>
-    <zh>  coreshift boost &lt;包名&gt;</zh>
-    <ar>  coreshift boost &lt;الحزمة&gt;</ar>
-    <ja>  coreshift boost &lt;パッケージ&gt;</ja>
-    <es>  coreshift boost &lt;paquete&gt;</es>
-    <hi>  coreshift boost &lt;पैकेज&gt;</hi>
-    <pt>  coreshift boost &lt;pacote&gt;</pt>
-    <ru>  coreshift boost &lt;пакет&gt;</ru>
-    <de>  coreshift boost &lt;Paket&gt;</de>
-  </section>
+  <en>  coreshift boost <package></en>
+  <id>  coreshift boost <package></id>
+  <zh>  coreshift boost <包名></zh>
+  <ar>  coreshift boost <الحزمة></ar>
+  <ja>  coreshift boost <パッケージ></ja>
+  <es>  coreshift boost <paquete></es>
+  <hi>  coreshift boost <पैकेज></hi>
+  <pt>  coreshift boost <pacote></pt>
+  <ru>  coreshift boost <пакет></ru>
+  <de>  coreshift boost <Paket></de>
+</section>
 
   <section id="usage_demote">
     <en>  coreshift demote</en>
