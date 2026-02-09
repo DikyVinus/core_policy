@@ -17,7 +17,8 @@ is_install_only() {
     esac
 }
 
-while IFS= read -r -d '' sumfile; do
+find "$MODDIR" -type f -name '*.sha256' -print0 |
+while IFS= read -r -d "$(printf '\0')" sumfile; do
     target="${sumfile%.sha256}"
     name="$(basename "$target")"
 
@@ -43,7 +44,7 @@ while IFS= read -r -d '' sumfile; do
         echo "[verify] MISMATCH: $name" >>"$LOG"
         FAILED=1
     fi
-done < <(find "$MODDIR" -type f -name '*.sha256' -print0)
+done
 
 if [ "$FAILED" -ne 0 ]; then
     echo "[verify] verification FAILED" >>"$LOG"
