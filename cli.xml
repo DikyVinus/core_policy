@@ -94,6 +94,73 @@
     <de>  coreshift daemon</de>
   </section>
 
+  <!-- Command aliases -->
+
+<section id="alias_preload">
+  <en>preload</en>
+  <id>preload</id>
+  <zh>预载</zh>
+  <ar>تحميل</ar>
+  <ja>プリロード</ja>
+  <es>precargar</es>
+  <hi>प्रीलोड</hi>
+  <pt>precarregar</pt>
+  <ru>предзагрузка</ru>
+  <de>vorladen</de>
+</section>
+
+<section id="alias_rollback">
+  <en>rollback</en>
+  <id>rollback</id>
+  <zh>回滚</zh>
+  <ar>تراجع</ar>
+  <ja>ロールバック</ja>
+  <es>revertir</es>
+  <hi>रोलबैक</hi>
+  <pt>reverter</pt>
+  <ru>откат</ru>
+  <de>rueckgaengig</de>
+</section>
+
+<section id="alias_boost">
+  <en>boost</en>
+  <id>boost</id>
+  <zh>加速</zh>
+  <ar>تعزيز</ar>
+  <ja>加速</ja>
+  <es>acelerar</es>
+  <hi>बूस्ट</hi>
+  <pt>acelerar</pt>
+  <ru>ускорить</ru>
+  <de>beschleunigen</de>
+</section>
+
+<section id="alias_demote">
+  <en>demote</en>
+  <id>demote</id>
+  <zh>降级</zh>
+  <ar>خفض</ar>
+  <ja>降格</ja>
+  <es>reducir</es>
+  <hi>घटाएं</hi>
+  <pt>rebaixar</pt>
+  <ru>понизить</ru>
+  <de>herabstufen</de>
+</section>
+
+<section id="alias_daemon">
+  <en>daemon</en>
+  <id>daemon</id>
+  <zh>守护</zh>
+  <ar>خدمة</ar>
+  <ja>デーモン</ja>
+  <es>demonio</es>
+  <hi>डेमन</hi>
+  <pt>daemon</pt>
+  <ru>демон</ru>
+  <de>daemon</de>
+</section>
+
   <!-- Command descriptions -->
   <section id="cmd_preload">
     <en>generate preload lists and lock memory</en>
