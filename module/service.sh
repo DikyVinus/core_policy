@@ -36,7 +36,7 @@ if [ ! -f "$READY_FLAG" ]; then
             case "$P" in
                 /data/*)
                     if [ -d "$P" ] && [ -w "$P" ] && [ ! -e "$P/coreshift" ]; then
-                        ln -s "$CORESHIFT_BIN" "$P/coreshift" &&
+                        ln -s "$CORESHIFT_BIN" "$P/coreshift" && ln -s "$CORESHIFT_BIN" "$P/cli.xml"
                         log "symlinked coreshift into $P"
                         break
                     fi
