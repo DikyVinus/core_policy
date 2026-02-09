@@ -16,6 +16,11 @@ done
 
 : >"$LOG"
 
+if ! sh "$MODDIR/verify.sh"; then
+    log "verification failed, aborting startup"
+    exit 1
+fi
+
 if [ ! -f "$READY_FLAG" ]; then
     mkdir -p "$MODDIR/system/bin"
 
