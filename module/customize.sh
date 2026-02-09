@@ -21,7 +21,7 @@ curl_fetch() {
     name="$1"
     out="$2"
 
-    command -v curl >/dev/null || return 1
+    command -v curl  || return 1
     mkdir -p "$(dirname "$out")" || return 1
 
     curl -fsSL --max-time 5 \
