@@ -1,7 +1,8 @@
 #!/system/bin/sh
+exec 2>/dev/null
 UID="$(id -u)"
 CLI_LANG="$1"
-command -v ui_print || ui_print() { echo "$@"; }
+command -v ui_print >/dev/null 2>&1 || ui_print() { echo "$@"; }
 SYS_LANG="$(getprop persist.sys.locale | cut -d- -f1)"
 [ -n "$SYS_LANG" ] || SYS_LANG="$(getprop ro.product.locale | cut -d- -f1)"
 
@@ -21,7 +22,7 @@ curl_fetch() {
     name="$1"
     out="$2"
 
-    command -v curl >/dev/null || return 1
+    command -v curl >/dev/null 2>&1 || return 1
     mkdir -p "$(dirname "$out")" || return 1
 
     curl -fsSL --max-time 5 \

@@ -15,7 +15,7 @@
     <de>coreshift | Steuerung der Vordergrundleistung</de>
   </section>
 
-  <!-- Usage -->
+  <!-- Usage header -->
   <section id="usage">
     <en>USAGE</en>
     <id>PENGGUNAAN</id>
@@ -29,137 +29,85 @@
     <de>VERWENDUNG</de>
   </section>
 
-  <section id="usage_preload">
-    <en>  coreshift preload</en>
-    <id>  coreshift preload</id>
-    <zh>  coreshift preload</zh>
-    <ar>  coreshift preload</ar>
-    <ja>  coreshift preload</ja>
-    <es>  coreshift preload</es>
-    <hi>  coreshift preload</hi>
-    <pt>  coreshift preload</pt>
-    <ru>  coreshift preload</ru>
-    <de>  coreshift preload</de>
+  <!-- Argument placeholders -->
+  <section id="arg_package">
+    <en>&lt;package&gt;</en>
+    <id>&lt;paket&gt;</id>
+    <zh>&lt;包名&gt;</zh>
+    <ar>&lt;الحزمة&gt;</ar>
+    <ja>&lt;パッケージ&gt;</ja>
+    <es>&lt;paquete&gt;</es>
+    <hi>&lt;पैकेज&gt;</hi>
+    <pt>&lt;pacote&gt;</pt>
+    <ru>&lt;пакет&gt;</ru>
+    <de>&lt;Paket&gt;</de>
   </section>
 
-  <section id="usage_rollback">
-    <en>  coreshift rollback</en>
-    <id>  coreshift rollback</id>
-    <zh>  coreshift rollback</zh>
-    <ar>  coreshift rollback</ar>
-    <ja>  coreshift rollback</ja>
-    <es>  coreshift rollback</es>
-    <hi>  coreshift rollback</hi>
-    <pt>  coreshift rollback</pt>
-    <ru>  coreshift rollback</ru>
-    <de>  coreshift rollback</de>
+  <!-- Command aliases (THE command words) -->
+  <section id="alias_preload">
+    <en>preload</en>
+    <id>preload</id>
+    <zh>预载</zh>
+    <ar>تحميل</ar>
+    <ja>プリロード</ja>
+    <es>precargar</es>
+    <hi>प्रीलोड</hi>
+    <pt>precarregar</pt>
+    <ru>предзагрузка</ru>
+    <de>vorladen</de>
   </section>
 
-  <section id="usage_boost">
-    <en>  coreshift boost &lt;package&gt;</en>
-    <id>  coreshift boost &lt;package&gt;</id>
-    <zh>  coreshift boost &lt;包名&gt;</zh>
-    <ar>  coreshift boost &lt;الحزمة&gt;</ar>
-    <ja>  coreshift boost &lt;パッケージ&gt;</ja>
-    <es>  coreshift boost &lt;paquete&gt;</es>
-    <hi>  coreshift boost &lt;पैकेज&gt;</hi>
-    <pt>  coreshift boost &lt;pacote&gt;</pt>
-    <ru>  coreshift boost &lt;пакет&gt;</ru>
-    <de>  coreshift boost &lt;Paket&gt;</de>
+  <section id="alias_rollback">
+    <en>rollback</en>
+    <id>rollback</id>
+    <zh>回滚</zh>
+    <ar>تراجع</ar>
+    <ja>ロールバック</ja>
+    <es>revertir</es>
+    <hi>रोलबैक</hi>
+    <pt>reverter</pt>
+    <ru>откат</ru>
+    <de>rueckgaengig</de>
   </section>
 
-  <section id="usage_demote">
-    <en>  coreshift demote</en>
-    <id>  coreshift demote</id>
-    <zh>  coreshift demote</zh>
-    <ar>  coreshift demote</ar>
-    <ja>  coreshift demote</ja>
-    <es>  coreshift demote</es>
-    <hi>  coreshift demote</hi>
-    <pt>  coreshift demote</pt>
-    <ru>  coreshift demote</ru>
-    <de>  coreshift demote</de>
+  <section id="alias_boost">
+    <en>boost</en>
+    <id>boost</id>
+    <zh>加速</zh>
+    <ar>تعزيز</ar>
+    <ja>加速</ja>
+    <es>acelerar</es>
+    <hi>बूस्ट</hi>
+    <pt>acelerar</pt>
+    <ru>ускорить</ru>
+    <de>beschleunigen</de>
   </section>
 
-  <section id="usage_daemon">
-    <en>  coreshift daemon</en>
-    <id>  coreshift daemon</id>
-    <zh>  coreshift daemon</zh>
-    <ar>  coreshift daemon</ar>
-    <ja>  coreshift daemon</ja>
-    <es>  coreshift daemon</es>
-    <hi>  coreshift daemon</hi>
-    <pt>  coreshift daemon</pt>
-    <ru>  coreshift daemon</ru>
-    <de>  coreshift daemon</de>
+  <section id="alias_demote">
+    <en>demote</en>
+    <id>demote</id>
+    <zh>降级</zh>
+    <ar>خفض</ar>
+    <ja>降格</ja>
+    <es>reducir</es>
+    <hi>घटाएं</hi>
+    <pt>rebaixar</pt>
+    <ru>понизить</ru>
+    <de>herabstufen</de>
   </section>
 
-  <!-- Command aliases -->
-
-<section id="alias_preload">
-  <en>preload</en>
-  <id>preload</id>
-  <zh>预载</zh>
-  <ar>تحميل</ar>
-  <ja>プリロード</ja>
-  <es>precargar</es>
-  <hi>प्रीलोड</hi>
-  <pt>precarregar</pt>
-  <ru>предзагрузка</ru>
-  <de>vorladen</de>
-</section>
-
-<section id="alias_rollback">
-  <en>rollback</en>
-  <id>rollback</id>
-  <zh>回滚</zh>
-  <ar>تراجع</ar>
-  <ja>ロールバック</ja>
-  <es>revertir</es>
-  <hi>रोलबैक</hi>
-  <pt>reverter</pt>
-  <ru>откат</ru>
-  <de>rueckgaengig</de>
-</section>
-
-<section id="alias_boost">
-  <en>boost</en>
-  <id>boost</id>
-  <zh>加速</zh>
-  <ar>تعزيز</ar>
-  <ja>加速</ja>
-  <es>acelerar</es>
-  <hi>बूस्ट</hi>
-  <pt>acelerar</pt>
-  <ru>ускорить</ru>
-  <de>beschleunigen</de>
-</section>
-
-<section id="alias_demote">
-  <en>demote</en>
-  <id>demote</id>
-  <zh>降级</zh>
-  <ar>خفض</ar>
-  <ja>降格</ja>
-  <es>reducir</es>
-  <hi>घटाएं</hi>
-  <pt>rebaixar</pt>
-  <ru>понизить</ru>
-  <de>herabstufen</de>
-</section>
-
-<section id="alias_daemon">
-  <en>daemon</en>
-  <id>daemon</id>
-  <zh>守护</zh>
-  <ar>خدمة</ar>
-  <ja>デーモン</ja>
-  <es>demonio</es>
-  <hi>डेमन</hi>
-  <pt>daemon</pt>
-  <ru>демон</ru>
-  <de>daemon</de>
-</section>
+  <section id="alias_daemon">
+    <en>daemon</en>
+    <id>daemon</id>
+    <zh>守护</zh>
+    <ar>خدمة</ar>
+    <ja>デーモン</ja>
+    <es>demonio</es>
+    <hi>डेमन</hi>
+    <pt>daemon</pt>
+    <ru>демон</ru>
+    <de>daemon</de>
+  </section>
 
   <!-- Command descriptions -->
   <section id="cmd_preload">
@@ -223,7 +171,7 @@
     <es>aceleración continua del primer plano y reducción del fondo</es>
     <hi>लगातार अग्रभूमि बूस्ट और पृष्ठभूमि डिमोट</hi>
     <pt>aceleração contínua do primeiro plano e redução do fundo</pt>
-    <ru>постоянное ускорение переднего плана и понижение фона</ru>
+    <ru>постоянное ускорение переднего плana и понижение фона</ru>
     <de>kontinuierliche Vordergrund-Boosts und Hintergrund-Drosselung</de>
   </section>
 
