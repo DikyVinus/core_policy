@@ -1,5 +1,5 @@
 #!/system/bin/sh
-2>/dev/null
+exec 2>/dev/null
 UID="$(id -u)"
 CLI_LANG="$1"
 command -v ui_print || ui_print() { echo "$@"; }
