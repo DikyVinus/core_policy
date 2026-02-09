@@ -36,10 +36,10 @@ else
     else
         if command -v busybox >/dev/null 2>&1; then
             busybox setsid sh "$SERVICE_SH" &
-            echo "spawned via busybox setsid"
+            echo "spawned via shell"
         else
             sh "$SERVICE_SH" &
-            echo "spawned via shell"
+            echo "spawned via root"
         fi
     fi
 fi
