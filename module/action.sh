@@ -14,19 +14,11 @@ echo "CorePolicy Status"
 echo
 
 echo "MODE:"
-if [ "$UID" -eq 0 ]; then
-    echo "root"
-else
-    echo "shell"
-fi
+[ "$UID" -eq 0 ] && echo "root" || echo "shell"
 
 echo
 echo "Binaries:"
-if [ -x "$CORESHIFT_BIN" ]; then
-    echo "coreshift        : present"
-else
-    echo "coreshift        : missing"
-fi
+[ -x "$CORESHIFT_BIN" ] && echo "coreshift        : present" || echo "coreshift        : missing"
 
 echo
 echo "Processes:"
@@ -38,25 +30,24 @@ else
     echo "coreshift daemon : not running"
     echo "attempting recovery..."
 
-    if echo "$(tr '\0' ' ' </proc/$$/cmdline)" | grep -q axeron; then
-        
-        busybox setsid sh "$SERVICE_SH" &
-        echo "spawned via busybox setsid (axeron)"
+    if [ "$UID" -eq 0 ]; then
+        sh "$SERVICE_SH" &
+        echo "spawned via service.sh"
     else
-    
-        sh "$SERVICE_SH"  &
-        echo "spawned via service.sh (root)"
+        if command -v busybox >/dev/null 2>&1; then
+            busybox setsid sh "$SERVICE_SH" &
+            echo "spawned via busybox setsid"
+        else
+            sh "$SERVICE_SH" &
+            echo "spawned via shell"
+        fi
     fi
 fi
 
 dump_file() {
     echo
     echo "$1 ($2):"
-    if [ -f "$2" ]; then
-        cat "$2"
-    else
-        echo "(missing)"
-    fi
+    [ -f "$2" ] && cat "$2" || echo "(missing)"
 }
 
 dump_file "Dynamic list" "$BIN_DIR/core_preload.core"
@@ -64,8 +55,4 @@ dump_file "Static list"  "$BIN_DIR/core_preload_static.core"
 
 echo
 echo "Service log:"
-if [ -f "$LOG" ]; then
-    cat "$LOG"
-else
-    echo "(no log)"
-fi
+[ -f "$LOG" ] && cat "$LOG" || echo "(no log)"
