@@ -2,57 +2,56 @@
 set -e
 
 MODDIR="${0%/*}"
-BIN_DIR="$MODDIR/system/bin"
+BIN="$MODDIR/system/bin"
 LOG="$MODDIR/core_policy.log"
 
-CORESHIFT_BIN="$BIN_DIR/coreshift"
-SERVICE_SH="$MODDIR/service.sh"
+CORESHIFT="$BIN/coreshift"
+SERVICE="$MODDIR/service.sh"
 
 UID="$(id -u)"
 
-echo "CorePolicy Status"
-echo
+p() { echo "$@"; }
 
-echo "MODE:"
-[ "$UID" -eq 0 ] && echo "root" || echo "shell"
+p "CorePolicy Status"
+p
 
-echo
-echo "Binaries:"
-[ -x "$CORESHIFT_BIN" ] && echo "coreshift        : present" || echo "coreshift        : missing"
+p "MODE:"
+[ "$UID" -eq 0 ] && p "root" || p "shell"
 
-echo
-echo "Processes:"
-DAEMON_PID="$(pidof coreshift || true)"
+p
+p "Binaries:"
+[ -x "$CORESHIFT" ] && p "coreshift : present" || p "coreshift : missing"
 
-if [ -n "$DAEMON_PID" ]; then
-    echo "coreshift daemon : running ($DAEMON_PID)"
-else
-    echo "coreshift daemon : not running"
-    echo "attempting recovery..."
+p
+p "Processes:"
+PID="$(pidof coreshift 2>/dev/null || true)"
 
-    if [ "$UID" -eq 0 ]; then
-        sh "$SERVICE_SH" &
-        echo "spawned via service.sh"
+spawn_service() {
+    if command -v busybox >/dev/null 2>&1; then
+        busybox setsid sh "$SERVICE" &
     else
-        if command -v busybox >/dev/null 2>&1; then
-            busybox setsid sh "$SERVICE_SH" &
-            echo "spawned via shell"
-        else
-            sh "$SERVICE_SH" &
-            echo "spawned via root"
-        fi
+        sh "$SERVICE" &
     fi
-fi
-
-dump_file() {
-    echo
-    echo "$1 ($2):"
-    [ -f "$2" ] && cat "$2" || echo "(missing)"
 }
 
-dump_file "Dynamic list" "$BIN_DIR/core_preload.core"
-dump_file "Static list"  "$BIN_DIR/core_preload_static.core"
+if [ -n "$PID" ]; then
+    p "coreshift daemon : running ($PID)"
+else
+    p "coreshift daemon : not running"
+    p "attempting recovery..."
+    spawn_service
+    p "service spawned"
+fi
 
-echo
-echo "Service log:"
-[ -f "$LOG" ] && cat "$LOG" || echo "(no log)"
+dump() {
+    p
+    p "$1 ($2):"
+    [ -f "$2" ] && cat "$2" || p "(missing)"
+}
+
+dump "Dynamic list" "$BIN/core_preload.core"
+dump "Static list"  "$BIN/core_preload_static.core"
+
+p
+p "Service log:"
+[ -f "$LOG" ] && cat "$LOG" || p "(no log)"
