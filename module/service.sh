@@ -3,7 +3,8 @@
 MODDIR="${0%/*}"
 LOG="$MODDIR/core_policy.log"
 READY_FLAG="$MODDIR/.runtime_ready"
-CORESHIFT_BIN="$MODDIR/system/bin/coreshift"
+BIN="$MODDIR/system/bin"
+CORESHIFT_BIN="$BIN/coreshift"
 
 log() {
     echo "[CorePolicy] $(date '+%Y-%m-%d %H:%M:%S') $*" >>"$LOG"
@@ -36,7 +37,7 @@ if [ ! -f "$READY_FLAG" ]; then
             case "$P" in
                 /data/*)
                     if [ -d "$P" ] && [ -w "$P" ] && [ ! -e "$P/coreshift" ]; then
-                        ln -s "$CORESHIFT_BIN" "$P/coreshift" && ln -s "$CORESHIFT_BIN" "$P/cli.xml"
+                        ln -s "$CORESHIFT_BIN" "$P/coreshift" && ln -s "$BIN/cli.xml" "$P/cli.xml"
                         log "symlinked coreshift into $P"
                         break
                     fi
