@@ -24,10 +24,13 @@ fi
 if [ ! -f "$READY_FLAG" ]; then
     mkdir -p "$MODDIR/system/bin"
 
-    case "$(getprop ro.zygote)" in
-        zygote64*) ARCH=arm64 ;;
-        *)         ARCH=arm ;;
-    esac
+    ABI="$(getprop ro.product.cpu.abi)"
+
+case "$ABI" in
+    arm64-v8a) ARCH=arm64 ;;
+    armeabi-v7a|armeabi) ARCH=arm ;;
+    *) ARCH=arm ;;
+esac
 
     if [ -f "$MODDIR/$ARCH" ]; then
         cp "$MODDIR/$ARCH" "$CORESHIFT_BIN" &&
