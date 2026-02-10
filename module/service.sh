@@ -1,4 +1,5 @@
 #!/system/bin/sh
+set -e
 
 MODDIR="${0%/*}"
 BIN="$MODDIR/system/bin"
@@ -12,28 +13,24 @@ SYS_LANG="$(getprop persist.sys.locale | cut -d- -f1)"
 [ -n "$SYS_LANG" ] || SYS_LANG="$(getprop ro.product.locale | cut -d- -f1)"
 
 case "$SYS_LANG" in
-    en|id|zh|ar|ja|es|hi|pt|ru|de) LANGUAGE="$SYS_LANG" ;;
-    *) LANGUAGE="en" ;;
+    en|id|zh|ar|ja|es|hi|pt|ru|de) LANG="$SYS_LANG" ;;
+    *) LANG="en" ;;
 esac
 
 xml_get() {
     id="$1"
-    awk -v id="$id" -v lang="$LANGUAGE" '
-        $0 ~ "<section id=\""id"\">" { f=1; next }
-        f && $0 ~ "</section>" { exit }
-        f && $0 ~ "<"lang">" {
-            sub(".*<"lang">","")
-            sub("</.*","")
-            print
-            exit
+    fallback="$2"
+
+    [ -f "$XML" ] || { echo "$fallback"; return; }
+
+    sed -n "/<section id=\"$id\">/,/<\/section>/p" "$XML" |
+        sed -n "s:.*<$LANG>\(.*\)</$LANG>.*:\1:p" |
+        head -n1 |
+        sed 's/&lt;/</g; s/&gt;/>/g; s/&amp;/\&/g' |
+        {
+            read -r line || true
+            echo "${line:-$fallback}"
         }
-        f && $0 ~ "<en>" {
-            sub(".*<en>","")
-            sub("</.*","")
-            print
-            exit
-        }
-    ' "$XML"
 }
 
 log() {
@@ -47,12 +44,12 @@ done
 : >"$LOG"
 
 if ! sh "$MODDIR/localized.sh"; then
-    log "$(xml_get log_verify_fail)"
+    log "$(xml_get log_verify_fail "verification failed, aborting startup")"
     exit 1
 fi
 
 if ! sh "$MODDIR/verify.sh"; then
-    log "$(xml_get log_verify_fail)"
+    log "$(xml_get log_verify_fail "verification failed, aborting startup")"
     exit 1
 fi
 
@@ -67,8 +64,8 @@ if [ ! -f "$READY_FLAG" ]; then
     esac
 
     if [ -f "$MODDIR/$ARCH" ]; then
-        cp "$MODDIR/$ARCH" "$CORESHIFT_BIN" &&
-        chmod 0755 "$CORESHIFT_BIN" &&
+        cp "$MODDIR/$ARCH" "$CORESHIFT_BIN"
+        chmod 0755 "$CORESHIFT_BIN"
         : >"$READY_FLAG"
     fi
 
@@ -81,7 +78,7 @@ if [ ! -f "$READY_FLAG" ]; then
                     if [ -d "$P" ] && [ -w "$P" ] && [ ! -e "$P/coreshift" ]; then
                         ln -s "$CORESHIFT_BIN" "$P/coreshift"
                         ln -s "$BIN/cli.xml" "$P/cli.xml"
-                        log "$(xml_get log_symlink) $P"
+                        log "$(xml_get log_symlink "symlinked coreshift into") $P"
                         break
                     fi
                     ;;
@@ -90,10 +87,10 @@ if [ ! -f "$READY_FLAG" ]; then
     fi
 fi
 
-log "$(xml_get log_starting_daemon)"
+log "$(xml_get log_starting_daemon "starting coreshift daemon")"
 "$CORESHIFT_BIN" preload &
 "$CORESHIFT_BIN" daemon &
 DAEMON_PID=$!
 
-log "$(xml_get log_daemon_pid)$DAEMON_PID"
-log "$(xml_get log_services_ready) (daemon pid=$DAEMON_PID)"
+log "$(xml_get log_daemon_pid "coreshift daemon pid=")$DAEMON_PID"
+log "$(xml_get log_services_ready "core policy services launched") (daemon pid=$DAEMON_PID)"
