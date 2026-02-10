@@ -36,7 +36,7 @@ for sumfile; do
         continue
     fi
 
-    expected="$(cat "$sumfile")"
+    expected="$(awk '{print $1}' "$sumfile")"
     actual="$(sha256sum "$target" | awk '{print $1}')"
 
     echo "[verify] expected=$expected" >>"$LOG"
