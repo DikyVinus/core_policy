@@ -1,4 +1,5 @@
 #!/system/bin/sh
+# SPDX-License-Identifier: Apache-2.0
 exec 2>/dev/null
 
 UID="$(id -u)"
