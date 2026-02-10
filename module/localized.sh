@@ -2,7 +2,7 @@
 set -euo pipefail
 
 MODDIR="${0%/*}"
-XML="$MODDIR/cli.xml"
+XML="$MODDIR/log.xml"
 FILE="$MODDIR/module.prop"
 HASH="$FILE.sha256"
 
