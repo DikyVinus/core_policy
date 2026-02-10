@@ -51,6 +51,9 @@ ESC_DESC="$(echo "$DESC" | sed 's/[&|]/\\&/g')"
 sed -i "s|^description=.*|description=$ESC_DESC|" "$FILE"
 
 echo "$MSG_REGEN"
-sha256sum "$FILE" >"$HASH"
+(
+    cd "$(dirname "$FILE")" || exit 1
+    sha256sum "./$(basename "$FILE")" >"$(basename "$HASH")"
+)
 
 echo "$MSG_DONE"
