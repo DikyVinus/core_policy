@@ -1,0 +1,433 @@
+<?xml version="1.0" encoding="utf-8"?>
+<corepolicy_log>
+ 
+ <section id="mod_description">
+  <en>Native CPU and memory policy daemon that optimizes performance by managing process priority, preloading shared libraries, and controlling background behavior.</en>
+  <id>Daemon kebijakan CPU dan memori native yang mengoptimalkan performa dengan mengatur prioritas proses, preload library bersama, dan mengontrol perilaku latar belakang.</id>
+  <zh>通过管理进程优先级、预加载共享库和控制后台行为来优化性能的原生 CPU 和内存策略守护进程。</zh>
+  <ar>خدمة أصلية لسياسات المعالج والذاكرة تعمل على تحسين الأداء عبر إدارة أولوية العمليات والتحميل المسبق والتحكم في الخلفية.</ar>
+  <ja>プロセス優先度管理、共有ライブラリのプリロード、バックグラウンド制御により性能を最適化するネイティブ CPU / メモリポリシーデーモン。</ja>
+  <es>Daemon nativo de políticas de CPU y memoria que optimiza el rendimiento gestionando prioridades de procesos, precarga de bibliotecas y control del fondo.</es>
+  <hi>प्रक्रिया प्राथमिकता प्रबंधन, साझा लाइब्रेरी प्रीलोड और बैकग्राउंड नियंत्रण द्वारा प्रदर्शन अनुकूलित करने वाला नेटिव CPU और मेमोरी डेमन।</hi>
+  <pt>Daemon nativo de política de CPU e memória que otimiza o desempenho gerenciando prioridade de processos, pré-carregamento e controle em segundo plano.</pt>
+  <ru>Нативный демон политики CPU и памяти, оптимизирующий производительность за счёт управления приоритетами процессов, предзагрузки библиотек и контроля фона.</ru>
+  <de>Nativer CPU- und Speicher-Policy-Daemon zur Leistungsoptimierung durch Prozessprioritäten, Preloading und Hintergrundsteuerung.</de>
+</section>
+
+ <section id="verify_hash">
+  <en>[*] verifying sha256</en>
+  <id>[*] memverifikasi sha256</id>
+  <zh>[*] 校验 sha256</zh>
+  <ar>[*] التحقق من sha256</ar>
+  <ja>[*] sha256 を検証中</ja>
+  <es>[*] verificando sha256</es>
+  <hi>[*] sha256 सत्यापित किया जा रहा है</hi>
+  <pt>[*] verificando sha256</pt>
+  <ru>[*] проверка sha256</ru>
+  <de>[*] überprüfe sha256</de>
+</section>
+
+<section id="update_desc">
+  <en>[*] updating description</en>
+  <id>[*] memperbarui deskripsi</id>
+  <zh>[*] 更新描述</zh>
+  <ar>[*] تحديث الوصف</ar>
+  <ja>[*] 説明を更新中</ja>
+  <es>[*] actualizando descripción</es>
+  <hi>[*] विवरण अपडेट किया जा रहा है</hi>
+  <pt>[*] atualizando descrição</pt>
+  <ru>[*] обновление описания</ru>
+  <de>[*] Beschreibung wird aktualisiert</de>
+</section>
+
+<section id="regen_hash">
+  <en>[*] regenerating sha256</en>
+  <id>[*] membuat ulang sha256</id>
+  <zh>[*] 重新生成 sha256</zh>
+  <ar>[*] إعادة إنشاء sha256</ar>
+  <ja>[*] sha256 を再生成</ja>
+  <es>[*] regenerando sha256</es>
+  <hi>[*] sha256 पुनः बनाया जा रहा है</hi>
+  <pt>[*] regenerando sha256</pt>
+  <ru>[*] пересоздание sha256</ru>
+  <de>[*] sha256 wird neu erzeugt</de>
+</section>
+
+<section id="done">
+  <en>[✓] done</en>
+  <id>[✓] selesai</id>
+  <zh>[✓] 完成</zh>
+  <ar>[✓] تم</ar>
+  <ja>[✓] 完了</ja>
+  <es>[✓] hecho</es>
+  <hi>[✓] पूर्ण</hi>
+  <pt>[✓] concluído</pt>
+  <ru>[✓] готово</ru>
+  <de>[✓] fertig</de>
+</section>
+
+<!-- Daemon / service logs -->
+
+<section id="log_verify_fail">
+  <en>verification failed, aborting startup</en>
+  <id>verifikasi gagal, membatalkan startup</id>
+  <zh>验证失败，启动已中止</zh>
+  <ar>فشل التحقق، إيقاف بدء التشغيل</ar>
+  <ja>検証に失敗しました。起動を中止します</ja>
+  <es>verificación fallida, abortando inicio</es>
+  <hi>सत्यापन विफल, स्टार्टअप रद्द किया गया</hi>
+  <pt>verificação falhou, inicialização abortada</pt>
+  <ru>проверка не пройдена, запуск отменён</ru>
+  <de>Überprüfung fehlgeschlagen, Start abgebrochen</de>
+</section>
+
+<section id="log_symlink">
+  <en>symlinked coreshift into</en>
+  <id>menautkan coreshift ke</id>
+  <zh>已将 coreshift 链接到</zh>
+  <ar>تم ربط coreshift إلى</ar>
+  <ja>coreshift をリンクしました：</ja>
+  <es>coreshift enlazado en</es>
+  <hi>coreshift को लिंक किया गया</hi>
+  <pt>coreshift vinculado em</pt>
+  <ru>создана ссылка coreshift в</ru>
+  <de>coreshift verlinkt nach</de>
+</section>
+
+<section id="log_starting_daemon">
+  <en>starting coreshift daemon</en>
+  <id>memulai daemon coreshift</id>
+  <zh>启动 coreshift 守护进程</zh>
+  <ar>بدء خدمة coreshift</ar>
+  <ja>coreshift デーモンを起動中</ja>
+  <es>iniciando demonio coreshift</es>
+  <hi>coreshift डेमन प्रारंभ किया जा रहा है</hi>
+  <pt>iniciando daemon coreshift</pt>
+  <ru>запуск демона coreshift</ru>
+  <de>coreshift-Daemon wird gestartet</de>
+</section>
+
+<section id="log_daemon_pid">
+  <en>coreshift daemon pid=</en>
+  <id>pid daemon coreshift=</id>
+  <zh>coreshift 守护进程 pid=</zh>
+  <ar>معرّف عملية خدمة coreshift=</ar>
+  <ja>coreshift デーモン PID=</ja>
+  <es>pid del demonio coreshift=</es>
+  <hi>coreshift डेमन pid=</hi>
+  <pt>pid do daemon coreshift=</pt>
+  <ru>pid демона coreshift=</ru>
+  <de>coreshift-Daemon PID=</de>
+</section>
+
+<section id="log_services_ready">
+  <en>core policy services launched</en>
+  <id>layanan kebijakan inti telah dijalankan</id>
+  <zh>核心策略服务已启动</zh>
+  <ar>تم تشغيل خدمات سياسة النواة</ar>
+  <ja>コアポリシーサービスが起動しました</ja>
+  <es>servicios de política central iniciados</es>
+  <hi>कोर पॉलिसी सेवाएँ प्रारंभ हो गईं</hi>
+  <pt>serviços de política central iniciados</pt>
+  <ru>службы core policy запущены</ru>
+  <de>Core-Policy-Dienste gestartet</de>
+</section>
+
+  <!-- Header -->
+
+  <section id="status_title">
+    <en>CorePolicy Status</en>
+    <id>Status CorePolicy</id>
+    <zh>CorePolicy 状态</zh>
+    <ar>حالة CorePolicy</ar>
+    <ja>CorePolicy ステータス</ja>
+    <es>Estado de CorePolicy</es>
+    <hi>CorePolicy स्थिति</hi>
+    <pt>Status do CorePolicy</pt>
+    <ru>Состояние CorePolicy</ru>
+    <de>CorePolicy-Status</de>
+  </section>
+
+  <section id="mode_label">
+    <en>MODE:</en>
+    <id>MODE:</id>
+    <zh>模式：</zh>
+    <ar>الوضع:</ar>
+    <ja>モード：</ja>
+    <es>MODO:</es>
+    <hi>मोड:</hi>
+    <pt>MODO:</pt>
+    <ru>РЕЖИМ:</ru>
+    <de>MODUS:</de>
+  </section>
+
+  <section id="mode_root">
+    <en>root</en>
+    <id>root</id>
+    <zh>root</zh>
+    <ar>root</ar>
+    <ja>root</ja>
+    <es>root</es>
+    <hi>root</hi>
+    <pt>root</pt>
+    <ru>root</ru>
+    <de>root</de>
+  </section>
+
+  <section id="mode_shell">
+    <en>shell</en>
+    <id>shell</id>
+    <zh>shell</zh>
+    <ar>shell</ar>
+    <ja>shell</ja>
+    <es>shell</es>
+    <hi>shell</hi>
+    <pt>shell</pt>
+    <ru>shell</ru>
+    <de>shell</de>
+  </section>
+
+  <!-- Binaries -->
+
+  <section id="binaries_label">
+    <en>Binaries:</en>
+    <id>Biner:</id>
+    <zh>二进制文件：</zh>
+    <ar>الملفات التنفيذية:</ar>
+    <ja>バイナリ：</ja>
+    <es>Binarios:</es>
+    <hi>बाइनरी:</hi>
+    <pt>Binários:</pt>
+    <ru>Бинарные файлы:</ru>
+    <de>Binärdateien:</de>
+  </section>
+
+  <section id="binary_present">
+    <en>coreshift : present</en>
+    <id>coreshift : tersedia</id>
+    <zh>coreshift：存在</zh>
+    <ar>coreshift : موجود</ar>
+    <ja>coreshift : 存在</ja>
+    <es>coreshift : presente</es>
+    <hi>coreshift : मौजूद</hi>
+    <pt>coreshift : presente</pt>
+    <ru>coreshift : присутствует</ru>
+    <de>coreshift : vorhanden</de>
+  </section>
+
+  <section id="binary_missing">
+    <en>coreshift : missing</en>
+    <id>coreshift : tidak ada</id>
+    <zh>coreshift：缺失</zh>
+    <ar>coreshift : مفقود</ar>
+    <ja>coreshift : 不存在</ja>
+    <es>coreshift : ausente</es>
+    <hi>coreshift : अनुपस्थित</hi>
+    <pt>coreshift : ausente</pt>
+    <ru>coreshift : отсутствует</ru>
+    <de>coreshift : fehlt</de>
+  </section>
+
+  <!-- Process / daemon -->
+
+  <section id="processes_label">
+    <en>Processes:</en>
+    <id>Proses:</id>
+    <zh>进程：</zh>
+    <ar>العمليات:</ar>
+    <ja>プロセス：</ja>
+    <es>Procesos:</es>
+    <hi>प्रोसेस:</hi>
+    <pt>Processos:</pt>
+    <ru>Процессы:</ru>
+    <de>Prozesse:</de>
+  </section>
+
+  <section id="daemon_running">
+    <en>coreshift daemon : running</en>
+    <id>daemon coreshift : berjalan</id>
+    <zh>coreshift 守护进程：运行中</zh>
+    <ar>خدمة coreshift : قيد التشغيل</ar>
+    <ja>coreshift デーモン：実行中</ja>
+    <es>demonio coreshift : en ejecución</es>
+    <hi>coreshift डेमन : चल रहा है</hi>
+    <pt>daemon coreshift : em execução</pt>
+    <ru>демон coreshift : запущен</ru>
+    <de>coreshift-Daemon : läuft</de>
+  </section>
+
+  <section id="daemon_not_running">
+    <en>coreshift daemon : not running</en>
+    <id>daemon coreshift : tidak berjalan</id>
+    <zh>coreshift 守护进程：未运行</zh>
+    <ar>خدمة coreshift : غير قيد التشغيل</ar>
+    <ja>coreshift デーモン：停止中</ja>
+    <es>demonio coreshift : detenido</es>
+    <hi>coreshift डेमन : बंद है</hi>
+    <pt>daemon coreshift : parado</pt>
+    <ru>демон coreshift : не запущен</ru>
+    <de>coreshift-Daemon : nicht aktiv</de>
+  </section>
+
+  <section id="attempt_recovery">
+    <en>attempting recovery...</en>
+    <id>mencoba pemulihan...</id>
+    <zh>尝试恢复...</zh>
+    <ar>محاولة الاستعادة...</ar>
+    <ja>復旧を試行中...</ja>
+    <es>intentando recuperación...</es>
+    <hi>रिकवरी का प्रयास...</hi>
+    <pt>tentando recuperação...</pt>
+    <ru>попытка восстановления...</ru>
+    <de>Wiederherstellung wird versucht...</de>
+  </section>
+
+  <section id="service_spawned">
+    <en>service spawned</en>
+    <id>layanan dijalankan</id>
+    <zh>服务已启动</zh>
+    <ar>تم تشغيل الخدمة</ar>
+    <ja>サービスを起動しました</ja>
+    <es>servicio iniciado</es>
+    <hi>सेवा प्रारंभ की गई</hi>
+    <pt>serviço iniciado</pt>
+    <ru>служба запущена</ru>
+    <de>Dienst gestartet</de>
+  </section>
+
+  <!-- Dumps -->
+
+  <section id="dump_dynamic">
+    <en>Dynamic list</en>
+    <id>Daftar dinamis</id>
+    <zh>动态列表</zh>
+    <ar>قائمة ديناميكية</ar>
+    <ja>動的リスト</ja>
+    <es>Lista dinámica</es>
+    <hi>डायनामिक सूची</hi>
+    <pt>Lista dinâmica</pt>
+    <ru>Динамический список</ru>
+    <de>Dynamische Liste</de>
+  </section>
+
+  <section id="dump_static">
+    <en>Static list</en>
+    <id>Daftar statis</id>
+    <zh>静态列表</zh>
+    <ar>قائمة ثابتة</ar>
+    <ja>静的リスト</ja>
+    <es>Lista estática</es>
+    <hi>स्टैटिक सूची</hi>
+    <pt>Lista estática</pt>
+    <ru>Статический список</ru>
+    <de>Statische Liste</de>
+  </section>
+
+  <section id="missing">
+    <en>(missing)</en>
+    <id>(tidak ada)</id>
+    <zh>(缺失)</zh>
+    <ar>(غير موجود)</ar>
+    <ja>(なし)</ja>
+    <es>(ausente)</es>
+    <hi>(अनुपस्थित)</hi>
+    <pt>(ausente)</pt>
+    <ru>(отсутствует)</ru>
+    <de>(fehlt)</de>
+  </section>
+
+  <!-- Logs -->
+
+  <section id="service_log">
+    <en>Service log:</en>
+    <id>Log layanan:</id>
+    <zh>服务日志：</zh>
+    <ar>سجل الخدمة:</ar>
+    <ja>サービスログ：</ja>
+    <es>Registro del servicio:</es>
+    <hi>सेवा लॉग:</hi>
+    <pt>Log do serviço:</pt>
+    <ru>Журнал службы:</ru>
+    <de>Service-Protokoll:</de>
+  </section>
+
+  <section id="no_log">
+    <en>(no log)</en>
+    <id>(tidak ada log)</id>
+    <zh>(无日志)</zh>
+    <ar>(لا يوجد سجل)</ar>
+    <ja>(ログなし)</ja>
+    <es>(sin registro)</es>
+    <hi>(कोई लॉग नहीं)</hi>
+    <pt>(sem log)</pt>
+    <ru>(нет журнала)</ru>
+    <de>(kein Protokoll)</de>
+  </section>
+
+ <section id="uninstall_start">
+    <en>[CorePolicy] Uninstall: stopping daemon and cleaning symlinks</en>
+    <id>[CorePolicy] Uninstall: menghentikan daemon dan membersihkan symlink</id>
+    <zh>[CorePolicy] 卸载：停止守护进程并清理符号链接</zh>
+    <ar>[CorePolicy] إلغاء التثبيت: إيقاف الخدمة وتنظيف الروابط</ar>
+    <ja>[CorePolicy] アンインストール：デーモン停止とシンボリックリンク削除</ja>
+    <es>[CorePolicy] Desinstalar: deteniendo demonio y limpiando enlaces</es>
+    <hi>[CorePolicy] अनइंस्टॉल: डेमन रोकना और सिमलिंक साफ़ करना</hi>
+    <pt>[CorePolicy] Desinstalação: parando daemon e limpando symlinks</pt>
+    <ru>[CorePolicy] Удаление: остановка демона и очистка ссылок</ru>
+    <de>[CorePolicy] Deinstallation: Daemon stoppen und Symlinks entfernen</de>
+  </section>
+
+  <section id="daemon_stopped">
+    <en>[CorePolicy] coreshift daemon stopped</en>
+    <id>[CorePolicy] daemon coreshift dihentikan</id>
+    <zh>[CorePolicy] coreshift 守护进程已停止</zh>
+    <ar>[CorePolicy] تم إيقاف خدمة coreshift</ar>
+    <ja>[CorePolicy] coreshift デーモンを停止しました</ja>
+    <es>[CorePolicy] demonio coreshift detenido</es>
+    <hi>[CorePolicy] coreshift डेमन बंद किया गया</hi>
+    <pt>[CorePolicy] daemon coreshift parado</pt>
+    <ru>[CorePolicy] демон coreshift остановлен</ru>
+    <de>[CorePolicy] coreshift-Daemon gestoppt</de>
+  </section>
+
+  <section id="removed_coreshift">
+    <en>[CorePolicy] removed %s/coreshift</en>
+    <id>[CorePolicy] menghapus %s/coreshift</id>
+    <zh>[CorePolicy] 已移除 %s/coreshift</zh>
+    <ar>[CorePolicy] تمت إزالة %s/coreshift</ar>
+    <ja>[CorePolicy] %s/coreshift を削除しました</ja>
+    <es>[CorePolicy] eliminado %s/coreshift</es>
+    <hi>[CorePolicy] %s/coreshift हटाया गया</hi>
+    <pt>[CorePolicy] removido %s/coreshift</pt>
+    <ru>[CorePolicy] удалён %s/coreshift</ru>
+    <de>[CorePolicy] %s/coreshift entfernt</de>
+  </section>
+
+  <section id="removed_cli_xml">
+    <en>[CorePolicy] removed %s/cli.xml</en>
+    <id>[CorePolicy] menghapus %s/cli.xml</id>
+    <zh>[CorePolicy] 已移除 %s/cli.xml</zh>
+    <ar>[CorePolicy] تمت إزالة %s/cli.xml</ar>
+    <ja>[CorePolicy] %s/cli.xml を削除しました</ja>
+    <es>[CorePolicy] eliminado %s/cli.xml</es>
+    <hi>[CorePolicy] %s/cli.xml हटाया गया</hi>
+    <pt>[CorePolicy] removido %s/cli.xml</pt>
+    <ru>[CorePolicy] удалён %s/cli.xml</ru>
+    <de>[CorePolicy] %s/cli.xml entfernt</de>
+  </section>
+
+  <section id="uninstall_complete">
+    <en>[CorePolicy] Uninstall complete</en>
+    <id>[CorePolicy] Uninstall selesai</id>
+    <zh>[CorePolicy] 卸载完成</zh>
+    <ar>[CorePolicy] اكتمل إلغاء التثبيت</ar>
+    <ja>[CorePolicy] アンインストール完了</ja>
+    <es>[CorePolicy] Desinstalación completa</es>
+    <hi>[CorePolicy] अनइंस्टॉल पूर्ण</hi>
+    <pt>[CorePolicy] Desinstalação concluída</pt>
+    <ru>[CorePolicy] Удаление завершено</ru>
+    <de>[CorePolicy] Deinstallation abgeschlossen</de>
+  </section>
+
+
+</corepolicy_log>
