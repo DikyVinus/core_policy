@@ -1,5 +1,5 @@
 #!/system/bin/sh
-set -e
+set -eu
 
 MODDIR="${0%/*}"
 LOG="$MODDIR/localized.log"
@@ -24,14 +24,24 @@ xml_get() {
 
     [ -f "$XML" ] || { echo "$fallback"; return; }
 
-    sed -n "/<section id=\"$id\">/,/<\/section>/p" "$XML" |
-        sed -n "s:.*<$LANG>\(.*\)</$LANG>.*:\1:p" |
-        head -n1 |
-        sed 's/&lt;/</g; s/&gt;/>/g; s/&amp;/\&/g' |
-        {
-            read -r line || true
-            echo "${line:-$fallback}"
+    awk -v id="$id" -v lang="$LANG" '
+        $0 ~ "<section id=\""id"\">" { f=1; next }
+        f && /<\/section>/ { exit }
+        f && $0 ~ "<"lang">" {
+            sub(".*<"lang">","")
+            sub("</.*","")
+            print
+            exit
         }
+        f && $0 ~ "<en>" {
+            sub(".*<en>","")
+            sub("</.*","")
+            print
+        }
+    ' "$XML" | head -n1 | sed 's/&lt;/</g; s/&gt;/>/g; s/&amp;/\&/g' | {
+        read -r line || true
+        echo "${line:-$fallback}"
+    }
 }
 
 MSG_VERIFY="$(xml_get verify_hash "[*] verifying sha256")"
@@ -42,18 +52,20 @@ DESC="$(xml_get mod_description "")"
 
 echo "$MSG_VERIFY"
 
-EXPECTED="$(cut -d' ' -f1 "$HASH")"
-ACTUAL="$(sha256sum "$FILE" | cut -d' ' -f1)"
+cd "$(dirname "$FILE")"
+
+EXPECTED="$(awk '{print $1}' "$(basename "$HASH")")"
+ACTUAL="$(sha256sum "$(basename "$FILE")" | awk '{print $1}')"
+
 [ "$EXPECTED" = "$ACTUAL" ]
 
 echo "$MSG_UPDATE"
-ESC_DESC="$(echo "$DESC" | sed 's/[&|]/\\&/g')"
-sed -i "s|^description=.*|description=$ESC_DESC|" "$FILE"
+
+ESC_DESC="$(printf '%s\n' "$DESC" | sed 's/[&|]/\\&/g')"
+sed -i "s|^description=.*|description=$ESC_DESC|" "$(basename "$FILE")"
 
 echo "$MSG_REGEN"
-(
-    cd "$(dirname "$FILE")" || exit 1
-    sha256sum "./$(basename "$FILE")" >"$(basename "$HASH")"
-)
+
+sha256sum "./$(basename "$FILE")" >"./$(basename "$HASH")"
 
 echo "$MSG_DONE"
