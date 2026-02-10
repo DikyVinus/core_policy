@@ -3,7 +3,7 @@ set -e
 
 MODDIR="${0%/*}"
 BIN="$MODDIR/system/bin"
-XML="$BIN/log.xml"
+XML="$MODDIR/log.xml"
 
 LOG="$MODDIR/core_policy.log"
 READY_FLAG="$MODDIR/.runtime_ready"
