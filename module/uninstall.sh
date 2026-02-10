@@ -1,5 +1,5 @@
 #!/system/bin/sh
-set -euo pipefail
+set -e
 
 MODDIR="${0%/*}"
 XML="$MODDIR/log.xml"
@@ -10,35 +10,31 @@ SYS_LANG="$(getprop persist.sys.locale | cut -d- -f1)"
 [ -n "$SYS_LANG" ] || SYS_LANG="$(getprop ro.product.locale | cut -d- -f1)"
 
 case "$SYS_LANG" in
-    en|id|zh|ar|ja|es|hi|pt|ru|de) LANGUAGE="$SYS_LANG" ;;
-    *) LANGUAGE="en" ;;
+    en|id|zh|ar|ja|es|hi|pt|ru|de) LANG="$SYS_LANG" ;;
+    *) LANG="en" ;;
 esac
 
 xml_get() {
     id="$1"
-    awk -v id="$id" -v lang="$LANGUAGE" '
-        $0 ~ "<section id=\""id"\">" { f=1; next }
-        f && $0 ~ "</section>" { exit }
-        f && $0 ~ "<"lang">" {
-            sub(".*<"lang">","")
-            sub("</.*","")
-            print
-            exit
+    fallback="$2"
+
+    [ -f "$XML" ] || { echo "$fallback"; return; }
+
+    sed -n "/<section id=\"$id\">/,/<\/section>/p" "$XML" |
+        sed -n "s:.*<$LANG>\(.*\)</$LANG>.*:\1:p" |
+        head -n1 |
+        sed 's/&lt;/</g; s/&gt;/>/g; s/&amp;/\&/g' |
+        {
+            read -r line || true
+            echo "${line:-$fallback}"
         }
-        f && $0 ~ "<en>" {
-            sub(".*<en>","")
-            sub("</.*","")
-            print
-            exit
-        }
-    ' "$XML"
 }
 
-MSG_START="$(xml_get uninstall_start)"
-MSG_STOP="$(xml_get daemon_stopped)"
-MSG_RM_CS="$(xml_get removed_coreshift)"
-MSG_RM_XML="$(xml_get removed_cli_xml)"
-MSG_DONE="$(xml_get uninstall_complete)"
+MSG_START="$(xml_get uninstall_start   "[CorePolicy] Uninstall: stopping daemon and cleaning symlinks")"
+MSG_STOP="$(xml_get daemon_stopped     "[CorePolicy] coreshift daemon stopped")"
+MSG_RM_CS="$(xml_get removed_coreshift "[CorePolicy] removed %s/coreshift")"
+MSG_RM_XML="$(xml_get removed_cli_xml  "[CorePolicy] removed %s/cli.xml")"
+MSG_DONE="$(xml_get uninstall_complete "[CorePolicy] Uninstall complete")"
 
 ui_print "$MSG_START"
 
