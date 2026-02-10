@@ -133,4 +133,235 @@
   <de>Core-Policy-Dienste gestartet</de>
 </section>
 
+  <!-- Header -->
+
+  <section id="status_title">
+    <en>CorePolicy Status</en>
+    <id>Status CorePolicy</id>
+    <zh>CorePolicy 状态</zh>
+    <ar>حالة CorePolicy</ar>
+    <ja>CorePolicy ステータス</ja>
+    <es>Estado de CorePolicy</es>
+    <hi>CorePolicy स्थिति</hi>
+    <pt>Status do CorePolicy</pt>
+    <ru>Состояние CorePolicy</ru>
+    <de>CorePolicy-Status</de>
+  </section>
+
+  <section id="mode_label">
+    <en>MODE:</en>
+    <id>MODE:</id>
+    <zh>模式：</zh>
+    <ar>الوضع:</ar>
+    <ja>モード：</ja>
+    <es>MODO:</es>
+    <hi>मोड:</hi>
+    <pt>MODO:</pt>
+    <ru>РЕЖИМ:</ru>
+    <de>MODUS:</de>
+  </section>
+
+  <section id="mode_root">
+    <en>root</en>
+    <id>root</id>
+    <zh>root</zh>
+    <ar>root</ar>
+    <ja>root</ja>
+    <es>root</es>
+    <hi>root</hi>
+    <pt>root</pt>
+    <ru>root</ru>
+    <de>root</de>
+  </section>
+
+  <section id="mode_shell">
+    <en>shell</en>
+    <id>shell</id>
+    <zh>shell</zh>
+    <ar>shell</ar>
+    <ja>shell</ja>
+    <es>shell</es>
+    <hi>shell</hi>
+    <pt>shell</pt>
+    <ru>shell</ru>
+    <de>shell</de>
+  </section>
+
+  <!-- Binaries -->
+
+  <section id="binaries_label">
+    <en>Binaries:</en>
+    <id>Biner:</id>
+    <zh>二进制文件：</zh>
+    <ar>الملفات التنفيذية:</ar>
+    <ja>バイナリ：</ja>
+    <es>Binarios:</es>
+    <hi>बाइनरी:</hi>
+    <pt>Binários:</pt>
+    <ru>Бинарные файлы:</ru>
+    <de>Binärdateien:</de>
+  </section>
+
+  <section id="binary_present">
+    <en>coreshift : present</en>
+    <id>coreshift : tersedia</id>
+    <zh>coreshift：存在</zh>
+    <ar>coreshift : موجود</ar>
+    <ja>coreshift : 存在</ja>
+    <es>coreshift : presente</es>
+    <hi>coreshift : मौजूद</hi>
+    <pt>coreshift : presente</pt>
+    <ru>coreshift : присутствует</ru>
+    <de>coreshift : vorhanden</de>
+  </section>
+
+  <section id="binary_missing">
+    <en>coreshift : missing</en>
+    <id>coreshift : tidak ada</id>
+    <zh>coreshift：缺失</zh>
+    <ar>coreshift : مفقود</ar>
+    <ja>coreshift : 不存在</ja>
+    <es>coreshift : ausente</es>
+    <hi>coreshift : अनुपस्थित</hi>
+    <pt>coreshift : ausente</pt>
+    <ru>coreshift : отсутствует</ru>
+    <de>coreshift : fehlt</de>
+  </section>
+
+  <!-- Process / daemon -->
+
+  <section id="processes_label">
+    <en>Processes:</en>
+    <id>Proses:</id>
+    <zh>进程：</zh>
+    <ar>العمليات:</ar>
+    <ja>プロセス：</ja>
+    <es>Procesos:</es>
+    <hi>प्रोसेस:</hi>
+    <pt>Processos:</pt>
+    <ru>Процессы:</ru>
+    <de>Prozesse:</de>
+  </section>
+
+  <section id="daemon_running">
+    <en>coreshift daemon : running</en>
+    <id>daemon coreshift : berjalan</id>
+    <zh>coreshift 守护进程：运行中</zh>
+    <ar>خدمة coreshift : قيد التشغيل</ar>
+    <ja>coreshift デーモン：実行中</ja>
+    <es>demonio coreshift : en ejecución</es>
+    <hi>coreshift डेमन : चल रहा है</hi>
+    <pt>daemon coreshift : em execução</pt>
+    <ru>демон coreshift : запущен</ru>
+    <de>coreshift-Daemon : läuft</de>
+  </section>
+
+  <section id="daemon_not_running">
+    <en>coreshift daemon : not running</en>
+    <id>daemon coreshift : tidak berjalan</id>
+    <zh>coreshift 守护进程：未运行</zh>
+    <ar>خدمة coreshift : غير قيد التشغيل</ar>
+    <ja>coreshift デーモン：停止中</ja>
+    <es>demonio coreshift : detenido</es>
+    <hi>coreshift डेमन : बंद है</hi>
+    <pt>daemon coreshift : parado</pt>
+    <ru>демон coreshift : не запущен</ru>
+    <de>coreshift-Daemon : nicht aktiv</de>
+  </section>
+
+  <section id="attempt_recovery">
+    <en>attempting recovery...</en>
+    <id>mencoba pemulihan...</id>
+    <zh>尝试恢复...</zh>
+    <ar>محاولة الاستعادة...</ar>
+    <ja>復旧を試行中...</ja>
+    <es>intentando recuperación...</es>
+    <hi>रिकवरी का प्रयास...</hi>
+    <pt>tentando recuperação...</pt>
+    <ru>попытка восстановления...</ru>
+    <de>Wiederherstellung wird versucht...</de>
+  </section>
+
+  <section id="service_spawned">
+    <en>service spawned</en>
+    <id>layanan dijalankan</id>
+    <zh>服务已启动</zh>
+    <ar>تم تشغيل الخدمة</ar>
+    <ja>サービスを起動しました</ja>
+    <es>servicio iniciado</es>
+    <hi>सेवा प्रारंभ की गई</hi>
+    <pt>serviço iniciado</pt>
+    <ru>служба запущена</ru>
+    <de>Dienst gestartet</de>
+  </section>
+
+  <!-- Dumps -->
+
+  <section id="dump_dynamic">
+    <en>Dynamic list</en>
+    <id>Daftar dinamis</id>
+    <zh>动态列表</zh>
+    <ar>قائمة ديناميكية</ar>
+    <ja>動的リスト</ja>
+    <es>Lista dinámica</es>
+    <hi>डायनामिक सूची</hi>
+    <pt>Lista dinâmica</pt>
+    <ru>Динамический список</ru>
+    <de>Dynamische Liste</de>
+  </section>
+
+  <section id="dump_static">
+    <en>Static list</en>
+    <id>Daftar statis</id>
+    <zh>静态列表</zh>
+    <ar>قائمة ثابتة</ar>
+    <ja>静的リスト</ja>
+    <es>Lista estática</es>
+    <hi>स्टैटिक सूची</hi>
+    <pt>Lista estática</pt>
+    <ru>Статический список</ru>
+    <de>Statische Liste</de>
+  </section>
+
+  <section id="missing">
+    <en>(missing)</en>
+    <id>(tidak ada)</id>
+    <zh>(缺失)</zh>
+    <ar>(غير موجود)</ar>
+    <ja>(なし)</ja>
+    <es>(ausente)</es>
+    <hi>(अनुपस्थित)</hi>
+    <pt>(ausente)</pt>
+    <ru>(отсутствует)</ru>
+    <de>(fehlt)</de>
+  </section>
+
+  <!-- Logs -->
+
+  <section id="service_log">
+    <en>Service log:</en>
+    <id>Log layanan:</id>
+    <zh>服务日志：</zh>
+    <ar>سجل الخدمة:</ar>
+    <ja>サービスログ：</ja>
+    <es>Registro del servicio:</es>
+    <hi>सेवा लॉग:</hi>
+    <pt>Log do serviço:</pt>
+    <ru>Журнал службы:</ru>
+    <de>Service-Protokoll:</de>
+  </section>
+
+  <section id="no_log">
+    <en>(no log)</en>
+    <id>(tidak ada log)</id>
+    <zh>(无日志)</zh>
+    <ar>(لا يوجد سجل)</ar>
+    <ja>(ログなし)</ja>
+    <es>(sin registro)</es>
+    <hi>(कोई लॉग नहीं)</hi>
+    <pt>(sem log)</pt>
+    <ru>(нет журнала)</ru>
+    <de>(kein Protokoll)</de>
+  </section>
+
  <corepolicy_log>
