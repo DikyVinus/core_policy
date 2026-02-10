@@ -5,21 +5,21 @@ MODDIR="${0%/*}"
 XML="$MODDIR/log.xml"
 FILE="$MODDIR/module.prop"
 HASH="$FILE.sha256"
-
+exec >$MODDIR/localized.log 2>&1
 xml_get() {
     id="$1"
     lang="$2"
     fallback="$3"
 
     sec="$(sed -n "/<section id=\"$id\">/,/<\/section>/p" "$XML")" || true
-    [ -z "$sec" ] && { printf '%s\n' "$fallback"; return; }
+    [ -z "$sec" ] && { echo "$fallback"; return; }
 
-    val="$(printf '%s\n' "$sec" | sed -n "s:.*<$lang>\\(.*\\)</$lang>.*:\\1:p")"
+    val="$(echo "$sec" | sed -n "s:.*<$lang>\\(.*\\)</$lang>.*:\\1:p")"
     if [ -z "$val" ]; then
-        val="$(printf '%s\n' "$sec" | sed -n "s:.*<en>\\(.*\\)</en>.*:\\1:p")"
+        val="$(echo "$sec" | sed -n "s:.*<en>\\(.*\\)</en>.*:\\1:p")"
     fi
 
-    printf '%s\n' "${val:-$fallback}"
+    echo "${val:-$fallback}"
 }
 
 LANG_CODE="${1:-${LANG:-en}}"
