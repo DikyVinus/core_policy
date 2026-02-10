@@ -17,9 +17,15 @@ esac
 is_root() { [ "$UID" -eq 0 ] || [ -w /data/adb ]; }
 
 axeron_base() {
-    echo "$PATH" | tr ':' '\n' |
-        sed -n 's|\(.*\/axeron[^/]*\).*|\1|p' |
-        head -n1
+    IFS=:
+for p in $PATH; do
+    case "$p" in
+        */axeron[^/]*)
+            printf '%s\n' "${p%%/axeron*}/axeron"
+            break
+            ;;
+    esac
+done
 }
 
 AXERON_BASE="$(axeron_base)"
