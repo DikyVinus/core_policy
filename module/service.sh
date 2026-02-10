@@ -10,6 +10,7 @@ READY_FLAG="$MODDIR/.runtime_ready"
 CORESHIFT_BIN="$BIN/coreshift"
 
 SYS_LANG="$(getprop persist.sys.locale | cut -d- -f1)"
+SYS_LANG="$(getprop persist.sys.locale | cut -d- -f1)"
 [ -n "$SYS_LANG" ] || SYS_LANG="$(getprop ro.product.locale | cut -d- -f1)"
 
 case "$SYS_LANG" in
@@ -23,25 +24,14 @@ xml_get() {
 
     [ -f "$XML" ] || { echo "$fallback"; return; }
 
-    awk -v id="$id" -v lang="$LANG" '
-        $0 ~ "<section id=\""id"\">" { f=1; next }
-        f && /<\/section>/ { exit }
-        f && $0 ~ "<"lang">" {
-            sub(".*<"lang">","")
-            sub("</.*","")
-            print
-            exit
+    sed -n "/<section id=\"$id\">/,/<\/section>/p" "$XML" |
+        sed -n "s:.*<$LANG>\(.*\)</$LANG>.*:\1:p" |
+        head -n1 |
+        sed 's/&lt;/</g; s/&gt;/>/g; s/&amp;/\&/g' |
+        {
+            read -r line || true
+            echo "${line:-$fallback}"
         }
-        f && $0 ~ "<en>" {
-            sub(".*<en>","")
-            sub("</.*","")
-            print
-            exit
-        }
-    ' "$XML" | sed 's/&lt;/</g; s/&gt;/>/g; s/&amp;/\&/g' | {
-        read -r line || true
-        echo "${line:-$fallback}"
-    }
 }
 
 log() {
