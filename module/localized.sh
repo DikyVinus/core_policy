@@ -1,5 +1,5 @@
 #!/system/bin/sh
-set -eu
+set -e
 
 MODDIR="${0%/*}"
 LOG="$MODDIR/localized.log"
@@ -14,50 +14,35 @@ SYS_LANG="$(getprop persist.sys.locale | cut -d- -f1)"
 [ -n "$SYS_LANG" ] || SYS_LANG="$(getprop ro.product.locale | cut -d- -f1)"
 
 case "$SYS_LANG" in
-    en|id|zh|ar|ja|es|hi|pt|ru|de)
-        LANG_CODE="$SYS_LANG"
-        ;;
-    *)
-        LANG_CODE="en"
-        ;;
+    en|id|zh|ar|ja|es|hi|pt|ru|de) LANG="$SYS_LANG" ;;
+    *) LANG="en" ;;
 esac
 
 xml_get() {
     id="$1"
-    lang="$2"
-    fallback="$3"
+    fallback="$2"
 
     [ -f "$XML" ] || { echo "$fallback"; return; }
 
-    awk -v id="$id" -v lang="$lang" '
-        $0 ~ "<section id=\""id"\">" { f=1; next }
-        f && /<\/section>/ { exit }
-        f && $0 ~ "<"lang">" {
-            sub(".*<"lang">","")
-            sub("</.*","")
-            print
-            exit
+    sed -n "/<section id=\"$id\">/,/<\/section>/p" "$XML" |
+        sed -n "s:.*<$LANG>\(.*\)</$LANG>.*:\1:p" |
+        head -n1 |
+        sed 's/&lt;/</g; s/&gt;/>/g; s/&amp;/\&/g' |
+        {
+            read -r line || true
+            echo "${line:-$fallback}"
         }
-        f && $0 ~ "<en>" {
-            sub(".*<en>","")
-            sub("</.*","")
-            print
-        }
-    ' "$XML" | head -n1 | sed 's/&lt;/</g; s/&gt;/>/g; s/&amp;/\&/g' | {
-        read -r line || true
-        echo "${line:-$fallback}"
-    }
 }
 
-MSG_VERIFY="$(xml_get verify_hash "$LANG_CODE" "[*] verifying sha256")"
-MSG_UPDATE="$(xml_get update_desc "$LANG_CODE" "[*] updating description")"
-MSG_REGEN="$(xml_get regen_hash "$LANG_CODE" "[*] regenerating sha256")"
-MSG_DONE="$(xml_get done "$LANG_CODE" "[✓] done")"
-DESC="$(xml_get mod_description "$LANG_CODE" "")"
+MSG_VERIFY="$(xml_get verify_hash "[*] verifying sha256")"
+MSG_UPDATE="$(xml_get update_desc "[*] updating description")"
+MSG_REGEN="$(xml_get regen_hash "[*] regenerating sha256")"
+MSG_DONE="$(xml_get done "[✓] done")"
+DESC="$(xml_get mod_description "")"
 
 echo "$MSG_VERIFY"
 (
-    cd "$(dirname "$FILE")"
+    cd "$(dirname "$FILE")" || exit 1
     sha256sum -c "$(basename "$HASH")"
 )
 
@@ -65,10 +50,9 @@ echo "$MSG_UPDATE"
 ESC_DESC="$(printf '%s\n' "$DESC" | sed 's/[&|]/\\&/g')"
 sed -i "s|^description=.*|description=$ESC_DESC|" "$FILE"
 
-
 echo "$MSG_REGEN"
 (
-    cd "$(dirname "$FILE")"
+    cd "$(dirname "$FILE")" || exit 1
     sha256sum "$(basename "$FILE")" >"$(basename "$HASH")"
 )
 
