@@ -51,9 +51,8 @@ ESC_DESC="$(printf '%s\n' "$DESC" | sed 's/[&|]/\\&/g')"
 sed -i "s|^description=.*|description=$ESC_DESC|" "$FILE"
 
 echo "$MSG_REGEN"
-(
-    cd "$(dirname "$FILE")" || exit 1
-    sha256sum "$(basename "$FILE")" >"$(basename "$HASH")"
-)
+EXPECTED="$(cut -d' ' -f1 "$HASH")"
+ACTUAL="$(sha256sum "$FILE" | cut -d' ' -f1)"
+[ "$EXPECTED" = "$ACTUAL" ]
 
 echo "$MSG_DONE"
