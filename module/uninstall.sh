@@ -6,36 +6,42 @@ XML="$MODDIR/log.xml"
 
 command -v ui_print >/dev/null 2>&1 || ui_print() { echo "$@"; }
 
+SYS_LANG="$(getprop persist.sys.locale | cut -d- -f1)"
+[ -n "$SYS_LANG" ] || SYS_LANG="$(getprop ro.product.locale | cut -d- -f1)"
+
+case "$SYS_LANG" in
+    en|id|zh|ar|ja|es|hi|pt|ru|de) LANGUAGE="$SYS_LANG" ;;
+    *) LANGUAGE="en" ;;
+esac
+
 xml_get() {
     id="$1"
-    lang="$2"
-    fallback="$3"
-
-    sec="$(sed -n "/<section id=\"$id\">/,/<\/section>/p" "$XML")" || true
-    [ -z "$sec" ] && { echo "$fallback"; return; }
-
-    val="$(echo "$sec" | sed -n "s:.*<$lang>\\(.*\\)</$lang>.*:\\1:p")"
-    if [ -z "$val" ]; then
-        val="$(echo "$sec" | sed -n "s:.*<en>\\(.*\\)</en>.*:\\1:p")"
-    fi
-
-    echo "${val:-$fallback}"
+    awk -v id="$id" -v lang="$LANGUAGE" '
+        $0 ~ "<section id=\""id"\">" { f=1; next }
+        f && $0 ~ "</section>" { exit }
+        f && $0 ~ "<"lang">" {
+            sub(".*<"lang">","")
+            sub("</.*","")
+            print
+            exit
+        }
+        f && $0 ~ "<en>" {
+            sub(".*<en>","")
+            sub("</.*","")
+            print
+            exit
+        }
+    ' "$XML"
 }
 
-# language resolution
-LANG_CODE="${1:-${LANG:-en}}"
-LANG_CODE="${LANG_CODE%%_*}"
-[ "${#LANG_CODE}" -ne 2 ] && LANG_CODE="en"
-
-MSG_START="$(xml_get uninstall_start   "$LANG_CODE" "[CorePolicy] Uninstall: stopping daemon and cleaning symlinks")"
-MSG_STOP="$(xml_get daemon_stopped     "$LANG_CODE" "[CorePolicy] coreshift daemon stopped")"
-MSG_RM_CS="$(xml_get removed_coreshift "$LANG_CODE" "[CorePolicy] removed %s/coreshift")"
-MSG_RM_XML="$(xml_get removed_cli_xml  "$LANG_CODE" "[CorePolicy] removed %s/cli.xml")"
-MSG_DONE="$(xml_get uninstall_complete "$LANG_CODE" "[CorePolicy] Uninstall complete")"
+MSG_START="$(xml_get uninstall_start)"
+MSG_STOP="$(xml_get daemon_stopped)"
+MSG_RM_CS="$(xml_get removed_coreshift)"
+MSG_RM_XML="$(xml_get removed_cli_xml)"
+MSG_DONE="$(xml_get uninstall_complete)"
 
 ui_print "$MSG_START"
 
-# Kill running coreshift daemons
 if pidof coreshift >/dev/null 2>&1; then
     for pid in $(pidof coreshift); do
         kill "$pid" 2>/dev/null || true
@@ -47,7 +53,6 @@ if pidof coreshift >/dev/null 2>&1; then
     ui_print "$MSG_STOP"
 fi
 
-# Remove only symlinks created during install
 for P in ${PATH//:/ }; do
     case "$P" in
         /data/*)
