@@ -3,7 +3,7 @@ set -e
 
 MODDIR="${0%/*}"
 BIN="$MODDIR/system/bin"
-LOG="$MODDIR/core_policy.log"
+STATUS_LOG="$MODDIR/core_policy.log"
 LOCAL_LOG="$MODDIR/localized.log"
 XML="$MODDIR/log.xml"
 
@@ -38,7 +38,10 @@ xml_get() {
         }
 }
 
-TITLE="$(xml_get status_title "CorePolicy Status")"
+STATUS_TITLE="$(xml_get status_log "System Status")"
+LOCAL_TITLE="$(xml_get localized_log "Localization Log")"
+SERVICE_TITLE="$(xml_get service_log "Service Activity Log")"
+
 MODE_L="$(xml_get mode_label "MODE:")"
 MODE_ROOT="$(xml_get mode_root "root")"
 MODE_SHELL="$(xml_get mode_shell "shell")"
@@ -57,18 +60,9 @@ DYN_L="$(xml_get dump_dynamic "Dynamic list")"
 STA_L="$(xml_get dump_static "Static list")"
 MISSING="$(xml_get missing "(missing)")"
 
-LOG_L="$(xml_get service_log "Service log:")"
 NO_LOG="$(xml_get no_log "(no log)")"
 
-p "localized.log:"
-[ -f "$LOCAL_LOG" ] && cat "$LOCAL_LOG" || p "$NO_LOG"
-
-p
-p "$LOG_L"
-[ -f "$LOG" ] && cat "$LOG" || p "$NO_LOG"
-
-p
-p "$TITLE"
+p "$STATUS_TITLE"
 p
 
 p "$MODE_L"
@@ -107,3 +101,11 @@ dump() {
 
 dump "$DYN_L" "$BIN/core_preload.core"
 dump "$STA_L" "$BIN/core_preload_static.core"
+
+p
+p "$LOCAL_TITLE"
+[ -f "$LOCAL_LOG" ] && cat "$LOCAL_LOG" || p "$NO_LOG"
+
+p
+p "$SERVICE_TITLE"
+[ -f "$STATUS_LOG" ] && cat "$STATUS_LOG" || p "$NO_LOG"
