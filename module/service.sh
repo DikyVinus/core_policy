@@ -10,7 +10,6 @@ READY_FLAG="$MODDIR/.runtime_ready"
 CORESHIFT_BIN="$BIN/coreshift"
 
 SYS_LANG="$(getprop persist.sys.locale | cut -d- -f1)"
-SYS_LANG="$(getprop persist.sys.locale | cut -d- -f1)"
 [ -n "$SYS_LANG" ] || SYS_LANG="$(getprop ro.product.locale | cut -d- -f1)"
 
 case "$SYS_LANG" in
