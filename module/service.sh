@@ -8,10 +8,17 @@ LOG="$MODDIR/core_policy.log"
 READY_FLAG="$MODDIR/.runtime_ready"
 CORESHIFT_BIN="$BIN/coreshift"
 
+SYS_LANG="$(getprop persist.sys.locale | cut -d- -f1)"
+[ -n "$SYS_LANG" ] || SYS_LANG="$(getprop ro.product.locale | cut -d- -f1)"
+
+case "$SYS_LANG" in
+    en|id|zh|ar|ja|es|hi|pt|ru|de) LANGUAGE="$SYS_LANG" ;;
+    *) LANGUAGE="en" ;;
+esac
+
 xml_get() {
     id="$1"
-    lang="${LANGUAGE:-en}"
-    awk -v id="$id" -v lang="$lang" '
+    awk -v id="$id" -v lang="$LANGUAGE" '
         $0 ~ "<section id=\""id"\">" { f=1; next }
         f && $0 ~ "</section>" { exit }
         f && $0 ~ "<"lang">" {
@@ -24,6 +31,7 @@ xml_get() {
             sub(".*<en>","")
             sub("</.*","")
             print
+            exit
         }
     ' "$XML"
 }
@@ -32,7 +40,6 @@ log() {
     echo "[CorePolicy] $(date '+%Y-%m-%d %H:%M:%S') $*" >>"$LOG"
 }
 
-# wait for system UI
 until pidof com.android.systemui >/dev/null 2>&1; do
     sleep 8
 done
@@ -44,7 +51,6 @@ if ! sh "$MODDIR/localized.sh"; then
     exit 1
 fi
 
-# verification
 if ! sh "$MODDIR/verify.sh"; then
     log "$(xml_get log_verify_fail)"
     exit 1
@@ -54,7 +60,6 @@ if [ ! -f "$READY_FLAG" ]; then
     mkdir -p "$BIN"
 
     ABI="$(getprop ro.product.cpu.abi)"
-
     case "$ABI" in
         arm64-v8a) ARCH=arm64 ;;
         armeabi-v7a|armeabi) ARCH=arm ;;
