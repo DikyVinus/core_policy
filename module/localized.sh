@@ -6,7 +6,8 @@ LOG="$MODDIR/localized.log"
 XML="$MODDIR/log.xml"
 FILE="$MODDIR/module.prop"
 HASH="$FILE.sha256"
-
+GATE="$MODDIR/.localized_done"
+[ -f "$DONE_FLAG" ] && exit 0
 : >"$LOG"
 exec >>"$LOG" 2>&1
 
@@ -58,3 +59,4 @@ echo "$MSG_REGEN"
 sha256sum "./$(basename "$FILE")" >"./$(basename "$HASH")"
 
 echo "$MSG_DONE"
+touch $GATE
