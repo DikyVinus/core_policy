@@ -1,5 +1,5 @@
 #!/system/bin/sh
-set -euo pipefail
+set -e
 
 MODDIR="${0%/*}"
 BIN="$MODDIR/system/bin"
@@ -18,52 +18,56 @@ SYS_LANG="$(getprop persist.sys.locale | cut -d- -f1)"
 [ -n "$SYS_LANG" ] || SYS_LANG="$(getprop ro.product.locale | cut -d- -f1)"
 
 case "$SYS_LANG" in
-    en|id|zh|ar|ja|es|hi|pt|ru|de) LANGUAGE="$SYS_LANG" ;;
-    *) LANGUAGE="en" ;;
+    en|id|zh|ar|ja|es|hi|pt|ru|de) LANG="$SYS_LANG" ;;
+    *) LANG="en" ;;
 esac
 
 xml_get() {
     id="$1"
-    awk -v id="$id" -v lang="$LANGUAGE" '
-        $0 ~ "<section id=\""id"\">" { f=1; next }
-        f && $0 ~ "</section>" { exit }
-        f && $0 ~ "<"lang">" {
-            sub(".*<"lang">","")
-            sub("</.*","")
-            print
-            exit
+    fallback="$2"
+
+    [ -f "$XML" ] || { echo "$fallback"; return; }
+
+    sed -n "/<section id=\"$id\">/,/<\/section>/p" "$XML" |
+        sed -n "s:.*<$LANG>\(.*\)</$LANG>.*:\1:p" |
+        head -n1 |
+        sed 's/&lt;/</g; s/&gt;/>/g; s/&amp;/\&/g' |
+        {
+            read -r line || true
+            echo "${line:-$fallback}"
         }
-        f && $0 ~ "<en>" {
-            sub(".*<en>","")
-            sub("</.*","")
-            print
-            exit
-        }
-    ' "$XML"
 }
 
-TITLE="$(xml_get status_title)"
-MODE_L="$(xml_get mode_label)"
-MODE_ROOT="$(xml_get mode_root)"
-MODE_SHELL="$(xml_get mode_shell)"
+TITLE="$(xml_get status_title "CorePolicy Status")"
+MODE_L="$(xml_get mode_label "MODE:")"
+MODE_ROOT="$(xml_get mode_root "root")"
+MODE_SHELL="$(xml_get mode_shell "shell")"
 
-BIN_L="$(xml_get binaries_label)"
-BIN_OK="$(xml_get binary_present)"
-BIN_MISS="$(xml_get binary_missing)"
+BIN_L="$(xml_get binaries_label "Binaries:")"
+BIN_OK="$(xml_get binary_present "coreshift : present")"
+BIN_MISS="$(xml_get binary_missing "coreshift : missing")"
 
-PROC_L="$(xml_get processes_label)"
-RUNNING="$(xml_get daemon_running)"
-NOT_RUNNING="$(xml_get daemon_not_running)"
-RECOVER="$(xml_get attempt_recovery)"
-SPAWNED="$(xml_get service_spawned)"
+PROC_L="$(xml_get processes_label "Processes:")"
+RUNNING="$(xml_get daemon_running "coreshift daemon : running")"
+NOT_RUNNING="$(xml_get daemon_not_running "coreshift daemon : not running")"
+RECOVER="$(xml_get attempt_recovery "attempting recovery...")"
+SPAWNED="$(xml_get service_spawned "service spawned")"
 
-DYN_L="$(xml_get dump_dynamic)"
-STA_L="$(xml_get dump_static)"
-MISSING="$(xml_get missing)"
+DYN_L="$(xml_get dump_dynamic "Dynamic list")"
+STA_L="$(xml_get dump_static "Static list")"
+MISSING="$(xml_get missing "(missing)")"
 
-LOG_L="$(xml_get service_log)"
-NO_LOG="$(xml_get no_log)"
+LOG_L="$(xml_get service_log "Service log:")"
+NO_LOG="$(xml_get no_log "(no log)")"
 
+p "localized.log:"
+[ -f "$LOCAL_LOG" ] && cat "$LOCAL_LOG" || p "$NO_LOG"
+
+p
+p "$LOG_L"
+[ -f "$LOG" ] && cat "$LOG" || p "$NO_LOG"
+
+p
 p "$TITLE"
 p
 
@@ -73,14 +77,6 @@ p "$MODE_L"
 p
 p "$BIN_L"
 [ -x "$CORESHIFT" ] && p "$BIN_OK" || p "$BIN_MISS"
-
-p
-p "localized.log:"
-[ -f "$LOCAL_LOG" ] && cat "$LOCAL_LOG" || p "$NO_LOG"
-
-p
-p "$LOG_L"
-[ -f "$LOG" ] && cat "$LOG" || p "$NO_LOG"
 
 p
 p "$PROC_L"
