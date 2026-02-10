@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <corepolicy_log>
- 
+
+ <section id="localized_log">
+    <en>localized.log:</en>
+    <zh>本地化日志：</zh>
+    <id>log lokal:</id>
+</section>
+
+<section id="status_title">
+    <en>CorePolicy Status</en>
+    <zh>CorePolicy 状态</zh>
+    <id>Status CorePolicy</id>
+</section>
+
  <section id="mod_description">
   <en>Native CPU and memory policy daemon that optimizes performance by managing process priority, preloading shared libraries, and controlling background behavior.</en>
   <id>Daemon kebijakan CPU dan memori native yang mengoptimalkan performa dengan mengatur prioritas proses, preload library bersama, dan mengontrol perilaku latar belakang.</id>
