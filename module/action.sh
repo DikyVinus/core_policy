@@ -59,8 +59,21 @@ SPAWNED="$(xml_get service_spawned "service spawned")"
 DYN_L="$(xml_get dump_dynamic "Dynamic list")"
 STA_L="$(xml_get dump_static "Static list")"
 MISSING="$(xml_get missing "(missing)")"
-
 NO_LOG="$(xml_get no_log "(no log)")"
+
+spawn_service() {
+    if command -v busybox >/dev/null 2>&1; then
+        busybox setsid sh "$SERVICE" &
+    else
+        sh "$SERVICE" &
+    fi
+}
+
+dump() {
+    p
+    p "$1 ($2):"
+    [ -f "$2" ] && cat "$2" || p "$MISSING"
+}
 
 p "$STATUS_TITLE"
 p
@@ -76,14 +89,6 @@ p
 p "$PROC_L"
 PID="$(pidof coreshift 2>/dev/null || true)"
 
-spawn_service() {
-    if command -v busybox >/dev/null 2>&1; then
-        busybox setsid sh "$SERVICE" &
-    else
-        sh "$SERVICE" &
-    fi
-}
-
 if [ -n "$PID" ]; then
     p "$RUNNING ($PID)"
 else
@@ -93,15 +98,6 @@ else
     p "$SPAWNED"
 fi
 
-dump() {
-    p
-    p "$1 ($2):"
-    [ -f "$2" ] && cat "$2" || p "$MISSING"
-}
-
-dump "$DYN_L" "$BIN/core_preload.core"
-dump "$STA_L" "$BIN/core_preload_static.core"
-
 p
 p "$LOCAL_TITLE"
 [ -f "$LOCAL_LOG" ] && cat "$LOCAL_LOG" || p "$NO_LOG"
@@ -109,3 +105,6 @@ p "$LOCAL_TITLE"
 p
 p "$SERVICE_TITLE"
 [ -f "$STATUS_LOG" ] && cat "$STATUS_LOG" || p "$NO_LOG"
+
+dump "$DYN_L" "$BIN/core_preload.core"
+dump "$STA_L" "$BIN/core_preload_static.core"
