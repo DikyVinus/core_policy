@@ -1,5 +1,5 @@
 #!/system/bin/sh
-set -eu
+set -e
 
 MODDIR="${0%/*}"
 LOG="$MODDIR/localized.log"
