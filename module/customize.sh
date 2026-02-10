@@ -21,7 +21,7 @@ axeron_base() {
 for p in $PATH; do
     case "$p" in
         */axeron[^/]*)
-            printf '%s\n' "${p%%/axeron*}/axeron"
+            echo "${p%%/axeron*}/axeron"
             break
             ;;
     esac
