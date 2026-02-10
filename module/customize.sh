@@ -17,15 +17,25 @@ esac
 is_root() { [ "$UID" -eq 0 ] || [ -w /data/adb ]; }
 
 axeron_base() {
+oldIFS=$IFS
     IFS=:
-for p in $PATH; do
-    case "$p" in
-        */axeron[^/]*)
-            echo "${p%%/axeron*}/axeron"
-            break
-            ;;
-    esac
-done
+    for p in $PATH; do
+        case "$p" in
+            */axeron[^/]*)
+                echo "${p%%/axeron*}/axeron"
+                oldIFS=$IFS
+                return 0
+                ;;
+        esac
+    done
+    oldIFS=$IFS
+
+    if [ -n "$AXERONDIR" ] && [ -d "$AXERONDIR" ]; then
+        echo "$AXERONDIR"
+        return 0
+    fi
+
+    return 1
 }
 
 AXERON_BASE="$(axeron_base)"
