@@ -68,7 +68,7 @@ watch_integrity() {
 }
 
 if command -v busybox >/dev/null 2>&1; then
-    busybox setsid sh -c watch_integrity &
+    busybox setsid sh -c 'watch_integrity' &
 else
     watch_integrity &
 fi
