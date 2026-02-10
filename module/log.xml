@@ -40,6 +40,32 @@
   <de>Dienstaktivitätsprotokoll</de>
 </section>
 
+ <section id="dump_dynamic">
+    <en>Dynamic list</en>
+    <id>Daftar dinamis</id>
+    <zh>动态列表</zh>
+    <ar>القائمة الديناميكية</ar>
+    <ja>動的リスト</ja>
+    <es>Lista dinámica</es>
+    <hi>डायनामिक सूची</hi>
+    <pt>Lista dinâmica</pt>
+    <ru>Динамический список</ru>
+    <de>Dynamische Liste</de>
+</section>
+
+ <section id="dump_static">
+    <en>Static list</en>
+    <id>Daftar statis</id>
+    <zh>静态列表</zh>
+    <ar>القائمة الثابتة</ar>
+    <ja>静的リスト</ja>
+    <es>Lista estática</es>
+    <hi>स्थिर सूची</hi>
+    <pt>Lista estática</pt>
+    <ru>Статический список</ru>
+    <de>Statische Liste</de>
+</section>
+
  <section id="mod_description">
   <en>Native CPU and memory policy daemon that optimizes performance by managing process priority, preloading shared libraries, and controlling background behavior.</en>
   <id>Daemon kebijakan CPU dan memori native yang mengoptimalkan performa dengan mengatur prioritas proses, preload library bersama, dan mengontrol perilaku latar belakang.</id>
