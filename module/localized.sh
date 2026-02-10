@@ -2,10 +2,12 @@
 set -euo pipefail
 
 MODDIR="${0%/*}"
+LOG="$MODDIR/localized.log
 XML="$MODDIR/log.xml"
 FILE="$MODDIR/module.prop"
 HASH="$FILE.sha256"
-exec >$MODDIR/localized.log 2>&1
+exec >$LOG 2>&1
+: >$LOG
 xml_get() {
     id="$1"
     lang="$2"
