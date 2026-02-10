@@ -23,14 +23,25 @@ xml_get() {
 
     [ -f "$XML" ] || { echo "$fallback"; return; }
 
-    sed -n "/<section id=\"$id\">/,/<\/section>/p" "$XML" |
-        sed -n "s:.*<$LANG>\(.*\)</$LANG>.*:\1:p" |
-        head -n1 |
-        sed 's/&lt;/</g; s/&gt;/>/g; s/&amp;/\&/g' |
-        {
-            read -r line || true
-            echo "${line:-$fallback}"
+    awk -v id="$id" -v lang="$LANG" '
+        $0 ~ "<section id=\""id"\">" { f=1; next }
+        f && /<\/section>/ { exit }
+        f && $0 ~ "<"lang">" {
+            sub(".*<"lang">","")
+            sub("</.*","")
+            print
+            exit
         }
+        f && $0 ~ "<en>" {
+            sub(".*<en>","")
+            sub("</.*","")
+            print
+            exit
+        }
+    ' "$XML" | sed 's/&lt;/</g; s/&gt;/>/g; s/&amp;/\&/g' | {
+        read -r line || true
+        echo "${line:-$fallback}"
+    }
 }
 
 log() {
