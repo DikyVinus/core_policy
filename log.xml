@@ -2,15 +2,42 @@
 <corepolicy_log>
 
  <section id="localized_log">
-    <en>localized.log:</en>
-    <zh>本地化日志：</zh>
-    <id>log lokal:</id>
+  <en>Localization Log</en>
+  <id>Log Lokalisasi</id>
+  <zh>本地化日志</zh>
+  <ar>سجل الترجمة</ar>
+  <ja>ローカライズログ</ja>
+  <es>Registro de localización</es>
+  <hi>स्थानीयकरण लॉग</hi>
+  <pt>Registro de localização</pt>
+  <ru>Журнал локализации</ru>
+  <de>Lokalisierungsprotokoll</de>
 </section>
 
-<section id="status_title">
-    <en>CorePolicy Status</en>
-    <zh>CorePolicy 状态</zh>
-    <id>Status CorePolicy</id>
+<section id="status_log">
+  <en>System Status</en>
+  <id>Status Sistem</id>
+  <zh>系统状态</zh>
+  <ar>حالة النظام</ar>
+  <ja>システム状態</ja>
+  <es>Estado del sistema</es>
+  <hi>सिस्टम स्थिति</hi>
+  <pt>Status do sistema</pt>
+  <ru>Состояние системы</ru>
+  <de>Systemstatus</de>
+</section>
+
+<section id="service_log">
+  <en>Service Activity Log</en>
+  <id>Log Aktivitas Layanan</id>
+  <zh>服务活动日志</zh>
+  <ar>سجل نشاط الخدمة</ar>
+  <ja>サービスアクティビティログ</ja>
+  <es>Registro de actividad del servicio</es>
+  <hi>सेवा गतिविधि लॉग</hi>
+  <pt>Registro de atividade do serviço</pt>
+  <ru>Журнал активности службы</ru>
+  <de>Dienstaktivitätsprotokoll</de>
 </section>
 
  <section id="mod_description">
