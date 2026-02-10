@@ -93,6 +93,20 @@ if command -v curl >/dev/null 2>&1; then
         [ -n "$UPDATE_DIR" ] && cp -f "$LANG_XML" "$UPD_LANG"
 fi
 
+LANG_SHA="$LANG_XML.sha256"
+UPD_LANG_SHA="$UPD_LANG.sha256"
+
+if [ -f "$LANG_XML" ]; then
+    (
+        cd "$(dirname "$LANG_XML")" || exit 1
+        sha256sum "$(basename "$LANG_XML")" >"$(basename "$LANG_SHA")"
+    )
+
+    if [ -n "$UPDATE_DIR" ] && [ -f "$LANG_SHA" ]; then
+        cp -f "$LANG_SHA" "$UPD_LANG_SHA"
+    fi
+fi
+
 xml_get() {
     [ -f "$LANG_XML" ] || return 1
     sed -n "/<section id=\"$1\">/,/<\/section>/p" "$LANG_XML" |
