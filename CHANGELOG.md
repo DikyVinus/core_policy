@@ -1,68 +1,98 @@
 # CorePolicy v5.0
 
-## Overview
-CorePolicy v5.0 focuses on **execution efficiency, syscall minimization, and deterministic behavior**.  
-This release significantly refines preload and boost logic while introducing a **language-aware CLI** without adding user-facing configuration complexity.
+## Executive Summary
+CorePolicy v5.0 is a **foundational release** focused on correctness, determinism, and long-term maintainability.  
+The priority of this version is **doing less work, fewer syscalls, fewer processes, and doing it exactly once**.
+
+The release introduces a **fully language-aware CLI and logging system** while simultaneously **reducing runtime complexity**.  
+No new user configuration is required.
 
 ---
 
-## Architectural Changes
-- Unified all policy logic into a single execution path.
-- Merged previously separate policy libraries into one shared core to eliminate duplicated state and redundant execution.
-- Collapsed `core_policy_perf` and preload handling directly into `coreshift`, removing inter-process handoff overhead.
-- Reduced runtime dependency graph by removing unnecessary helper binaries.
-- Centralized environment detection (root / non-root / Axeron) to avoid repeated checks.
+## 1. Core Architecture
+
+- All policy logic unified into **a single execution path**.
+- Previously split components merged into one shared core:
+  - Removed duplicated state.
+  - Removed redundant execution paths.
+- `core_policy_perf` and preload helpers fully absorbed into `coreshift`.
+- Eliminated inter-process handoff and helper binaries.
+- Centralized environment detection:
+  - root
+  - non-root
+  - Axeron  
+  This prevents repeated checks and inconsistent behavior.
+- Runtime dependency graph significantly reduced.
+
+Result:
+- Fewer forks
+- Fewer execs
+- Lower failure surface
+- Fully deterministic behavior
 
 ---
 
-## Execution Model
-- Single-pass execution for policy application instead of staged invocations.
-- Deterministic ordering:
+## 2. Execution Model (Determinism First)
+
+- Single-pass execution model replaces staged invocations.
+- Strict, deterministic ordering:
   1. Preload
   2. Policy lock
   3. Foreground / top-app boost
   4. Cleanup
-- Eliminated race windows caused by multiple independent entry points.
-- Reduced syscall count by reusing resolved state across execution phases.
+- Removed race windows caused by multiple independent entry points.
+- Resolved state is reused across phases.
+- Syscall count reduced by avoiding repeated discovery and validation.
 
 ---
 
-## Preload System (Improved)
-- Preload lists are now consumed directly by the main executable.
-- Removed helper-process based preload dispatch to avoid fork/exec overhead.
-- Optimized mmap and mlock usage:
-  - Batched mappings to reduce syscall pressure.
-  - Conditional locking only when memory pressure allows.
-- Static and dynamic preload logic unified with strict failure accounting.
-- Graceful degradation when preload targets are unavailable or rejected by the kernel.
-- Zero retry loops for failed preload entries to prevent wasted cycles.
+## 3. Preload System (Rebuilt)
+
+- Preload lists consumed directly by the main executable.
+- Removed fork/exec-based preload dispatch entirely.
+- Optimized memory handling:
+  - Batched `mmap` operations
+  - Conditional `mlock` only when memory pressure allows
+- Static and dynamic preload logic unified.
+- Strict failure accounting:
+  - No retries
+  - No spin loops
+- Graceful degradation:
+  - Missing libraries
+  - Kernel rejection
+  - Memory constraints
+- Zero wasted cycles on failed preload entries.
 
 ---
 
-## Scheduler and Boosting (Refined)
+## 4. Scheduler and Boosting (Refined)
+
 - Boosting logic is now **context-aware and whitelist-driven**.
 - Thread-level boosting resolved dynamically at runtime.
-- Reduced over-boosting by:
-  - Filtering non-render, non-critical, and transient threads.
-  - Avoiding background and cached process interference.
+- Over-boosting reduced by:
+  - Filtering non-render and transient threads
+  - Ignoring background and cached processes
 - Improved detection of:
   - Top-app execution context
-  - SurfaceFlinger and render-critical threads
-- Boost windows are shorter and strictly bounded to avoid scheduler churn.
-- No persistent priority elevation beyond foreground necessity.
+  - Render-critical threads
+  - SurfaceFlinger involvement
+- Boost windows are:
+  - Short
+  - Bounded
+  - Non-persistent
+- No priority elevation beyond foreground necessity.
 
 ---
 
-## CLI Support
-- Lightweight CLI interface added for controlled execution and diagnostics.
-- No additional runtime dependencies introduced.
-- CLI operates in both root and non-root environments.
-- No persistent state written by CLI operations.
+## 5. Localization and Language Support (New)
 
-### Supported CLI Languages (10)
-The CLI automatically selects language based on system locale.
+### Language-Aware System
+- CLI, logs, and status output are now **fully localized**.
+- Language is selected automatically from system locale.
+- No user configuration required.
+- Localization does not alter execution logic or state.
 
-Supported language codes:
+### Supported Languages (10)
 - `en` – English
 - `id` – Bahasa Indonesia
 - `zh` – 中文
@@ -74,35 +104,65 @@ Supported language codes:
 - `ru` – Русский
 - `de` – Deutsch
 
+### Localized Components
+- CLI usage and command descriptions
+- Status output titles
+- Service and activity logs
+- Installer and verification messages
+- Module description text
+
+Localization is strictly **read-only** and does not affect integrity verification.
+
 ---
 
-## Installer and Integrity
-- Fixed `customize.sh` false-positive integrity detections.
-- Simplified integrity checks while preserving verification guarantees.
-- Removed abort paths triggered by benign file layout differences.
-- Axeron-aware execution prevents background process misclassification.
-- BusyBox-safe execution paths retained for minimal environments.
+## 6. CLI Support
+
+- Lightweight CLI interface for diagnostics and controlled execution.
+- No additional runtime dependencies.
+- Works in:
+  - root environments
+  - non-root environments
+- No persistent state written by CLI commands.
+- CLI execution does not interfere with daemon behavior.
 
 ---
 
-## Performance and Efficiency
+## 7. Installer and Integrity
+
+- Fixed `customize.sh` false-positive integrity failures.
+- Integrity verification logic simplified while preserving guarantees.
+- Removed abort paths caused by benign file layout differences.
+- Axeron-aware execution prevents background misclassification.
+- BusyBox-safe execution retained.
+
+---
+
+## 8. Performance and Efficiency
+
 - Fewer forks and execs during normal operation.
-- Lower idle CPU overhead due to reduced scheduler churn.
-- Fewer unnecessary syscalls during preload and boost phases.
+- Reduced scheduler churn.
+- Lower idle CPU usage.
+- Reduced syscall pressure during preload and boost phases.
 - Improved cache locality from consolidated code paths.
-- Reduced memory pressure caused by aggressive locking.
+- Reduced memory pressure from aggressive locking strategies.
 
 ---
 
-## Stability
-- Safer fallback behavior when preload or boost operations fail.
-- No functional regressions on unsupported or constrained devices.
-- Improved compatibility across AOSP and OEM ROM variants.
-- No boot-time blocking or persistent background activity.
+## 9. Stability and Compatibility
+
+- Safe fallback behavior when preload or boost operations fail.
+- No regressions on constrained or unsupported devices.
+- Improved compatibility across:
+  - AOSP ROMs
+  - OEM ROMs
+- No boot-time blocking.
+- No persistent background activity.
 
 ---
 
 ## Notes
+
 - No user-facing configuration changes.
-- Existing installations upgrade cleanly without manual intervention.
+- Existing installations upgrade cleanly.
+- No manual intervention required.
 - Behavior remains fully automatic and adaptive.
