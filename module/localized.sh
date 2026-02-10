@@ -41,18 +41,16 @@ MSG_DONE="$(xml_get done "[✓] done")"
 DESC="$(xml_get mod_description "")"
 
 echo "$MSG_VERIFY"
-(
-    cd "$(dirname "$FILE")" || exit 1
-    sha256sum -c "$(basename "$HASH")"
-)
 
-echo "$MSG_UPDATE"
-ESC_DESC="$(printf '%s\n' "$DESC" | sed 's/[&|]/\\&/g')"
-sed -i "s|^description=.*|description=$ESC_DESC|" "$FILE"
-
-echo "$MSG_REGEN"
 EXPECTED="$(cut -d' ' -f1 "$HASH")"
 ACTUAL="$(sha256sum "$FILE" | cut -d' ' -f1)"
 [ "$EXPECTED" = "$ACTUAL" ]
+
+echo "$MSG_UPDATE"
+ESC_DESC="$(echo "$DESC" | sed 's/[&|]/\\&/g')"
+sed -i "s|^description=.*|description=$ESC_DESC|" "$FILE"
+
+echo "$MSG_REGEN"
+sha256sum "$FILE" >"$HASH"
 
 echo "$MSG_DONE"
