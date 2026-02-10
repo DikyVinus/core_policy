@@ -364,4 +364,70 @@
     <de>(kein Protokoll)</de>
   </section>
 
+ <section id="uninstall_start">
+    <en>[CorePolicy] Uninstall: stopping daemon and cleaning symlinks</en>
+    <id>[CorePolicy] Uninstall: menghentikan daemon dan membersihkan symlink</id>
+    <zh>[CorePolicy] 卸载：停止守护进程并清理符号链接</zh>
+    <ar>[CorePolicy] إلغاء التثبيت: إيقاف الخدمة وتنظيف الروابط</ar>
+    <ja>[CorePolicy] アンインストール：デーモン停止とシンボリックリンク削除</ja>
+    <es>[CorePolicy] Desinstalar: deteniendo demonio y limpiando enlaces</es>
+    <hi>[CorePolicy] अनइंस्टॉल: डेमन रोकना और सिमलिंक साफ़ करना</hi>
+    <pt>[CorePolicy] Desinstalação: parando daemon e limpando symlinks</pt>
+    <ru>[CorePolicy] Удаление: остановка демона и очистка ссылок</ru>
+    <de>[CorePolicy] Deinstallation: Daemon stoppen und Symlinks entfernen</de>
+  </section>
+
+  <section id="daemon_stopped">
+    <en>[CorePolicy] coreshift daemon stopped</en>
+    <id>[CorePolicy] daemon coreshift dihentikan</id>
+    <zh>[CorePolicy] coreshift 守护进程已停止</zh>
+    <ar>[CorePolicy] تم إيقاف خدمة coreshift</ar>
+    <ja>[CorePolicy] coreshift デーモンを停止しました</ja>
+    <es>[CorePolicy] demonio coreshift detenido</es>
+    <hi>[CorePolicy] coreshift डेमन बंद किया गया</hi>
+    <pt>[CorePolicy] daemon coreshift parado</pt>
+    <ru>[CorePolicy] демон coreshift остановлен</ru>
+    <de>[CorePolicy] coreshift-Daemon gestoppt</de>
+  </section>
+
+  <section id="removed_coreshift">
+    <en>[CorePolicy] removed %s/coreshift</en>
+    <id>[CorePolicy] menghapus %s/coreshift</id>
+    <zh>[CorePolicy] 已移除 %s/coreshift</zh>
+    <ar>[CorePolicy] تمت إزالة %s/coreshift</ar>
+    <ja>[CorePolicy] %s/coreshift を削除しました</ja>
+    <es>[CorePolicy] eliminado %s/coreshift</es>
+    <hi>[CorePolicy] %s/coreshift हटाया गया</hi>
+    <pt>[CorePolicy] removido %s/coreshift</pt>
+    <ru>[CorePolicy] удалён %s/coreshift</ru>
+    <de>[CorePolicy] %s/coreshift entfernt</de>
+  </section>
+
+  <section id="removed_cli_xml">
+    <en>[CorePolicy] removed %s/cli.xml</en>
+    <id>[CorePolicy] menghapus %s/cli.xml</id>
+    <zh>[CorePolicy] 已移除 %s/cli.xml</zh>
+    <ar>[CorePolicy] تمت إزالة %s/cli.xml</ar>
+    <ja>[CorePolicy] %s/cli.xml を削除しました</ja>
+    <es>[CorePolicy] eliminado %s/cli.xml</es>
+    <hi>[CorePolicy] %s/cli.xml हटाया गया</hi>
+    <pt>[CorePolicy] removido %s/cli.xml</pt>
+    <ru>[CorePolicy] удалён %s/cli.xml</ru>
+    <de>[CorePolicy] %s/cli.xml entfernt</de>
+  </section>
+
+  <section id="uninstall_complete">
+    <en>[CorePolicy] Uninstall complete</en>
+    <id>[CorePolicy] Uninstall selesai</id>
+    <zh>[CorePolicy] 卸载完成</zh>
+    <ar>[CorePolicy] اكتمل إلغاء التثبيت</ar>
+    <ja>[CorePolicy] アンインストール完了</ja>
+    <es>[CorePolicy] Desinstalación completa</es>
+    <hi>[CorePolicy] अनइंस्टॉल पूर्ण</hi>
+    <pt>[CorePolicy] Desinstalação concluída</pt>
+    <ru>[CorePolicy] Удаление завершено</ru>
+    <de>[CorePolicy] Deinstallation abgeschlossen</de>
+  </section>
+
+
  <corepolicy_log>
