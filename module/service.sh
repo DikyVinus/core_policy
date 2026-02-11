@@ -3,6 +3,7 @@
 set -e
 
 MODDIR="${0%/*}"
+is_root() { [ "$(id -u)" -eq 0 ]; }
 BIN="$MODDIR/system/bin"
 XML="$MODDIR/log.xml"
 
@@ -52,6 +53,54 @@ fi
 if ! sh "$MODDIR/verify.sh"; then
     log "$(xml_get log_verify_fail "verification failed, aborting startup")"
     exit 1
+fi
+
+PRIO="ondemand schedutil schedhorizon sugov_ext"
+
+pick_gov() {
+    AVAIL="$1"
+    for g in $PRIO; do
+        echo "$AVAIL" | tr ' ' '\n' | grep -qx "$g" && {
+            echo "$g"
+            return 0
+        }
+    done
+    return 1
+}
+
+if is_root; then
+    log "$(xml_get log_gov_scan "scanning cpufreq/devfreq governors")"
+
+    for cpu in /sys/devices/system/cpu/cpu[0-9]*; do
+        GOVPATH="$cpu/cpufreq"
+        [ -d "$GOVPATH" ] || continue
+
+        AVAIL="$(cat "$GOVPATH/scaling_available_governors" 2>/dev/null)"
+        CUR="$(cat "$GOVPATH/scaling_governor" 2>/dev/null)"
+        SEL="$(pick_gov "$AVAIL")"
+
+        if [ -n "$SEL" ]; then
+            echo "$SEL" > "$GOVPATH/scaling_governor" 2>/dev/null || true
+            log "$(xml_get log_cpu_gov_set "cpu governor set") $cpu -> $SEL (was $CUR)"
+        else
+            log "$(xml_get log_cpu_gov_skip "cpu governor unchanged") $cpu (no match)"
+        fi
+    done
+
+    for dev in /sys/class/devfreq/*; do
+        [ -f "$dev/available_governors" ] || continue
+
+        AVAIL="$(cat "$dev/available_governors" 2>/dev/null)"
+        CUR="$(cat "$dev/governor" 2>/dev/null)"
+        SEL="$(pick_gov "$AVAIL")"
+
+        if [ -n "$SEL" ]; then
+            echo "$SEL" > "$dev/governor" 2>/dev/null || true
+            log "$(xml_get log_devfreq_gov_set "devfreq governor set") $dev -> $SEL (was $CUR)"
+        else
+            log "$(xml_get log_devfreq_gov_skip "devfreq governor unchanged") $dev (no match)"
+        fi
+    done
 fi
 
 if [ ! -f "$READY_FLAG" ]; then
