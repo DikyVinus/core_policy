@@ -120,11 +120,11 @@ if is_root; then
         CUR="$(cat "$GOVPATH/scaling_governor" 2>/dev/null)"
         SEL="$(pick_gov "$AVAIL")"
 
-        if [ -n "$SEL" ]; then
+        if [ -n "$SEL" ] && [ "$SEL" != "$CUR" ]; then
             echo "$SEL" > "$GOVPATH/scaling_governor" 2>/dev/null || true
-            log "$(xml_get log_cpu_gov_set "cpu governor set") $cpu -> $SEL (was $CUR)"
+            log "$(xml_get log_cpu_gov_set "cpu governor set") $cpu -> $SEL ($(xml_get log_was "was") $CUR)"
         else
-            log "$(xml_get log_cpu_gov_skip "cpu governor unchanged") $cpu (no match)"
+            log "$(xml_get log_current "current") $cpu -> $CUR"
         fi
     done
 
@@ -135,11 +135,11 @@ if is_root; then
         CUR="$(cat "$dev/governor" 2>/dev/null)"
         SEL="$(pick_gov "$AVAIL")"
 
-        if [ -n "$SEL" ]; then
+        if [ -n "$SEL" ] && [ "$SEL" != "$CUR" ]; then
             echo "$SEL" > "$dev/governor" 2>/dev/null || true
-            log "$(xml_get log_devfreq_gov_set "devfreq governor set") $dev -> $SEL (was $CUR)"
+            log "$(xml_get log_devfreq_gov_set "devfreq governor set") $dev -> $SEL ($(xml_get log_was "was") $CUR)"
         else
-            log "$(xml_get log_devfreq_gov_skip "devfreq governor unchanged") $dev (no match)"
+            log "$(xml_get log_current "current") $dev -> $CUR"
         fi
     done
 fi
@@ -177,9 +177,9 @@ if is_root; then
 
         if [ -n "$SEL" ] && [ "$SEL" != "$CUR" ]; then
             echo "$SEL" > "$q/scheduler" 2>/dev/null || true
-            log "$(xml_get log_blk_set "block scheduler set") ${q%/queue} -> $SEL (was $CUR)"
+            log "$(xml_get log_blk_set "block scheduler set") ${q%/queue} -> $SEL ($(xml_get log_was "was") $CUR)"
         else
-            log "$(xml_get log_blk_skip "block scheduler unchanged") ${q%/queue} (current $CUR)"
+            log "$(xml_get log_current "current") ${q%/queue} -> $CUR"
         fi
     done
 fi
@@ -190,8 +190,15 @@ write() {
     path="$1"
     val="$2"
     [ -e "$path" ] || return
+
+    cur="$(cat "$path" 2>/dev/null || true)"
+    if [ "$cur" = "$val" ]; then
+        log "$(xml_get log_current "current") $path -> $cur"
+        return
+    fi
+
     echo "$val" > "$path" 2>/dev/null || return
-    log "$(xml_get log_value_set "set") $path -> $val"
+    log "$(xml_get log_value_set "set") $path -> $val ($(xml_get log_was "was") $cur)"
 }
 
 LITTLE=""
@@ -217,7 +224,6 @@ range_from_list() {
 }
 
 LITTLE_RANGE="$(range_from_list "$LITTLE")"
-BIG_RANGE="$(range_from_list "$BIG")"
 ALL_RANGE="$(range_from_list "$LITTLE $BIG")"
 
 write /dev/cpuctl/background/cpu.uclamp.min 0
@@ -274,10 +280,8 @@ for q in /sys/block/*/queue; do
 done
 
 write /sys/block/zram0/max_comp_streams 2
-
 write /sys/kernel/mm/transparent_hugepage/enabled madvise
 write /sys/kernel/mm/transparent_hugepage/defrag defer
-
 write /proc/sys/vm/watermark_scale_factor 10
 write /proc/sys/vm/page-cluster 0
 
