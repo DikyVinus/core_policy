@@ -1,6 +1,5 @@
 #!/system/bin/sh
 # SPDX-License-Identifier: Apache-2.0
-set -e
 
 MODDIR="${0%/*}"
 is_root() { [ "$(id -u)" -eq 0 ]; }
