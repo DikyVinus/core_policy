@@ -105,17 +105,17 @@
   <de>devfreq-Governor unverändert</de>
 </section>
 
- <section id="log_blk_scan">
-  <en>scanning block schedulers (dryrun)</en>
-  <id>memindai scheduler blok (dryrun)</id>
-  <zh>正在扫描块调度器（演练）</zh>
-  <ar>جارٍ فحص مجدولات الكتل (وضع تجريبي)</ar>
-  <ja>ブロックスケジューラをスキャン中（ドライラン）</ja>
-  <es>escaneando planificadores de bloque (prueba)</es>
-  <hi>ब्लॉक शेड्यूलर स्कैन किया जा रहा है (ड्रायरन)</hi>
-  <pt>verificando agendadores de bloco (simulação)</pt>
-  <ru>сканирование планировщиков блоков (dryrun)</ru>
-  <de>Block-Scheduler werden geprüft (Dryrun)</de>
+<section id="log_blk_scan">
+  <en>scanning block schedulers</en>
+  <id>memindai scheduler blok</id>
+  <zh>正在扫描块调度器</zh>
+  <ar>جارٍ فحص مجدولات الكتل</ar>
+  <ja>ブロックスケジューラをスキャン中</ja>
+  <es>escaneando planificadores de bloque</es>
+  <hi>ब्लॉक शेड्यूलर स्कैन किया जा रहा है</hi>
+  <pt>verificando agendadores de bloco</pt>
+  <ru>сканирование планировщиков блоков</ru>
+  <de>Block-Scheduler werden geprüft</de>
 </section>
 
 <section id="log_blk_would_set">
