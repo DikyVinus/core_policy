@@ -219,6 +219,7 @@ range_from_list() {
 
 LITTLE_RANGE="$(range_from_list "$LITTLE")"
 BIG_RANGE="$(range_from_list "$BIG")"
+ALL_RANGE="$(range_from_list "$LITTLE $BIG")"
 
 write /dev/cpuctl/background/cpu.uclamp.min 0
 write /dev/cpuctl/background/cpu.uclamp.max 10
@@ -241,10 +242,10 @@ write /dev/cpuctl/top-app/cpu.uclamp.latency_sensitive 1
     write /dev/cpuset/system-background/cpus "$LITTLE_RANGE"
 }
 
-if [ -n "$BIG_RANGE" ] && [ -n "$LITTLE_RANGE" ]; then
-    write /dev/cpuset/foreground/cpus "$LITTLE_RANGE,$BIG_RANGE"
-    write /dev/cpuset/top-app/cpus "$LITTLE_RANGE,$BIG_RANGE"
-fi
+[ -n "$ALL_RANGE" ] && {
+    write /dev/cpuset/foreground/cpus "$ALL_RANGE"
+    write /dev/cpuset/top-app/cpus "$ALL_RANGE"
+}
 
 write /dev/cpuset/background/sched_load_balance 0
 write /dev/cpuset/system-background/sched_load_balance 0
