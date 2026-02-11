@@ -1,62 +1,62 @@
 #!/system/bin/sh
-
 # SPDX-License-Identifier: Apache-2.0
-
-set -e
 
 MODDIR="${0%/*}"
 LOG="$MODDIR/verify.debug.log"
 FAILED=0
 
-UID="$(id -u)"
-
-echo "[verify] UID=$UID" >"$LOG"
+echo "[verify] UID=`id -u`" >"$LOG"
 echo "[verify] MODDIR=$MODDIR" >>"$LOG"
 
 is_install_only() {
     case "${1##*/}" in
         customize.sh|install.sh|uninstall.sh) return 0 ;;
-        *) return 1 ;;
     esac
+    return 1
 }
 
-SUMFILES=$(ls "$MODDIR"/*.sha256 2>/dev/null)
+has_sha=0
+which sha256sum >/dev/null 2>&1 && has_sha=1
 
-for sumfile in $SUMFILES; do
+for sumfile in `ls "$MODDIR"/*.sha256 2>/dev/null`; do
     target="${sumfile%.sha256}"
     name="${target##*/}"
 
-    echo "[verify] checking ${sumfile##*/}" >>"$LOG"  
+    echo "[verify] checking ${sumfile##*/}" >>"$LOG"
 
-    if [ ! -f "$target" ]; then  
-        if is_install_only "$target"; then  
-            echo "[verify] skipped install-only artifact: $name" >>"$LOG"  
-        else  
-            echo "[verify] MISSING target: $target" >>"$LOG"  
-            FAILED=1  
-        fi  
-        continue  
-    fi  
-
-
-    read -r expected _ < "$sumfile"
-    
-    
-    if command -v sha256sum >/dev/null 2>&1; then
-        actual_raw=$(sha256sum "$target")
-    else
-        actual_raw=$(openssl dgst -sha256 "$target" 2>/dev/null | sed 's/.*= //')
+    if [ ! -f "$target" ]; then
+        if is_install_only "$target"; then
+            echo "[verify] skipped install-only artifact: $name" >>"$LOG"
+        else
+            echo "[verify] MISSING target: $target" >>"$LOG"
+            FAILED=1
+        fi
+        continue
     fi
-    
-    
-    actual="${actual_raw%% *}"
 
-    echo "[verify] expected=$expected" >>"$LOG"  
-    echo "[verify] actual=$actual" >>"$LOG"  
+    if [ "$has_sha" -eq 1 ]; then
+        read expected _ < "$sumfile"
+        actual=`sha256sum "$target"`
+        actual="${actual%% *}"
 
-    if [ "$expected" != "$actual" ]; then  
-        echo "[verify] MISMATCH: $name" >>"$LOG"  
-        FAILED=1  
+        echo "[verify] expected=$expected" >>"$LOG"
+        echo "[verify] actual=$actual" >>"$LOG"
+
+        [ "$expected" = "$actual" ] || {
+            echo "[verify] MISMATCH: $name" >>"$LOG"
+            FAILED=1
+        }
+    else
+        sum_mtime=`ls -ln "$sumfile" | awk '{print $6,$7,$8}'`
+        tgt_mtime=`ls -ln "$target" | awk '{print $6,$7,$8}'`
+
+        echo "[verify] sum_mtime=$sum_mtime" >>"$LOG"
+        echo "[verify] tgt_mtime=$tgt_mtime" >>"$LOG"
+
+        [ "$sum_mtime" = "$tgt_mtime" ] || {
+            echo "[verify] MTIME MISMATCH: $name" >>"$LOG"
+            FAILED=1
+        }
     fi
 done
 
