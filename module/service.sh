@@ -42,21 +42,21 @@ until pidof com.android.systemui ; do
     sleep 8
 done
 
-: >"$LOG"
+echo >"$LOG"
 
 read CONTEXT < /proc/self/attr/current
 
 case "$CONTEXT" in
     *magisk*)
-        log "magisk selinux context detected, aborting"
-        exit 1
+        log "magisk selinux context detected, skipping localization"
+        ;;
+    *)
+        if ! sh "$MODDIR/localized.sh"; then
+            log "$(xml_get log_verify_fail "verification failed, aborting startup")"
+            exit 1
+        fi
         ;;
 esac
-
-if ! sh "$MODDIR/localized.sh"; then
-    log "$(xml_get log_verify_fail "verification failed, aborting startup")"
-    exit 1
-fi
 
 if ! sh "$MODDIR/verify.sh"; then
     log "$(xml_get log_verify_fail "verification failed, aborting startup")"
