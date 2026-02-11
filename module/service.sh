@@ -286,3 +286,27 @@ write /proc/sys/vm/watermark_scale_factor 10
 write /proc/sys/vm/page-cluster 0
 
 fi
+
+CMD=/system/bin/cmd
+PROTECT_PKGS="
+android
+com.android.systemui
+com.android.providers.telephony
+com.android.providers.media
+com.android.providers.settings
+com.android.bluetooth
+com.android.settings
+com.android.launcher3
+com.android.permissioncontroller
+com.google.android.gms
+com.google.android.gsf
+"
+
+for pkg in $($CMD package list packages -s | sed 's/package://'); do
+    case " $PROTECT_PKGS " in
+        *" $pkg "*) continue ;;
+    esac
+
+    $CMD activity make-uid-idle --user 0 "$pkg"
+    $CMD sensorservice set-uid-state "$pkg" idle
+done
