@@ -44,6 +44,15 @@ done
 
 : >"$LOG"
 
+CONTEXT="$(cat /proc/self/attr/current)"
+
+case "$CONTEXT" in
+    *magisk*)
+        log "magisk selinux context detected, aborting"
+        exit 1
+        ;;
+esac
+
 if ! sh "$MODDIR/localized.sh"; then
     log "$(xml_get log_verify_fail "verification failed, aborting startup")"
     exit 1
