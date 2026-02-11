@@ -24,15 +24,21 @@ for sumfile in `ls "$MODDIR"/*.sha256 2>/dev/null`; do
 
     echo "[verify] checking ${sumfile##*/}" >>"$LOG"
 
-    if [ ! -f "$target" ]; then
-        if is_install_only "$target"; then
-            echo "[verify] skipped install-only artifact: $name" >>"$LOG"
-        else
-            echo "[verify] MISSING target: $target" >>"$LOG"
-            FAILED=1
-        fi
-        continue
+    if is_install_only "$target"; then
+    if [ -f "$target" ]; then
+        echo "[verify] INSTALL-ONLY FILE STILL PRESENT: $name" >>"$LOG"
+        FAILED=1
+    else
+        echo "[verify] install-only artifact removed as expected: $name" >>"$LOG"
     fi
+    continue
+fi
+
+if [ ! -f "$target" ]; then
+    echo "[verify] MISSING target: $target" >>"$LOG"
+    FAILED=1
+    continue
+fi
 
     if [ "$has_sha" -eq 1 ]; then
         read expected _ < "$sumfile"
