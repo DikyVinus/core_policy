@@ -40,6 +40,71 @@
   <de>Dienstaktivitätsprotokoll</de>
 </section>
 
+ <section id="log_gov_scan">
+  <en>scanning cpufreq/devfreq governors</en>
+  <id>memindai governor cpufreq/devfreq</id>
+  <zh>正在扫描 cpufreq/devfreq 调速器</zh>
+  <ar>جارٍ فحص وحدات تحكم cpufreq/devfreq</ar>
+  <ja>cpufreq/devfreq ガバナーをスキャン中</ja>
+  <es>escaneando gobernadores cpufreq/devfreq</es>
+  <hi>cpufreq/devfreq गवर्नर स्कैन किया जा रहा है</hi>
+  <pt>verificando governadores cpufreq/devfreq</pt>
+  <ru>сканирование governor cpufreq/devfreq</ru>
+  <de>cpufreq/devfreq-Governor werden geprüft</de>
+</section>
+
+<section id="log_cpu_gov_set">
+  <en>cpu governor set</en>
+  <id>governor cpu diatur</id>
+  <zh>CPU 调速器已设置</zh>
+  <ar>تم تعيين حاكم المعالج</ar>
+  <ja>CPU ガバナーを設定</ja>
+  <es>gobernador de CPU establecido</es>
+  <hi>CPU गवर्नर सेट किया गया</hi>
+  <pt>governador de CPU definido</pt>
+  <ru>установлен governor CPU</ru>
+  <de>CPU-Governor gesetzt</de>
+</section>
+
+<section id="log_cpu_gov_skip">
+  <en>cpu governor unchanged</en>
+  <id>governor cpu tidak diubah</id>
+  <zh>CPU 调速器未更改</zh>
+  <ar>لم يتم تغيير حاكم المعالج</ar>
+  <ja>CPU ガバナーは変更なし</ja>
+  <es>gobernador de CPU sin cambios</es>
+  <hi>CPU गवर्नर अपरिवर्तित</hi>
+  <pt>governador de CPU inalterado</pt>
+  <ru>governor CPU без изменений</ru>
+  <de>CPU-Governor unverändert</de>
+</section>
+
+<section id="log_devfreq_gov_set">
+  <en>devfreq governor set</en>
+  <id>governor devfreq diatur</id>
+  <zh>devfreq 调速器已设置</zh>
+  <ar>تم تعيين حاكم devfreq</ar>
+  <ja>devfreq ガバナーを設定</ja>
+  <es>gobernador devfreq establecido</es>
+  <hi>devfreq गवर्नर सेट किया गया</hi>
+  <pt>governador devfreq definido</pt>
+  <ru>установлен governor devfreq</ru>
+  <de>devfreq-Governor gesetzt</de>
+</section>
+
+<section id="log_devfreq_gov_skip">
+  <en>devfreq governor unchanged</en>
+  <id>governor devfreq tidak diubah</id>
+  <zh>devfreq 调速器未更改</zh>
+  <ar>لم يتم تغيير حاكم devfreq</ar>
+  <ja>devfreq ガバナーは変更なし</ja>
+  <es>gobernador devfreq sin cambios</es>
+  <hi>devfreq गवर्नर अपरिवर्तित</hi>
+  <pt>governador devfreq inalterado</pt>
+  <ru>governor devfreq без изменений</ru>
+  <de>devfreq-Governor unverändert</de>
+</section>
+
  <section id="dump_dynamic">
     <en>Dynamic list</en>
     <id>Daftar dinamis</id>
