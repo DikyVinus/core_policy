@@ -11,7 +11,7 @@ GATE="$MODDIR/.localized_done"
 
 [ -f "$GATE" ] && exit 0
 
-cat /dev/null >"$LOG"
+echo >"$LOG"
 exec >>"$LOG" 2>&1
 
 SYS_LANG=`getprop persist.sys.locale | cut -d- -f1`
