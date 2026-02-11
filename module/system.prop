@@ -13,7 +13,5 @@ sys.init.updatable_crashing=0
 sys.rss_hwm_reset.on=0
 logd.logpersistd.enable=false
 logd.logpersistd=stop
-llk.enable=0
-khungtask.enable=0
 persist.device_config.mglru_native.lru_gen_config=core
 dmesgd.start=0
