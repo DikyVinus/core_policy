@@ -40,6 +40,149 @@
   <de>Dienstaktivitätsprotokoll</de>
 </section>
 
+ <section id="log_gov_scan">
+  <en>scanning cpufreq/devfreq governors</en>
+  <id>memindai governor cpufreq/devfreq</id>
+  <zh>正在扫描 cpufreq/devfreq 调速器</zh>
+  <ar>جارٍ فحص وحدات تحكم cpufreq/devfreq</ar>
+  <ja>cpufreq/devfreq ガバナーをスキャン中</ja>
+  <es>escaneando gobernadores cpufreq/devfreq</es>
+  <hi>cpufreq/devfreq गवर्नर स्कैन किया जा रहा है</hi>
+  <pt>verificando governadores cpufreq/devfreq</pt>
+  <ru>сканирование governor cpufreq/devfreq</ru>
+  <de>cpufreq/devfreq-Governor werden geprüft</de>
+</section>
+
+<section id="log_cpu_gov_set">
+  <en>cpu governor set</en>
+  <id>governor cpu diatur</id>
+  <zh>CPU 调速器已设置</zh>
+  <ar>تم تعيين حاكم المعالج</ar>
+  <ja>CPU ガバナーを設定</ja>
+  <es>gobernador de CPU establecido</es>
+  <hi>CPU गवर्नर सेट किया गया</hi>
+  <pt>governador de CPU definido</pt>
+  <ru>установлен governor CPU</ru>
+  <de>CPU-Governor gesetzt</de>
+</section>
+
+<section id="log_cpu_gov_skip">
+  <en>cpu governor unchanged</en>
+  <id>governor cpu tidak diubah</id>
+  <zh>CPU 调速器未更改</zh>
+  <ar>لم يتم تغيير حاكم المعالج</ar>
+  <ja>CPU ガバナーは変更なし</ja>
+  <es>gobernador de CPU sin cambios</es>
+  <hi>CPU गवर्नर अपरिवर्तित</hi>
+  <pt>governador de CPU inalterado</pt>
+  <ru>governor CPU без изменений</ru>
+  <de>CPU-Governor unverändert</de>
+</section>
+
+<section id="log_devfreq_gov_set">
+  <en>devfreq governor set</en>
+  <id>governor devfreq diatur</id>
+  <zh>devfreq 调速器已设置</zh>
+  <ar>تم تعيين حاكم devfreq</ar>
+  <ja>devfreq ガバナーを設定</ja>
+  <es>gobernador devfreq establecido</es>
+  <hi>devfreq गवर्नर सेट किया गया</hi>
+  <pt>governador devfreq definido</pt>
+  <ru>установлен governor devfreq</ru>
+  <de>devfreq-Governor gesetzt</de>
+</section>
+
+<section id="log_devfreq_gov_skip">
+  <en>devfreq governor unchanged</en>
+  <id>governor devfreq tidak diubah</id>
+  <zh>devfreq 调速器未更改</zh>
+  <ar>لم يتم تغيير حاكم devfreq</ar>
+  <ja>devfreq ガバナーは変更なし</ja>
+  <es>gobernador devfreq sin cambios</es>
+  <hi>devfreq गवर्नर अपरिवर्तित</hi>
+  <pt>governador devfreq inalterado</pt>
+  <ru>governor devfreq без изменений</ru>
+  <de>devfreq-Governor unverändert</de>
+</section>
+
+ <section id="log_blk_scan">
+  <en>scanning block schedulers (dryrun)</en>
+  <id>memindai scheduler blok (dryrun)</id>
+  <zh>正在扫描块调度器（演练）</zh>
+  <ar>جارٍ فحص مجدولات الكتل (وضع تجريبي)</ar>
+  <ja>ブロックスケジューラをスキャン中（ドライラン）</ja>
+  <es>escaneando planificadores de bloque (prueba)</es>
+  <hi>ब्लॉक शेड्यूलर स्कैन किया जा रहा है (ड्रायरन)</hi>
+  <pt>verificando agendadores de bloco (simulação)</pt>
+  <ru>сканирование планировщиков блоков (dryrun)</ru>
+  <de>Block-Scheduler werden geprüft (Dryrun)</de>
+</section>
+
+<section id="log_blk_would_set">
+  <en>block scheduler would be set</en>
+  <id>scheduler blok akan diatur</id>
+  <zh>块调度器将被设置</zh>
+  <ar>سيتم تعيين مجدول الكتل</ar>
+  <ja>ブロックスケジューラを設定予定</ja>
+  <es>el planificador de bloque sería establecido</es>
+  <hi>ब्लॉक शेड्यूलर सेट किया जाएगा</hi>
+  <pt>agendador de bloco seria definido</pt>
+  <ru>планировщик блоков будет установлен</ru>
+  <de>Block-Scheduler würde gesetzt</de>
+</section>
+
+<section id="log_blk_skip">
+  <en>block scheduler unchanged</en>
+  <id>scheduler blok tidak diubah</id>
+  <zh>块调度器未更改</zh>
+  <ar>لم يتم تغيير مجدول الكتل</ar>
+  <ja>ブロックスケジューラは変更なし</ja>
+  <es>planificador de bloque sin cambios</es>
+  <hi>ब्लॉक शेड्यूलर अपरिवर्तित</hi>
+  <pt>agendador de bloco inalterado</pt>
+  <ru>планировщик блоков без изменений</ru>
+  <de>Block-Scheduler unverändert</de>
+</section>
+
+ <section id="log_value_set">
+  <en>set</en>
+  <id>ditetapkan</id>
+  <zh>已设置</zh>
+  <ar>تم الضبط</ar>
+  <ja>設定</ja>
+  <es>establecido</es>
+  <hi>सेट</hi>
+  <pt>definido</pt>
+  <ru>установлено</ru>
+  <de>gesetzt</de>
+</section>
+
+ <section id="log_current">
+    <en>current</en>
+    <id>saat ini</id>
+    <zh>当前</zh>
+    <ar>الحالي</ar>
+    <ja>現在</ja>
+    <es>actual</es>
+    <hi>वर्तमान</hi>
+    <pt>atual</pt>
+    <ru>текущий</ru>
+    <de>aktuell</de>
+</section>
+
+<section id="log_was">
+    <en>was</en>
+    <id>sebelumnya</id>
+    <zh>之前</zh>
+    <ar>السابق</ar>
+    <ja>以前</ja>
+    <es>antes</es>
+    <hi>पहले</hi>
+    <pt>antes</pt>
+    <ru>было</ru>
+    <de>war</de>
+</section>
+
  <section id="dump_dynamic">
     <en>Dynamic list</en>
     <id>Daftar dinamis</id>
