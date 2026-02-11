@@ -144,6 +144,19 @@
   <de>Block-Scheduler unverändert</de>
 </section>
 
+ <section id="log_value_set">
+  <en>set</en>
+  <id>ditetapkan</id>
+  <zh>已设置</zh>
+  <ar>تم الضبط</ar>
+  <ja>設定</ja>
+  <es>establecido</es>
+  <hi>सेट</hi>
+  <pt>definido</pt>
+  <ru>установлено</ru>
+  <de>gesetzt</de>
+</section>
+
  <section id="dump_dynamic">
     <en>Dynamic list</en>
     <id>Daftar dinamis</id>
