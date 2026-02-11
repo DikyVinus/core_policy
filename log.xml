@@ -157,6 +157,32 @@
   <de>gesetzt</de>
 </section>
 
+ <section id="log_current">
+    <en>current</en>
+    <id>saat ini</id>
+    <zh>当前</zh>
+    <ar>الحالي</ar>
+    <ja>現在</ja>
+    <es>actual</es>
+    <hi>वर्तमान</hi>
+    <pt>atual</pt>
+    <ru>текущий</ru>
+    <de>aktuell</de>
+</section>
+
+<section id="log_was">
+    <en>was</en>
+    <id>sebelumnya</id>
+    <zh>之前</zh>
+    <ar>السابق</ar>
+    <ja>以前</ja>
+    <es>antes</es>
+    <hi>पहले</hi>
+    <pt>antes</pt>
+    <ru>было</ru>
+    <de>war</de>
+</section>
+
  <section id="dump_dynamic">
     <en>Dynamic list</en>
     <id>Daftar dinamis</id>
