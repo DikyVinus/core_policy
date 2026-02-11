@@ -105,6 +105,45 @@
   <de>devfreq-Governor unverändert</de>
 </section>
 
+ <section id="log_blk_scan">
+  <en>scanning block schedulers (dryrun)</en>
+  <id>memindai scheduler blok (dryrun)</id>
+  <zh>正在扫描块调度器（演练）</zh>
+  <ar>جارٍ فحص مجدولات الكتل (وضع تجريبي)</ar>
+  <ja>ブロックスケジューラをスキャン中（ドライラン）</ja>
+  <es>escaneando planificadores de bloque (prueba)</es>
+  <hi>ब्लॉक शेड्यूलर स्कैन किया जा रहा है (ड्रायरन)</hi>
+  <pt>verificando agendadores de bloco (simulação)</pt>
+  <ru>сканирование планировщиков блоков (dryrun)</ru>
+  <de>Block-Scheduler werden geprüft (Dryrun)</de>
+</section>
+
+<section id="log_blk_would_set">
+  <en>block scheduler would be set</en>
+  <id>scheduler blok akan diatur</id>
+  <zh>块调度器将被设置</zh>
+  <ar>سيتم تعيين مجدول الكتل</ar>
+  <ja>ブロックスケジューラを設定予定</ja>
+  <es>el planificador de bloque sería establecido</es>
+  <hi>ब्लॉक शेड्यूलर सेट किया जाएगा</hi>
+  <pt>agendador de bloco seria definido</pt>
+  <ru>планировщик блоков будет установлен</ru>
+  <de>Block-Scheduler würde gesetzt</de>
+</section>
+
+<section id="log_blk_skip">
+  <en>block scheduler unchanged</en>
+  <id>scheduler blok tidak diubah</id>
+  <zh>块调度器未更改</zh>
+  <ar>لم يتم تغيير مجدول الكتل</ar>
+  <ja>ブロックスケジューラは変更なし</ja>
+  <es>planificador de bloque sin cambios</es>
+  <hi>ब्लॉक शेड्यूलर अपरिवर्तित</hi>
+  <pt>agendador de bloco inalterado</pt>
+  <ru>планировщик блоков без изменений</ru>
+  <de>Block-Scheduler unverändert</de>
+</section>
+
  <section id="dump_dynamic">
     <en>Dynamic list</en>
     <id>Daftar dinamis</id>
