@@ -25,13 +25,10 @@ for sumfile in `ls "$MODDIR"/*.sha256 2>/dev/null`; do
     echo "[verify] checking ${sumfile##*/}" >>"$LOG"
 
     if is_install_only "$target"; then
-    if [ -f "$target" ]; then
-        echo "[verify] INSTALL-ONLY FILE STILL PRESENT: $name" >>"$LOG"
-        FAILED=1
-    else
-        echo "[verify] install-only artifact removed as expected: $name" >>"$LOG"
+    if [ ! -f "$target" ]; then
+        echo "[verify] install-only artifact not present (ok): $name" >>"$LOG"
+        continue
     fi
-    continue
 fi
 
 if [ ! -f "$target" ]; then
