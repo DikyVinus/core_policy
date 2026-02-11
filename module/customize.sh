@@ -18,18 +18,18 @@ esac
 is_root() { [ "$UID" -eq 0 ] || [ -w /data/adb ]; }
 
 axeron_base() {
-oldIFS=$IFS
+    OLDIFS="$IFS"
     IFS=:
     for p in $PATH; do
         case "$p" in
-            */axeron[^/]*)
+            */axeron*)
+                IFS="$OLDIFS"
                 echo "${p%%/axeron*}/axeron"
-                oldIFS=$IFS
                 return 0
-                ;;
+            ;;
         esac
     done
-    oldIFS=$IFS
+    IFS="$OLDIFS"
 
     if [ -n "$AXERONDIR" ] && [ -d "$AXERONDIR" ]; then
         echo "$AXERONDIR"
@@ -63,17 +63,19 @@ notify() {
 }
 
 watch_integrity() {
-    end=$((SECONDS + 20))
-    while [ "$SECONDS" -lt "$end" ]; do
+    i=0
+    while [ "$i" -lt 20 ]; do
         [ -d "$MODDIR" ] || notify "Module directory missing"
         [ -x /system/bin/settaskprofile ] || notify "settaskprofile binary missing"
 
         if [ -f "$PROP_FILE" ]; then
-            cur="$(sha256sum "$PROP_FILE" | awk '{print $1}')"
+            cur=`sha256sum "$PROP_FILE" | awk '{print $1}'`
             [ "$cur" = "$EXPECTED_SHA256" ] || notify "module.prop checksum mismatch"
         else
             notify "module.prop missing"
         fi
+
+        i=`expr "$i" + 1`
         sleep 1
     done
 }
@@ -98,10 +100,12 @@ LANG_SHA="$LANG_XML.sha256"
 UPD_LANG_SHA="$UPD_LANG.sha256"
 
 if [ -f "$LANG_XML" ]; then
-    (
-        cd "$(dirname "$LANG_XML")" || exit 1
-        sha256sum "$(basename "$LANG_XML")" >"$(basename "$LANG_SHA")"
-    )
+    DIR=`dirname "$LANG_XML"`
+BASE=`basename "$LANG_XML"`
+HASHBASE=`basename "$LANG_SHA"`
+
+cd "$DIR" || exit 1
+sha256sum "$BASE" >"$HASHBASE"
 
     if [ -n "$UPDATE_DIR" ] && [ -f "$LANG_SHA" ]; then
         cp -f "$LANG_SHA" "$UPD_LANG_SHA"
@@ -116,8 +120,12 @@ xml_get() {
 }
 
 say() {
-    t="$(xml_get "$1")"
-    ui "${t:-$2}"
+    t=`xml_get "$1"`
+    if [ -n "$t" ]; then
+        ui "$t"
+    else
+        ui "$2"
+    fi
 }
 
 ui " "
