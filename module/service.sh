@@ -1,6 +1,6 @@
 #!/system/bin/sh
 # SPDX-License-Identifier: Apache-2.0
-
+exec >/dev/null 2>&1
 MODDIR="${0%/*}"
 is_root() { [ "$(id -u)" -eq 0 ]; }
 BIN="$MODDIR/system/bin"
@@ -29,7 +29,7 @@ xml_get() {
         head -n1 |
         sed 's/&lt;/</g; s/&gt;/>/g; s/&amp;/\&/g' |
         {
-            read -r line || true
+            read line || true
             echo "${line:-$fallback}"
         }
 }
@@ -38,13 +38,13 @@ log() {
     echo "[CorePolicy] $(date '+%Y-%m-%d %H:%M:%S') $*" >>"$LOG"
 }
 
-until pidof com.android.systemui >/dev/null 2>&1; do
+until pidof com.android.systemui ; do
     sleep 8
 done
 
 : >"$LOG"
 
-CONTEXT="$(cat /proc/self/attr/current)"
+read CONTEXT < /proc/self/attr/current
 
 case "$CONTEXT" in
     *magisk*)
@@ -81,20 +81,23 @@ if [ ! -f "$READY_FLAG" ]; then
 
     chmod 0644 "$LOG"
 
-    if ! command -v coreshift >/dev/null 2>&1; then
-        for P in ${PATH//:/ }; do
-            case "$P" in
-                /data/*)
-                    if [ -d "$P" ] && [ -w "$P" ] && [ ! -e "$P/coreshift" ]; then
-                        ln -s "$CORESHIFT_BIN" "$P/coreshift"
-                        ln -s "$BIN/cli.xml" "$P/cli.xml"
-                        log "$(xml_get log_symlink "symlinked coreshift into") $P"
-                        break
-                    fi
-                    ;;
-            esac
-        done
-    fi
+    if ! which coreshift ; then
+    OLDIFS="$IFS"
+    IFS=:
+    for P in $PATH; do
+        case "$P" in
+            /data/*)
+                if [ -d "$P" ] && [ -w "$P" ] && [ ! -e "$P/coreshift" ]; then
+                    ln -s "$CORESHIFT_BIN" "$P/coreshift"
+                    ln -s "$BIN/cli.xml" "$P/cli.xml"
+                    log "$(xml_get log_symlink "symlinked coreshift into") $P"
+                    break
+                fi
+            ;;
+        esac
+    done
+    IFS="$OLDIFS"
+fi
 fi
 
 log "$(xml_get log_starting_daemon "starting coreshift daemon")"
@@ -110,10 +113,12 @@ PRIO="schedutil simple_ondemand schedhorizon sugov_ext"
 pick_gov() {
     AVAIL="$1"
     for g in $PRIO; do
-        echo "$AVAIL" | tr ' ' '\n' | grep -qx "$g" && {
-            echo "$g"
-            return 0
-        }
+        for x in $AVAIL; do
+            [ "$x" = "$g" ] && {
+                echo "$g"
+                return 0
+            }
+        done
     done
     return 1
 }
@@ -125,12 +130,12 @@ if is_root; then
         GOVPATH="$cpu/cpufreq"
         [ -d "$GOVPATH" ] || continue
 
-        AVAIL="$(cat "$GOVPATH/scaling_available_governors" 2>/dev/null)"
-        CUR="$(cat "$GOVPATH/scaling_governor" 2>/dev/null)"
+        AVAIL="$(cat "$GOVPATH/scaling_available_governors")"
+        CUR="$(cat "$GOVPATH/scaling_governor")"
         SEL="$(pick_gov "$AVAIL")"
 
         if [ -n "$SEL" ] && [ "$SEL" != "$CUR" ]; then
-            echo "$SEL" > "$GOVPATH/scaling_governor" 2>/dev/null || true
+            echo "$SEL" > "$GOVPATH/scaling_governor" || true
             log "$(xml_get log_cpu_gov_set "cpu governor set") $cpu -> $SEL ($(xml_get log_was "was") $CUR)"
         else
             log "$(xml_get log_current "current") $cpu -> $CUR"
@@ -140,12 +145,12 @@ if is_root; then
     for dev in /sys/class/devfreq/*; do
         [ -f "$dev/available_governors" ] || continue
 
-        AVAIL="$(cat "$dev/available_governors" 2>/dev/null)"
-        CUR="$(cat "$dev/governor" 2>/dev/null)"
+        AVAIL="$(cat "$dev/available_governors")"
+        CUR="$(cat "$dev/governor" )"
         SEL="$(pick_gov "$AVAIL")"
 
         if [ -n "$SEL" ] && [ "$SEL" != "$CUR" ]; then
-            echo "$SEL" > "$dev/governor" 2>/dev/null || true
+            echo "$SEL" > "$dev/governor" || true
             log "$(xml_get log_devfreq_gov_set "devfreq governor set") $dev -> $SEL ($(xml_get log_was "was") $CUR)"
         else
             log "$(xml_get log_current "current") $dev -> $CUR"
@@ -156,12 +161,14 @@ fi
 BLK_PRIO="mq-deadline kyber bfq deadline none noop"
 
 pick_blk() {
-    AVAIL="$1"
+    AVAIL=`echo "$1" | tr '[]' ' '`
     for g in $BLK_PRIO; do
-        echo "$AVAIL" | tr '[]' ' ' | tr ' ' '\n' | grep -qx "$g" && {
-            echo "$g"
-            return 0
-        }
+        for x in $AVAIL; do
+            [ "$x" = "$g" ] && {
+                echo "$g"
+                return 0
+            }
+        done
     done
     return 1
 }
@@ -180,12 +187,12 @@ if is_root; then
         [ -f "$q/io_timeout" ] || continue
         [ -f "$q/scheduler" ] || continue
 
-        AVAIL="$(cat "$q/scheduler" 2>/dev/null)"
+        AVAIL="$(cat "$q/scheduler")"
         CUR="$(echo "$AVAIL" | sed -n 's/.*\[\(.*\)\].*/\1/p')"
         SEL="$(pick_blk "$AVAIL")"
 
         if [ -n "$SEL" ] && [ "$SEL" != "$CUR" ]; then
-            echo "$SEL" > "$q/scheduler" 2>/dev/null || true
+            echo "$SEL" > "$q/scheduler" || true
             log "$(xml_get log_blk_set "block scheduler set") ${q%/queue} -> $SEL ($(xml_get log_was "was") $CUR)"
         else
             log "$(xml_get log_current "current") ${q%/queue} -> $CUR"
@@ -200,13 +207,13 @@ write() {
     val="$2"
     [ -e "$path" ] || return
 
-    cur="$(cat "$path" 2>/dev/null || true)"
+    cur="$(cat "$path" || true)"
     if [ "$cur" = "$val" ]; then
         log "$(xml_get log_current "current") $path -> $cur"
         return
     fi
 
-    echo "$val" > "$path" 2>/dev/null || return
+    echo "$val" > "$path" || return
     log "$(xml_get log_value_set "set") $path -> $val ($(xml_get log_was "was") $cur)"
 }
 
@@ -214,7 +221,7 @@ LITTLE=""
 BIG=""
 for c in /sys/devices/system/cpu/cpu[0-9]*; do
     id="${c##*cpu}"
-    cap="$(cat "$c/cpu_capacity" 2>/dev/null)"
+    cap="$(cat "$c/cpu_capacity")"
     [ -z "$cap" ] && continue
     if [ "$cap" -lt 512 ]; then
         LITTLE="$LITTLE $id"
@@ -224,7 +231,8 @@ for c in /sys/devices/system/cpu/cpu[0-9]*; do
 done
 
 range_from_list() {
-    local min="" max=""
+    min=""
+    max=""
     for i in $1; do
         [ -z "$min" ] && min="$i"
         max="$i"
