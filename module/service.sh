@@ -96,7 +96,7 @@ DAEMON_PID=$!
 log "$(xml_get log_daemon_pid "coreshift daemon pid=")$DAEMON_PID"
 log "$(xml_get log_services_ready "core policy services launched") (daemon pid=$DAEMON_PID)"
 
-PRIO="ondemand simple_ondemand schedutil schedhorizon sugov_ext"
+PRIO="schedutil simple_ondemand schedhorizon sugov_ext"
 
 pick_gov() {
     AVAIL="$1"
