@@ -55,6 +55,50 @@ if ! sh "$MODDIR/verify.sh"; then
     exit 1
 fi
 
+if [ ! -f "$READY_FLAG" ]; then
+    mkdir -p "$BIN"
+
+    ABI="$(getprop ro.product.cpu.abi)"
+    case "$ABI" in
+        arm64-v8a) ARCH=arm64 ;;
+        armeabi-v7a|armeabi) ARCH=arm ;;
+        *) ARCH=arm ;;
+    esac
+
+    if [ -f "$MODDIR/$ARCH" ]; then
+        cp "$MODDIR/$ARCH" "$CORESHIFT_BIN"
+        chmod 0755 "$CORESHIFT_BIN"
+        : >"$READY_FLAG"
+    fi
+
+    chmod 0644 "$LOG"
+
+    if ! command -v coreshift >/dev/null 2>&1; then
+        for P in ${PATH//:/ }; do
+            case "$P" in
+                /data/*)
+                    if [ -d "$P" ] && [ -w "$P" ] && [ ! -e "$P/coreshift" ]; then
+                        ln -s "$CORESHIFT_BIN" "$P/coreshift"
+                        ln -s "$BIN/cli.xml" "$P/cli.xml"
+                        log "$(xml_get log_symlink "symlinked coreshift into") $P"
+                        break
+                    fi
+                    ;;
+            esac
+        done
+    fi
+fi
+
+
+log "$(xml_get log_starting_daemon "starting coreshift daemon")"
+"$CORESHIFT_BIN" preload &
+"$CORESHIFT_BIN" daemon &
+DAEMON_PID=$!
+
+log "$(xml_get log_daemon_pid "coreshift daemon pid=")$DAEMON_PID"
+log "$(xml_get log_services_ready "core policy services launched") (daemon pid=$DAEMON_PID)"
+
+
 PRIO="ondemand schedutil schedhorizon sugov_ext"
 
 pick_gov() {
@@ -103,44 +147,137 @@ if is_root; then
     done
 fi
 
-if [ ! -f "$READY_FLAG" ]; then
-    mkdir -p "$BIN"
+BLK_PRIO="mq-deadline kyber bfq deadline none noop"
 
-    ABI="$(getprop ro.product.cpu.abi)"
-    case "$ABI" in
-        arm64-v8a) ARCH=arm64 ;;
-        armeabi-v7a|armeabi) ARCH=arm ;;
-        *) ARCH=arm ;;
-    esac
+pick_blk() {
+    AVAIL="$1"
+    for g in $BLK_PRIO; do
+        echo "$AVAIL" | tr '[]' ' ' | tr ' ' '\n' | grep -qx "$g" && {
+            echo "$g"
+            return 0
+        }
+    done
+    return 1
+}
 
-    if [ -f "$MODDIR/$ARCH" ]; then
-        cp "$MODDIR/$ARCH" "$CORESHIFT_BIN"
-        chmod 0755 "$CORESHIFT_BIN"
-        : >"$READY_FLAG"
-    fi
+if is_root; then
+    log "$(xml_get log_blk_scan "scanning block schedulers")"
 
-    chmod 0644 "$LOG"
+    for q in /sys/block/*/queue; do
+        [ -f "$q/scheduler" ] || continue
 
-    if ! command -v coreshift >/dev/null 2>&1; then
-        for P in ${PATH//:/ }; do
-            case "$P" in
-                /data/*)
-                    if [ -d "$P" ] && [ -w "$P" ] && [ ! -e "$P/coreshift" ]; then
-                        ln -s "$CORESHIFT_BIN" "$P/coreshift"
-                        ln -s "$BIN/cli.xml" "$P/cli.xml"
-                        log "$(xml_get log_symlink "symlinked coreshift into") $P"
-                        break
-                    fi
-                    ;;
-            esac
-        done
-    fi
+        AVAIL="$(cat "$q/scheduler" 2>/dev/null)"
+        CUR="$(echo "$AVAIL" | sed -n 's/.*\[\(.*\)\].*/\1/p')"
+        SEL="$(pick_blk "$AVAIL")"
+
+        if [ -n "$SEL" ] && [ "$SEL" != "$CUR" ]; then
+            echo "$SEL" > "$q/scheduler" 2>/dev/null || true
+            log "$(xml_get log_blk_set "block scheduler set") ${q%/queue} -> $SEL (was $CUR)"
+        else
+            log "$(xml_get log_blk_skip "block scheduler unchanged") ${q%/queue} (current $CUR)"
+        fi
+    done
 fi
 
-log "$(xml_get log_starting_daemon "starting coreshift daemon")"
-"$CORESHIFT_BIN" preload &
-"$CORESHIFT_BIN" daemon &
-DAEMON_PID=$!
+if is_root; then
 
-log "$(xml_get log_daemon_pid "coreshift daemon pid=")$DAEMON_PID"
-log "$(xml_get log_services_ready "core policy services launched") (daemon pid=$DAEMON_PID)"
+write() {
+    path="$1"
+    key="$2"
+    def="$3"
+
+    val="$(xml_get "$key" "$def")"
+    [ -e "$path" ] || return
+
+    echo "$val" > "$path" 2>/dev/null || return
+    log "$(xml_get log_value_set "set") $path -> $val"
+}
+
+LITTLE=""
+BIG=""
+for c in /sys/devices/system/cpu/cpu[0-9]*; do
+    id="${c##*cpu}"
+    cap="$(cat "$c/cpu_capacity" 2>/dev/null)"
+    [ -z "$cap" ] && continue
+    if [ "$cap" -lt 512 ]; then
+        LITTLE="$LITTLE $id"
+    else
+        BIG="$BIG $id"
+    fi
+done
+
+range_from_list() {
+    for i in $1; do
+        [ -z "$min" ] && min="$i"
+        max="$i"
+    done
+    [ -n "$min" ] && echo "$min-$max"
+    min=""
+    max=""
+}
+
+LITTLE_RANGE="$(range_from_list "$LITTLE")"
+BIG_RANGE="$(range_from_list "$BIG")"
+
+write /dev/cpuctl/background/cpu.uclamp.min            cfg_bg_uclamp_min            0
+write /dev/cpuctl/background/cpu.uclamp.max            cfg_bg_uclamp_max            10
+write /dev/cpuctl/background/cpu.uclamp.latency_sensitive cfg_bg_latency             0
+
+write /dev/cpuctl/system-background/cpu.uclamp.min     cfg_sysbg_uclamp_min         0
+write /dev/cpuctl/system-background/cpu.uclamp.max     cfg_sysbg_uclamp_max         15
+write /dev/cpuctl/system-background/cpu.uclamp.latency_sensitive cfg_sysbg_latency   0
+
+write /dev/cpuctl/foreground/cpu.uclamp.min            cfg_fg_uclamp_min            0
+write /dev/cpuctl/foreground/cpu.uclamp.max            cfg_fg_uclamp_max            25
+write /dev/cpuctl/foreground/cpu.uclamp.latency_sensitive cfg_fg_latency             1
+
+write /dev/cpuctl/top-app/cpu.uclamp.min               cfg_top_uclamp_min           20
+write /dev/cpuctl/top-app/cpu.uclamp.max               cfg_top_uclamp_max           100
+write /dev/cpuctl/top-app/cpu.uclamp.latency_sensitive cfg_top_latency              1
+
+[ -n "$LITTLE_RANGE" ] && {
+    write /dev/cpuset/background/cpus      cfg_bg_cpuset   "$LITTLE_RANGE"
+    write /dev/cpuset/system-background/cpus cfg_sysbg_cpuset "$LITTLE_RANGE"
+}
+
+if [ -n "$BIG_RANGE" ] && [ -n "$LITTLE_RANGE" ]; then
+    write /dev/cpuset/foreground/cpus cfg_fg_cpuset "$LITTLE_RANGE,$BIG_RANGE"
+    write /dev/cpuset/top-app/cpus    cfg_top_cpuset "$LITTLE_RANGE,$BIG_RANGE"
+fi
+
+write /dev/cpuset/background/sched_load_balance        cfg_bg_lb   0
+write /dev/cpuset/system-background/sched_load_balance cfg_sysbg_lb 0
+write /dev/cpuset/foreground/sched_load_balance        cfg_fg_lb   1
+write /dev/cpuset/top-app/sched_load_balance           cfg_top_lb  1
+
+write /proc/sys/kernel/sched_migration_cost_ns cfg_sched_migration_cost 5000000
+
+for p in /sys/devices/system/cpu/cpufreq/policy*/schedutil; do
+    [ -d "$p" ] || continue
+    write "$p/up_rate_limit_us"   cfg_schedutil_up_rate   500
+    write "$p/down_rate_limit_us" cfg_schedutil_down_rate 20000
+done
+
+for q in /sys/block/*/queue; do
+    dev="${q#/sys/block/}"
+    dev="${dev%/queue}"
+
+    case "$dev" in
+        loop*|ram*|zram*|fd*) continue ;;
+    esac
+
+    [ -f "$q/io_timeout" ] || continue
+
+    write "$q/read_ahead_kb" cfg_blk_readahead   128
+    write "$q/nr_requests"   cfg_blk_nr_requests 64
+done
+
+write /sys/block/zram0/max_comp_streams cfg_zram_streams 2
+
+write /sys/kernel/mm/transparent_hugepage/enabled cfg_thp_mode   madvise
+write /sys/kernel/mm/transparent_hugepage/defrag  cfg_thp_defrag defer
+
+write /proc/sys/vm/watermark_scale_factor cfg_vm_watermark_scale 10
+write /proc/sys/vm/page-cluster           cfg_vm_page_cluster    0
+
+fi
