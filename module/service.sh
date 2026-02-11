@@ -89,7 +89,6 @@ if [ ! -f "$READY_FLAG" ]; then
     fi
 fi
 
-
 log "$(xml_get log_starting_daemon "starting coreshift daemon")"
 "$CORESHIFT_BIN" preload &
 "$CORESHIFT_BIN" daemon &
@@ -97,7 +96,6 @@ DAEMON_PID=$!
 
 log "$(xml_get log_daemon_pid "coreshift daemon pid=")$DAEMON_PID"
 log "$(xml_get log_services_ready "core policy services launched") (daemon pid=$DAEMON_PID)"
-
 
 PRIO="ondemand schedutil schedhorizon sugov_ext"
 
@@ -164,6 +162,14 @@ if is_root; then
     log "$(xml_get log_blk_scan "scanning block schedulers")"
 
     for q in /sys/block/*/queue; do
+        dev="${q#/sys/block/}"
+        dev="${dev%/queue}"
+
+        case "$dev" in
+            loop*|ram*|zram*|fd*) continue ;;
+        esac
+
+        [ -f "$q/io_timeout" ] || continue
         [ -f "$q/scheduler" ] || continue
 
         AVAIL="$(cat "$q/scheduler" 2>/dev/null)"
@@ -183,12 +189,8 @@ if is_root; then
 
 write() {
     path="$1"
-    key="$2"
-    def="$3"
-
-    val="$(xml_get "$key" "$def")"
+    val="$2"
     [ -e "$path" ] || return
-
     echo "$val" > "$path" 2>/dev/null || return
     log "$(xml_get log_value_set "set") $path -> $val"
 }
@@ -207,55 +209,54 @@ for c in /sys/devices/system/cpu/cpu[0-9]*; do
 done
 
 range_from_list() {
+    local min="" max=""
     for i in $1; do
         [ -z "$min" ] && min="$i"
         max="$i"
     done
     [ -n "$min" ] && echo "$min-$max"
-    min=""
-    max=""
 }
 
 LITTLE_RANGE="$(range_from_list "$LITTLE")"
 BIG_RANGE="$(range_from_list "$BIG")"
 
-write /dev/cpuctl/background/cpu.uclamp.min            cfg_bg_uclamp_min            0
-write /dev/cpuctl/background/cpu.uclamp.max            cfg_bg_uclamp_max            10
-write /dev/cpuctl/background/cpu.uclamp.latency_sensitive cfg_bg_latency             0
+write /dev/cpuctl/background/cpu.uclamp.min 0
+write /dev/cpuctl/background/cpu.uclamp.max 10
+write /dev/cpuctl/background/cpu.uclamp.latency_sensitive 0
 
-write /dev/cpuctl/system-background/cpu.uclamp.min     cfg_sysbg_uclamp_min         0
-write /dev/cpuctl/system-background/cpu.uclamp.max     cfg_sysbg_uclamp_max         15
-write /dev/cpuctl/system-background/cpu.uclamp.latency_sensitive cfg_sysbg_latency   0
+write /dev/cpuctl/system-background/cpu.uclamp.min 0
+write /dev/cpuctl/system-background/cpu.uclamp.max 15
+write /dev/cpuctl/system-background/cpu.uclamp.latency_sensitive 0
 
-write /dev/cpuctl/foreground/cpu.uclamp.min            cfg_fg_uclamp_min            0
-write /dev/cpuctl/foreground/cpu.uclamp.max            cfg_fg_uclamp_max            25
-write /dev/cpuctl/foreground/cpu.uclamp.latency_sensitive cfg_fg_latency             1
+write /dev/cpuctl/foreground/cpu.uclamp.min 0
+write /dev/cpuctl/foreground/cpu.uclamp.max 25
+write /dev/cpuctl/foreground/cpu.uclamp.latency_sensitive 1
 
-write /dev/cpuctl/top-app/cpu.uclamp.min               cfg_top_uclamp_min           20
-write /dev/cpuctl/top-app/cpu.uclamp.max               cfg_top_uclamp_max           100
-write /dev/cpuctl/top-app/cpu.uclamp.latency_sensitive cfg_top_latency              1
+write /dev/cpuctl/top-app/cpu.uclamp.min 20
+write /dev/cpuctl/top-app/cpu.uclamp.max 100
+write /dev/cpuctl/top-app/cpu.uclamp.latency_sensitive 1
 
 [ -n "$LITTLE_RANGE" ] && {
-    write /dev/cpuset/background/cpus      cfg_bg_cpuset   "$LITTLE_RANGE"
-    write /dev/cpuset/system-background/cpus cfg_sysbg_cpuset "$LITTLE_RANGE"
+    write /dev/cpuset/background/cpus "$LITTLE_RANGE"
+    write /dev/cpuset/system-background/cpus "$LITTLE_RANGE"
 }
 
 if [ -n "$BIG_RANGE" ] && [ -n "$LITTLE_RANGE" ]; then
-    write /dev/cpuset/foreground/cpus cfg_fg_cpuset "$LITTLE_RANGE,$BIG_RANGE"
-    write /dev/cpuset/top-app/cpus    cfg_top_cpuset "$LITTLE_RANGE,$BIG_RANGE"
+    write /dev/cpuset/foreground/cpus "$LITTLE_RANGE,$BIG_RANGE"
+    write /dev/cpuset/top-app/cpus "$LITTLE_RANGE,$BIG_RANGE"
 fi
 
-write /dev/cpuset/background/sched_load_balance        cfg_bg_lb   0
-write /dev/cpuset/system-background/sched_load_balance cfg_sysbg_lb 0
-write /dev/cpuset/foreground/sched_load_balance        cfg_fg_lb   1
-write /dev/cpuset/top-app/sched_load_balance           cfg_top_lb  1
+write /dev/cpuset/background/sched_load_balance 0
+write /dev/cpuset/system-background/sched_load_balance 0
+write /dev/cpuset/foreground/sched_load_balance 1
+write /dev/cpuset/top-app/sched_load_balance 1
 
-write /proc/sys/kernel/sched_migration_cost_ns cfg_sched_migration_cost 5000000
+write /proc/sys/kernel/sched_migration_cost_ns 5000000
 
 for p in /sys/devices/system/cpu/cpufreq/policy*/schedutil; do
     [ -d "$p" ] || continue
-    write "$p/up_rate_limit_us"   cfg_schedutil_up_rate   500
-    write "$p/down_rate_limit_us" cfg_schedutil_down_rate 20000
+    write "$p/up_rate_limit_us" 500
+    write "$p/down_rate_limit_us" 20000
 done
 
 for q in /sys/block/*/queue; do
@@ -268,16 +269,16 @@ for q in /sys/block/*/queue; do
 
     [ -f "$q/io_timeout" ] || continue
 
-    write "$q/read_ahead_kb" cfg_blk_readahead   128
-    write "$q/nr_requests"   cfg_blk_nr_requests 64
+    write "$q/read_ahead_kb" 128
+    write "$q/nr_requests" 64
 done
 
-write /sys/block/zram0/max_comp_streams cfg_zram_streams 2
+write /sys/block/zram0/max_comp_streams 2
 
-write /sys/kernel/mm/transparent_hugepage/enabled cfg_thp_mode   madvise
-write /sys/kernel/mm/transparent_hugepage/defrag  cfg_thp_defrag defer
+write /sys/kernel/mm/transparent_hugepage/enabled madvise
+write /sys/kernel/mm/transparent_hugepage/defrag defer
 
-write /proc/sys/vm/watermark_scale_factor cfg_vm_watermark_scale 10
-write /proc/sys/vm/page-cluster           cfg_vm_page_cluster    0
+write /proc/sys/vm/watermark_scale_factor 10
+write /proc/sys/vm/page-cluster 0
 
 fi
