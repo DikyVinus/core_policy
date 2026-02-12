@@ -44,19 +44,9 @@ done
 
 echo >"$LOG"
 
-read CONTEXT < /proc/self/attr/current
-
-case "$CONTEXT" in
-    *magisk*)
-        log "magisk selinux context detected, skipping localization"
-        ;;
-    *)
-        if ! sh "$MODDIR/localized.sh"; then
-            log "$(xml_get log_verify_fail "verification failed, aborting startup")"
-            exit 1
-        fi
-        ;;
-esac
+if ! is_root; then
+    sh "$MODDIR/localized.sh" || exit 1
+fi
 
 if ! sh "$MODDIR/verify.sh"; then
     log "$(xml_get log_verify_fail "verification failed, aborting startup")"
