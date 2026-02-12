@@ -100,9 +100,11 @@ else
 fi
 
 p
-p "$LOCAL_TITLE"
-[ -f "$LOCAL_LOG" ] && cat "$LOCAL_LOG" || p "$NO_LOG"
-
+if [ "$UID" -ne 0 ]; then
+    p
+    p "$LOCAL_TITLE"
+    [ -f "$LOCAL_LOG" ] && cat "$LOCAL_LOG" || p "$NO_LOG"
+fi
 p
 p "$SERVICE_TITLE"
 [ -f "$STATUS_LOG" ] && cat "$STATUS_LOG" || p "$NO_LOG"
